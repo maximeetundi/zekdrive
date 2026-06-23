@@ -1,0 +1,39 @@
+# IDE / OS
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Local Env
+.env
+.env.local
+.env.*.local
+
+# Node / Nuxt / Admin / Vitrine
+node_modules/
+.nuxt/
+.output/
+dist/
+dist_dev/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+# Go / API
+api/api
+api/tmp/
+api/bin/
+api/vendor/
+
+# Docker / Volumes / Logs
+postgres_data/
+redis_data/
+nginx_logs/
+*.log

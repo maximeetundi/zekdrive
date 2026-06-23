@@ -1,0 +1,132 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: zekdrive_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-zekdrive}
+      POSTGRES_USER: ${POSTGRES_USER:-zekdrive}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-zekdrive_secret}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-zekdrive}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zekdrive_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: zekdrive_redis
+    restart: unless-stopped
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zekdrive_net
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: builder
+    container_name: zekdrive_api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '8088:8080'
+    volumes:
+      - ./api:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: air -c .air.toml
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:8080/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - zekdrive_net
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: zekdrive_admin
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NUXT_PUBLIC_API_URL: http://api:8080/api/v1
+    ports:
+      - '3003:3001'
+    depends_on:
+      - api
+    networks:
+      - zekdrive_net
+
+  vitrine:
+    build:
+      context: ./vitrine
+      dockerfile: Dockerfile
+    container_name: zekdrive_vitrine
+    restart: unless-stopped
+    ports:
+      - '3000:80'
+    networks:
+      - zekdrive_net
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: zekdrive_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@zekdrive.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-pgadmin_password}
+    ports:
+      - '5050:80'
+    depends_on:
+      - postgres
+    networks:
+      - zekdrive_net
+
+  nginx:
+    image: nginx:alpine
+    container_name: zekdrive_nginx
+    restart: unless-stopped
+    ports:
+      - '8082:80'
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - api
+      - admin
+      - vitrine
+    networks:
+      - zekdrive_net
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  zekdrive_net:
+    driver: bridge

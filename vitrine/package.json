@@ -1,0 +1,17 @@
+{
+  "name": "zekdrive-vitrine",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev --port 3000",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview"
+  },
+  "dependencies": {
+    "nuxt": "^3.12.0"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "typescript": "^5.5.2"
+  }
+}

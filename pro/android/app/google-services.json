@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "144100723702",
+    "project_id": "demodrivermond",
+    "storage_bucket": "demodrivermond.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:144100723702:android:b75e50b5cf0b27fa4d95d7",
+        "android_client_info": {
+          "package_name": "com.taha.guelabledriveer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9hFWPpHdF9Hff9H99fHn0TYV5nH-rGhk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:144100723702:android:d5f8fbba80b3d6274d95d7",
+        "android_client_info": {
+          "package_name": "com.taha.ridewaves"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9hFWPpHdF9Hff9H99fHn0TYV5nH-rGhk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

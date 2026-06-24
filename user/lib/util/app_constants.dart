@@ -6,7 +6,7 @@ import 'package:ride_sharing_user_app/util/images.dart';
 
 class AppConstants {
   static const String appName = 'Guelablé';
-  static const String baseUrl = 'https://guelable.com';
+  static const String baseUrl = 'http://82.165.55.190:8088';
   static const Color lightPrimary = Color(0xFF14B19E);
   static const Color darkPrimary = Color(0xFF00735f);
   static const String fontFamily = 'SFProText';

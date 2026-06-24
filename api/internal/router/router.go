@@ -18,6 +18,7 @@ type Router struct {
 	pricingHandler  *handler.PricingHandler
 	adminHandler    *handler.AdminHandler
 	wsHandler       *handler.WSHandler
+	mapHandler      *handler.MapHandler
 
 	authMiddleware fiber.Handler
 }
@@ -33,6 +34,7 @@ func NewRouter(
 	pricingHandler *handler.PricingHandler,
 	adminHandler *handler.AdminHandler,
 	wsHandler *handler.WSHandler,
+	mapHandler *handler.MapHandler,
 	authMiddleware fiber.Handler,
 ) *Router {
 	return &Router{
@@ -46,6 +48,7 @@ func NewRouter(
 		pricingHandler:  pricingHandler,
 		adminHandler:    adminHandler,
 		wsHandler:       wsHandler,
+		mapHandler:      mapHandler,
 		authMiddleware:  authMiddleware,
 	}
 }
@@ -74,6 +77,25 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	auth.Post("/refresh", r.authHandler.RefreshToken)
 	auth.Post("/whatsapp/send-otp", r.authHandler.SendWhatsAppOTP)
 	auth.Post("/whatsapp/verify-otp", r.authHandler.VerifyWhatsAppOTP)
+
+	// ── CUSTOMER & DRIVER MOBILE COMPATIBILITY & OPEN-SOURCE MAPS LAYER (PUBLIC) ──
+	app.Get("/api/customer/config/geocode-api", r.mapHandler.Geocode)
+	app.Get("/api/customer/config/place-api-autocomplete", r.mapHandler.SearchLocation)
+	app.Get("/api/customer/config/place-api-details", r.mapHandler.PlaceDetails)
+	app.Get("/api/customer/config/distance_api", r.mapHandler.DistanceAPI)
+
+	app.Get("/api/driver/config/geocode-api", r.mapHandler.Geocode)
+
+	// Auth Compatibility
+	app.Post("/api/customer/auth/registration", r.authHandler.Register)
+	app.Post("/api/customer/auth/login", r.authHandler.Login)
+	app.Post("/api/customer/auth/send-otp", r.authHandler.SendWhatsAppOTP)
+	app.Post("/api/customer/auth/otp-verification", r.authHandler.VerifyWhatsAppOTP)
+
+	app.Post("/api/driver/auth/registration", r.driverHandler.Register)
+	app.Post("/api/driver/auth/login", r.authHandler.Login)
+	app.Post("/api/driver/auth/send-otp", r.authHandler.SendWhatsAppOTP)
+	app.Post("/api/driver/auth/otp-verification", r.authHandler.VerifyWhatsAppOTP)
 
 	// Protected Routes Group
 	protected := api.Group("", r.authMiddleware)
@@ -134,4 +156,15 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	admin := protected.Group("/admin", middleware.RequireRole(domain.RoleAdmin))
 	admin.Get("/stats", r.adminHandler.GetSystemStats)
 	admin.Put("/zones/:id/surge", r.adminHandler.UpdateZoneSurge)
+
+	// ── CUSTOMER & DRIVER MOBILE COMPATIBILITY & OPEN-SOURCE MAPS LAYER (PROTECTED) ──
+	app.Post("/api/customer/config/get-routes", r.authMiddleware, r.mapHandler.GetRoutes)
+	app.Get("/api/driver/get-routes", r.authMiddleware, r.mapHandler.GetRoutes)
+
+	app.Get("/api/customer/info", r.authMiddleware, r.userHandler.GetMe)
+	app.Put("/api/customer/update/profile", r.authMiddleware, r.userHandler.UpdateProfile)
+
+	app.Get("/api/driver/info", r.authMiddleware, r.driverHandler.GetMe)
+	app.Put("/api/driver/update/profile", r.authMiddleware, r.userHandler.UpdateProfile)
+	app.Post("/api/driver/update-online-status", r.authMiddleware, r.driverHandler.UpdateStatus)
 }

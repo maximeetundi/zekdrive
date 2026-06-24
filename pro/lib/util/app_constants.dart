@@ -5,7 +5,7 @@ class AppConstants {
   static const String appName = 'Guelable Pro';
   static const String polylineMapKey =
       'AIzaSyBLzkqJWnCO_OucXE-aoUdj9rtqfcuZo54';
-  static const String baseUrl = 'http://109.176.207.130';
+  static const String baseUrl = 'http://82.165.55.190:8088';
   static const String configUri = '/api/driver/configuration';
   static const String registration = '/api/driver/auth/registration';
   static const String loginUri = '/api/driver/auth/login';

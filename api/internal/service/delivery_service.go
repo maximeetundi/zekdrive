@@ -96,6 +96,11 @@ func (s *deliveryService) RequestDelivery(ctx context.Context, senderID uuid.UUI
 		// Notify driver and sender
 		s.notifier.SendNotification(ctx, matchedDriver.UserID, "New Delivery Assigned", "Please pick up delivery package for "+delivery.RecipientName, map[string]interface{}{"delivery_id": delivery.ID})
 		s.notifier.SendNotification(ctx, senderID, "Delivery Courier Found", "A courier has been dispatched to pick up your package.", map[string]interface{}{"delivery_id": delivery.ID})
+
+		// Pusher Compatibility Event: customer-trip-request to driver
+		_ = s.notifier.PublishPusherEvent(ctx, "private-customer-trip-request."+matchedDriver.ID.String(), "customer-trip-request."+matchedDriver.ID.String(), map[string]string{"trip_id": delivery.ID.String()})
+		// Pusher Compatibility Event: driver-trip-accepted to sender
+		_ = s.notifier.PublishPusherEvent(ctx, "private-driver-trip-accepted."+delivery.ID.String(), "driver-trip-accepted."+delivery.ID.String(), map[string]string{"id": delivery.ID.String(), "type": "parcel"})
 	} else {
 		// No courier found initially
 		s.notifier.SendNotification(ctx, senderID, "Searching for Courier", "We are searching for delivery couriers near you.", map[string]interface{}{"delivery_id": delivery.ID})
@@ -142,6 +147,9 @@ func (s *deliveryService) AcceptDelivery(ctx context.Context, deliveryID, driver
 	s.notifier.SendNotification(ctx, delivery.SenderID, "Courier Assigned", "Your courier has accepted the job!", map[string]interface{}{"delivery_id": delivery.ID})
 	s.notifier.SendNotification(ctx, driver.UserID, "Delivery Confirmed", "Go pick up the package from sender.", map[string]interface{}{"delivery_id": delivery.ID})
 
+	// Pusher Compatibility Event: driver-trip-accepted to sender
+	_ = s.notifier.PublishPusherEvent(ctx, "private-driver-trip-accepted."+delivery.ID.String(), "driver-trip-accepted."+delivery.ID.String(), map[string]string{"id": delivery.ID.String(), "type": "parcel"})
+
 	return s.deliveryRepo.GetByID(ctx, deliveryID)
 }
 
@@ -164,6 +172,8 @@ func (s *deliveryService) UpdateStatus(ctx context.Context, deliveryID uuid.UUID
 	switch status {
 	case domain.DeliveryStatusPickedUp:
 		s.notifier.SendNotification(ctx, delivery.SenderID, "Package Picked Up", "Your package is in transit.", map[string]interface{}{"delivery_id": delivery.ID})
+		// Pusher Compatibility Event: driver-trip-started to sender
+		_ = s.notifier.PublishPusherEvent(ctx, "private-driver-trip-started."+delivery.ID.String(), "driver-trip-started."+delivery.ID.String(), map[string]string{"id": delivery.ID.String(), "type": "parcel"})
 	case domain.DeliveryStatusDelivered:
 		// Release driver
 		if delivery.DriverID != nil {
@@ -171,6 +181,8 @@ func (s *deliveryService) UpdateStatus(ctx context.Context, deliveryID uuid.UUID
 			s.notifier.SendNotification(ctx, delivery.Driver.UserID, "Delivery Finished", "You are ready for the next job.", map[string]interface{}{"delivery_id": delivery.ID})
 		}
 		s.notifier.SendNotification(ctx, delivery.SenderID, "Package Delivered", "Your package has been successfully delivered to "+delivery.RecipientName, map[string]interface{}{"delivery_id": delivery.ID})
+		// Pusher Compatibility Event: driver-trip-completed to sender
+		_ = s.notifier.PublishPusherEvent(ctx, "private-driver-trip-completed."+delivery.ID.String(), "driver-trip-completed."+delivery.ID.String(), map[string]string{"id": delivery.ID.String(), "type": "parcel"})
 	}
 
 	return s.deliveryRepo.GetByID(ctx, deliveryID)
@@ -197,8 +209,14 @@ func (s *deliveryService) CancelDelivery(ctx context.Context, deliveryID uuid.UU
 	if delivery.DriverID != nil {
 		s.driverService.UpdateStatus(ctx, *delivery.DriverID, domain.DriverStatusOnline)
 		s.notifier.SendNotification(ctx, delivery.Driver.UserID, "Delivery Cancelled", "Sender cancelled the delivery job.", map[string]interface{}{"delivery_id": delivery.ID})
+		
+		// Pusher Compatibility Event: customer-trip-cancelled to driver
+		_ = s.notifier.PublishPusherEvent(ctx, "private-customer-trip-cancelled."+delivery.ID.String()+"."+delivery.DriverID.String(), "customer-trip-cancelled."+delivery.ID.String()+"."+delivery.DriverID.String(), map[string]string{"trip_id": delivery.ID.String()})
 	}
 	s.notifier.SendNotification(ctx, delivery.SenderID, "Delivery Cancelled", "Your delivery order was cancelled.", map[string]interface{}{"delivery_id": delivery.ID})
+
+	// Pusher Compatibility Event: driver-trip-cancelled to sender
+	_ = s.notifier.PublishPusherEvent(ctx, "private-driver-trip-cancelled."+delivery.ID.String(), "driver-trip-cancelled."+delivery.ID.String(), map[string]string{"id": delivery.ID.String()})
 
 	return s.deliveryRepo.GetByID(ctx, deliveryID)
 }

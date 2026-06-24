@@ -79,7 +79,7 @@ func main() {
 	pricingHandler := handler.NewPricingHandler(pricingService)
 	adminHandler := handler.NewAdminHandler(pgDB, zoneRepo)
 	wsHandler := handler.NewWSHandler(wsHub, authService, driverRepo)
-	mapHandler := handler.NewMapHandler(cfg, tripRepo, deliveryRepo)
+	mapHandler := handler.NewMapHandler(cfg, tripRepo, deliveryRepo, driverRepo)
 
 	// 8. Initialize Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(authService)

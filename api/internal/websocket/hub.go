@@ -11,19 +11,27 @@ import (
 )
 
 type Hub struct {
-	clients    map[uuid.UUID]*Client
-	Register   chan *Client
-	Unregister chan *Client
-	mu         sync.RWMutex
-	redis      *database.RedisClient
+	clients           map[uuid.UUID]*Client
+	Register          chan *Client
+	Unregister        chan *Client
+	pusherClients     map[string]*PusherClient
+	pusherSubscribers map[string]map[string]*PusherClient
+	PusherRegister    chan *PusherClient
+	PusherUnregister  chan *PusherClient
+	mu                sync.RWMutex
+	redis             *database.RedisClient
 }
 
 func NewHub(redis *database.RedisClient) *Hub {
 	return &Hub{
-		clients:    make(map[uuid.UUID]*Client),
-		Register:   make(chan *Client),
-		Unregister: make(chan *Client),
-		redis:      redis,
+		clients:           make(map[uuid.UUID]*Client),
+		Register:          make(chan *Client),
+		Unregister:        make(chan *Client),
+		pusherClients:     make(map[string]*PusherClient),
+		pusherSubscribers: make(map[string]map[string]*PusherClient),
+		PusherRegister:    make(chan *PusherClient),
+		PusherUnregister:  make(chan *PusherClient),
+		redis:             redis,
 	}
 }
 
@@ -47,23 +55,45 @@ func (h *Hub) Run() {
 				log.Printf("WebSocket client unregistered: User %s", client.UserID)
 			}
 			h.mu.Unlock()
+
+		case client := <-h.PusherRegister:
+			h.mu.Lock()
+			h.pusherClients[client.SocketID] = client
+			h.mu.Unlock()
+			log.Printf("Pusher client registered: SocketID %s", client.SocketID)
+
+		case client := <-h.PusherUnregister:
+			h.mu.Lock()
+			if _, ok := h.pusherClients[client.SocketID]; ok {
+				delete(h.pusherClients, client.SocketID)
+				close(client.send)
+				// Remove client from all subscribers
+				for chanName, subs := range h.pusherSubscribers {
+					delete(subs, client.SocketID)
+					if len(subs) == 0 {
+						delete(h.pusherSubscribers, chanName)
+					}
+				}
+				log.Printf("Pusher client unregistered: SocketID %s", client.SocketID)
+			}
+			h.mu.Unlock()
 		}
 	}
 }
 
 func (h *Hub) SendToUser(userID uuid.UUID, message []byte) {
 	h.mu.RLock()
-	defer h.mu.RUnlock()
-	if client, ok := h.clients[userID]; ok {
-		client.send <- message
+	cells := h.clients[userID]
+	h.mu.RUnlock()
+	if cells != nil {
+		cells.send <- message
 	}
 }
 
 func (h *Hub) listenToRedis() {
 	ctx := context.Background()
-	// Subscribe to a pattern for notifications as well or handle them in the channel loop
-	// For notifications, we can subscribe to "notifications:*" pattern
-	patternPubSub := h.redis.PSubscribe(ctx, "notifications:*", "driver:location:*")
+	// Subscribe to notifications, driver locations, and pusher channels
+	patternPubSub := h.redis.PSubscribe(ctx, "notifications:*", "driver:location:*", "pusher:channel:*")
 	defer patternPubSub.Close()
 
 	ch := patternPubSub.Channel()
@@ -109,6 +139,50 @@ func (h *Hub) handleRedisMessage(channel string, payload string) {
 			if subscribed {
 				client.send <- []byte(payload)
 			}
+		}
+	}
+
+	// 3. If it's a pusher broadcast
+	// Channel format: pusher:channel:<pusher_channel_name>
+	if len(channel) > 15 && channel[:15] == "pusher:channel:" {
+		pusherChan := channel[15:]
+		h.BroadcastToPusherChannel(pusherChan, []byte(payload))
+	}
+}
+
+func (h *Hub) PusherSubscribe(channel string, client *PusherClient) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.pusherSubscribers[channel] == nil {
+		h.pusherSubscribers[channel] = make(map[string]*PusherClient)
+	}
+	h.pusherSubscribers[channel][client.SocketID] = client
+}
+
+func (h *Hub) PusherUnsubscribe(channel string, client *PusherClient) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.pusherSubscribers[channel] != nil {
+		delete(h.pusherSubscribers[channel], client.SocketID)
+		if len(h.pusherSubscribers[channel]) == 0 {
+			delete(h.pusherSubscribers, channel)
+		}
+	}
+}
+
+func (h *Hub) BroadcastToPusherChannel(channel string, payload []byte) {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	subs, exists := h.pusherSubscribers[channel]
+	if !exists {
+		return
+	}
+
+	for _, client := range subs {
+		select {
+		case client.send <- payload:
+		default:
+			// client send channel full, skip
 		}
 	}
 }

@@ -19,13 +19,15 @@ type MapHandler struct {
 	cfg          *config.Config
 	tripRepo     domain.TripRepository
 	deliveryRepo domain.DeliveryRepository
+	driverRepo   domain.DriverRepository
 }
 
-func NewMapHandler(cfg *config.Config, tripRepo domain.TripRepository, deliveryRepo domain.DeliveryRepository) *MapHandler {
+func NewMapHandler(cfg *config.Config, tripRepo domain.TripRepository, deliveryRepo domain.DeliveryRepository, driverRepo domain.DriverRepository) *MapHandler {
 	return &MapHandler{
 		cfg:          cfg,
 		tripRepo:     tripRepo,
 		deliveryRepo: deliveryRepo,
+		driverRepo:   driverRepo,
 	}
 }
 
@@ -267,28 +269,77 @@ func (h *MapHandler) GetRoutes(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid trip_request_id format"})
 	}
 
+	var startLat, startLng, endLat, endLng float64
+	var driverID *uuid.UUID
+	var status string
+
 	// Try fetching standard trip
-	var pickupLat, pickupLng, dropoffLat, dropoffLng float64
 	trip, err := h.tripRepo.GetByID(c.Context(), tripID)
 	if err == nil && trip != nil {
-		pickupLat = trip.PickupLat
-		pickupLng = trip.PickupLng
-		dropoffLat = trip.DropoffLat
-		dropoffLng = trip.DropoffLng
+		status = string(trip.Status)
+		driverID = trip.DriverID
+
+		// Default: pickup to dropoff
+		startLat = trip.PickupLat
+		startLng = trip.PickupLng
+		endLat = trip.DropoffLat
+		endLng = trip.DropoffLng
+
+		// If driver is assigned and active (accepted, arriving, or in_progress), route from driver's current location
+		if driverID != nil && (status == string(domain.TripStatusAccepted) || status == string(domain.TripStatusArriving) || status == string(domain.TripStatusInProgress)) {
+			driver, err := h.driverRepo.GetByID(c.Context(), *driverID)
+			if err == nil && driver != nil && driver.Latitude != nil && driver.Longitude != nil {
+				startLat = *driver.Latitude
+				startLng = *driver.Longitude
+
+				if status == string(domain.TripStatusInProgress) {
+					// Route driver to dropoff
+					endLat = trip.DropoffLat
+					endLng = trip.DropoffLng
+				} else {
+					// Route driver to pickup
+					endLat = trip.PickupLat
+					endLng = trip.PickupLng
+				}
+			}
+		}
 	} else {
 		// Try fetching delivery
 		delivery, err := h.deliveryRepo.GetByID(c.Context(), tripID)
 		if err != nil || delivery == nil {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "trip or delivery not found"})
 		}
-		pickupLat = delivery.PickupLat
-		pickupLng = delivery.PickupLng
-		dropoffLat = delivery.DropoffLat
-		dropoffLng = delivery.DropoffLng
+		status = string(delivery.Status)
+		driverID = delivery.DriverID
+
+		// Default: pickup to dropoff
+		startLat = delivery.PickupLat
+		startLng = delivery.PickupLng
+		endLat = delivery.DropoffLat
+		endLng = delivery.DropoffLng
+
+		// If driver is assigned and active (assigned or picked_up), route from driver's current location
+		if driverID != nil && (status == string(domain.DeliveryStatusAssigned) || status == string(domain.DeliveryStatusPickedUp)) {
+			driver, err := h.driverRepo.GetByID(c.Context(), *driverID)
+			if err == nil && driver != nil && driver.Latitude != nil && driver.Longitude != nil {
+				startLat = *driver.Latitude
+				startLng = *driver.Longitude
+
+				if status == string(domain.DeliveryStatusPickedUp) {
+					// Route driver to dropoff
+					endLat = delivery.DropoffLat
+					endLng = delivery.DropoffLng
+				} else {
+					// Route driver to pickup
+					endLat = delivery.PickupLat
+					endLng = delivery.PickupLng
+				}
+			}
+		}
 	}
 
 	// Call OSRM with polyline output format
-	osrmURL := fmt.Sprintf("https://router.project-osrm.org/route/v1/driving/%f,%f;%f,%f?overview=full&geometries=polyline", pickupLng, pickupLat, dropoffLng, dropoffLat)
+	osrmURL := fmt.Sprintf("https://router.project-osrm.org/route/v1/driving/%f,%f;%f,%f?overview=full&geometries=polyline", startLng, startLat, endLng, endLat)
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Get(osrmURL)

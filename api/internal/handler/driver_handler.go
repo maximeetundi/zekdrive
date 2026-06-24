@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -47,6 +49,12 @@ func (h *DriverHandler) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	if strings.Contains(c.Path(), "/customer/") || strings.Contains(c.Path(), "/driver/") {
+		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+			"data": d,
+		})
+	}
+
 	return c.Status(fiber.StatusCreated).JSON(d)
 }
 
@@ -65,6 +73,12 @@ func (h *DriverHandler) GetMe(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "driver profile not found"})
 	}
 
+	if strings.Contains(c.Path(), "/customer/") || strings.Contains(c.Path(), "/driver/") {
+		return c.JSON(fiber.Map{
+			"data": d,
+		})
+	}
+
 	return c.JSON(d)
 }
 
@@ -81,16 +95,51 @@ func (h *DriverHandler) UpdateLocation(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "driver profile not found"})
 	}
 
-	var req domain.UpdateLocationRequest
-	if err := c.BodyParser(&req); err != nil {
+	// Dynamic body parser to accept either string or float64 for coordinates (e.g. from /api/user/store-live-location)
+	var reqMap map[string]interface{}
+	if err := c.BodyParser(&reqMap); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse request body"})
 	}
 
-	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	var lat, lng float64
+
+	// Parse latitude
+	if latVal, exists := reqMap["latitude"]; exists {
+		switch v := latVal.(type) {
+		case float64:
+			lat = v
+		case string:
+			var err error
+			lat, err = strconv.ParseFloat(v, 64)
+			if err != nil {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid latitude format"})
+			}
+		default:
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "latitude must be float or string"})
+		}
+	} else {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "latitude is required"})
 	}
 
-	if err := h.driverService.UpdateLocation(c.Context(), d.ID, req.Latitude, req.Longitude); err != nil {
+	// Parse longitude
+	if lngVal, exists := reqMap["longitude"]; exists {
+		switch v := lngVal.(type) {
+		case float64:
+			lng = v
+		case string:
+			var err error
+			lng, err = strconv.ParseFloat(v, 64)
+			if err != nil {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid longitude format"})
+			}
+		default:
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "longitude must be float or string"})
+		}
+	} else {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "longitude is required"})
+	}
+
+	if err := h.driverService.UpdateLocation(c.Context(), d.ID, lat, lng); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -151,4 +200,97 @@ func (h *DriverHandler) FindNearby(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(drivers)
+}
+
+func (h *DriverHandler) GetDriverConfig(c *fiber.Ctx) error {
+	host := c.Hostname()
+	port := "443"
+	fullHost := c.Get("Host")
+	if strings.Contains(fullHost, ":") {
+		parts := strings.Split(fullHost, ":")
+		host = parts[0]
+		port = parts[1]
+	}
+
+	scheme := "http"
+	if c.Secure() {
+		scheme = "https"
+	}
+	baseURL := fmt.Sprintf("%s://%s/api/", scheme, fullHost)
+	imageBaseURLStr := fmt.Sprintf("%s://%s/uploads/", scheme, fullHost)
+
+	configMap := fiber.Map{
+		"is_demo":                    true,
+		"maintenance_mode":           false,
+		"required_pin_to_start_trip": false,
+		"add_intermediate_points":    true,
+		"business_name":              "ZekDrive",
+		"logo":                       "logo.png",
+		"bid_on_fare":                false,
+		"driver_completion_radius":   10.0,
+		"country_code":               "FR",
+		"business_address":           "Paris, France",
+		"business_contact_phone":     "+33100000000",
+		"business_contact_email":     "contact@zekdrive.com",
+		"business_support_phone":     "+33100000000",
+		"business_support_email":     "support@zekdrive.com",
+		"conversion_status":          false,
+		"conversion_rate":            0.0,
+		"base_url":                   baseURL,
+		"websocket_url":              host,
+		"websocket_port":             port,
+		"websocket_key":              "drivemond",
+		"review_status":              true,
+		"level_status":               false,
+		"image_base_url": fiber.Map{
+			"profile_image_customer": imageBaseURLStr + "customer/profile",
+			"banner":                 imageBaseURLStr + "promotion/banner",
+			"vehicle_category":       imageBaseURLStr + "vehicle/category",
+			"vehicle_model":          imageBaseURLStr + "vehicle/model",
+			"vehicle_brand":          imageBaseURLStr + "vehicle/brand",
+			"profile_image":          imageBaseURLStr + "driver/profile",
+			"identity_image":         imageBaseURLStr + "driver/identity",
+			"documents":              imageBaseURLStr + "driver/document",
+			"pages":                  imageBaseURLStr + "business/pages",
+			"conversation":           imageBaseURLStr + "conversation",
+			"parcel":                 imageBaseURLStr + "parcel/category",
+		},
+		"otp_resend_time":          60,
+		"currency_decimal_point":   "2",
+		"currency_code":            "EUR",
+		"currency_symbol":          "€",
+		"currency_symbol_position": "left",
+		"about_us": fiber.Map{
+			"image":             "",
+			"name":              "About Us",
+			"short_description": "ZekDrive",
+			"long_description":  "ZekDrive description",
+		},
+		"privacy_policy": fiber.Map{
+			"image":             "",
+			"name":              "Privacy Policy",
+			"short_description": "Privacy Policy",
+			"long_description":  "Privacy Policy description",
+		},
+		"terms_and_conditions": fiber.Map{
+			"image":             "",
+			"name":              "Terms & Conditions",
+			"short_description": "Terms & Conditions",
+			"long_description":  "Terms & Conditions description",
+		},
+		"legal": fiber.Map{
+			"image":             "",
+			"name":              "Legal Notice",
+			"short_description": "Legal Notice",
+			"long_description":  "Legal Notice description",
+		},
+		"verification":      false,
+		"sms_verification":   false,
+		"email_verification": false,
+		"facebook_login":     false,
+		"google_login":       false,
+		"self_registration":  true,
+	}
+
+	return c.JSON(configMap)
 }

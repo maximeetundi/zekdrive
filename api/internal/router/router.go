@@ -68,6 +68,10 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	// Upgrade handshakes are filtered by token
 	app.Get("/ws", r.wsHandler.Upgrade(), r.wsHandler.Handler())
 
+	// Pusher WebSocket Compatibility Layer
+	app.Get("/app/:key", r.wsHandler.PusherHandler())
+	app.Post("/broadcasting/auth", r.wsHandler.PusherAuth)
+
 	api := app.Group("/api")
 
 	// Public Auth Group
@@ -79,6 +83,9 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	auth.Post("/whatsapp/verify-otp", r.authHandler.VerifyWhatsAppOTP)
 
 	// ── CUSTOMER & DRIVER MOBILE COMPATIBILITY & OPEN-SOURCE MAPS LAYER (PUBLIC) ──
+	app.Get("/api/customer/configuration", r.userHandler.GetCustomerConfig)
+	app.Get("/api/driver/configuration", r.driverHandler.GetDriverConfig)
+
 	app.Get("/api/customer/config/geocode-api", r.mapHandler.Geocode)
 	app.Get("/api/customer/config/place-api-autocomplete", r.mapHandler.SearchLocation)
 	app.Get("/api/customer/config/place-api-details", r.mapHandler.PlaceDetails)
@@ -167,4 +174,5 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	app.Get("/api/driver/info", r.authMiddleware, r.driverHandler.GetMe)
 	app.Put("/api/driver/update/profile", r.authMiddleware, r.userHandler.UpdateProfile)
 	app.Post("/api/driver/update-online-status", r.authMiddleware, r.driverHandler.UpdateStatus)
+	app.Post("/api/user/store-live-location", r.authMiddleware, r.driverHandler.UpdateLocation)
 }

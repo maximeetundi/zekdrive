@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"strings"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/zekdrive/api/internal/domain"
@@ -34,6 +36,12 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	if strings.Contains(c.Path(), "/customer/") || strings.Contains(c.Path(), "/driver/") {
+		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+			"data": u,
+		})
+	}
+
 	return c.Status(fiber.StatusCreated).JSON(u)
 }
 
@@ -50,6 +58,17 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	resp, err := h.authService.Login(c.Context(), &req)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	if strings.Contains(c.Path(), "/customer/") || strings.Contains(c.Path(), "/driver/") {
+		return c.JSON(fiber.Map{
+			"data": fiber.Map{
+				"token":               resp.AccessToken,
+				"is_active":           true,
+				"is_phone_verified":   1,
+				"is_profile_verified": 1,
+			},
+		})
 	}
 
 	return c.JSON(resp)
@@ -104,6 +123,17 @@ func (h *AuthHandler) VerifyWhatsAppOTP(c *fiber.Ctx) error {
 	resp, err := h.authService.VerifyWhatsAppOTP(c.Context(), &req)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	if strings.Contains(c.Path(), "/customer/") || strings.Contains(c.Path(), "/driver/") {
+		return c.JSON(fiber.Map{
+			"data": fiber.Map{
+				"token":               resp.AccessToken,
+				"is_active":           true,
+				"is_phone_verified":   1,
+				"is_profile_verified": 1,
+			},
+		})
 	}
 
 	return c.JSON(resp)

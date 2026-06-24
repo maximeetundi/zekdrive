@@ -122,6 +122,11 @@ func (s *tripService) RequestTrip(ctx context.Context, riderID uuid.UUID, req *d
 		// Notify driver and rider
 		s.notifier.SendNotification(ctx, matchedDriver.UserID, "New Ride Assigned", "Please pick up passenger at "+trip.PickupAddress, map[string]interface{}{"trip_id": trip.ID})
 		s.notifier.SendNotification(ctx, riderID, "Driver Found", "Your driver is on the way!", map[string]interface{}{"trip_id": trip.ID})
+
+		// Pusher Compatibility Event: customer-trip-request to driver
+		_ = s.notifier.PublishPusherEvent(ctx, "private-customer-trip-request."+matchedDriver.ID.String(), "customer-trip-request."+matchedDriver.ID.String(), map[string]string{"trip_id": trip.ID.String()})
+		// Pusher Compatibility Event: driver-trip-accepted to rider
+		_ = s.notifier.PublishPusherEvent(ctx, "private-driver-trip-accepted."+trip.ID.String(), "driver-trip-accepted."+trip.ID.String(), map[string]string{"id": trip.ID.String(), "type": "ride"})
 	} else {
 		// No driver found initially
 		s.notifier.SendNotification(ctx, riderID, "Searching for Driver", "We are searching for drivers near you.", map[string]interface{}{"trip_id": trip.ID})
@@ -169,6 +174,9 @@ func (s *tripService) AcceptTrip(ctx context.Context, tripID, driverID uuid.UUID
 	s.notifier.SendNotification(ctx, trip.RiderID, "Trip Accepted", "Your driver has accepted the ride!", map[string]interface{}{"trip_id": trip.ID})
 	s.notifier.SendNotification(ctx, driver.UserID, "Trip Confirmed", "Go to "+trip.PickupAddress, map[string]interface{}{"trip_id": trip.ID})
 
+	// Pusher Compatibility Event: driver-trip-accepted to rider
+	_ = s.notifier.PublishPusherEvent(ctx, "private-driver-trip-accepted."+trip.ID.String(), "driver-trip-accepted."+trip.ID.String(), map[string]string{"id": trip.ID.String(), "type": "ride"})
+
 	return s.tripRepo.GetByID(ctx, tripID)
 }
 
@@ -193,6 +201,8 @@ func (s *tripService) UpdateStatus(ctx context.Context, tripID uuid.UUID, status
 		s.notifier.SendNotification(ctx, trip.RiderID, "Driver Arrived", "Your driver is waiting outside.", map[string]interface{}{"trip_id": trip.ID})
 	case domain.TripStatusInProgress:
 		s.notifier.SendNotification(ctx, trip.RiderID, "Trip Started", "Have a safe ride!", map[string]interface{}{"trip_id": trip.ID})
+		// Pusher Compatibility Event: driver-trip-started to rider
+		_ = s.notifier.PublishPusherEvent(ctx, "private-driver-trip-started."+trip.ID.String(), "driver-trip-started."+trip.ID.String(), map[string]string{"id": trip.ID.String(), "type": "ride"})
 	case domain.TripStatusCompleted:
 		// Settle payment state
 		s.tripRepo.UpdatePaymentStatus(ctx, tripID, domain.PaymentPaid)
@@ -202,6 +212,8 @@ func (s *tripService) UpdateStatus(ctx context.Context, tripID uuid.UUID, status
 			s.notifier.SendNotification(ctx, trip.Driver.UserID, "Trip Completed", "Earnings details are available in your wallet.", map[string]interface{}{"trip_id": trip.ID})
 		}
 		s.notifier.SendNotification(ctx, trip.RiderID, "Trip Completed", "Thank you for riding with us!", map[string]interface{}{"trip_id": trip.ID})
+		// Pusher Compatibility Event: driver-trip-completed to rider
+		_ = s.notifier.PublishPusherEvent(ctx, "private-driver-trip-completed."+trip.ID.String(), "driver-trip-completed."+trip.ID.String(), map[string]string{"id": trip.ID.String(), "type": "ride"})
 	}
 
 	return s.tripRepo.GetByID(ctx, tripID)
@@ -228,8 +240,14 @@ func (s *tripService) CancelTrip(ctx context.Context, tripID uuid.UUID) (*domain
 	if trip.DriverID != nil {
 		s.driverService.UpdateStatus(ctx, *trip.DriverID, domain.DriverStatusOnline)
 		s.notifier.SendNotification(ctx, trip.Driver.UserID, "Trip Cancelled", "Passenger cancelled the trip request.", map[string]interface{}{"trip_id": trip.ID})
+		
+		// Pusher Compatibility Event: customer-trip-cancelled to driver
+		_ = s.notifier.PublishPusherEvent(ctx, "private-customer-trip-cancelled."+trip.ID.String()+"."+trip.DriverID.String(), "customer-trip-cancelled."+trip.ID.String()+"."+trip.DriverID.String(), map[string]string{"trip_id": trip.ID.String()})
 	}
 	s.notifier.SendNotification(ctx, trip.RiderID, "Trip Cancelled", "Your trip was cancelled.", map[string]interface{}{"trip_id": trip.ID})
+
+	// Pusher Compatibility Event: driver-trip-cancelled to rider
+	_ = s.notifier.PublishPusherEvent(ctx, "private-driver-trip-cancelled."+trip.ID.String(), "driver-trip-cancelled."+trip.ID.String(), map[string]string{"id": trip.ID.String()})
 
 	return s.tripRepo.GetByID(ctx, tripID)
 }

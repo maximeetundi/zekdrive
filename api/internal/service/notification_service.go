@@ -18,8 +18,15 @@ type NotificationPayload struct {
 	Timestamp int64                  `json:"timestamp"`
 }
 
+type PusherPublishPayload struct {
+	Event   string      `json:"event"`
+	Channel string      `json:"channel"`
+	Data    string      `json:"data"` // Pusher event data is stringified JSON
+}
+
 type NotificationService interface {
 	SendNotification(ctx context.Context, userID uuid.UUID, title, body string, data map[string]interface{}) error
+	PublishPusherEvent(ctx context.Context, channelName, eventName string, data interface{}) error
 }
 
 type notificationService struct {
@@ -49,4 +56,26 @@ func (s *notificationService) SendNotification(ctx context.Context, userID uuid.
 
 	// Publish notifications to Redis pub/sub
 	return s.redis.Publish(ctx, "notifications:"+userID.String(), bytes).Err()
+}
+
+func (s *notificationService) PublishPusherEvent(ctx context.Context, channelName, eventName string, data interface{}) error {
+	dataBytes, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	payload := PusherPublishPayload{
+		Event:   eventName,
+		Channel: channelName,
+		Data:    string(dataBytes),
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	// Publish to Redis channel "pusher:channel:<channelName>"
+	redisChan := "pusher:channel:" + channelName
+	return s.redis.Publish(ctx, redisChan, payloadBytes).Err()
 }

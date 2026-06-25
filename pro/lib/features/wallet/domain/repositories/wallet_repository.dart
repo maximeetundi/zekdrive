@@ -57,33 +57,50 @@ class WalletRepository implements WalletRepositoryInterface{
 
   }
 
+  // --- Nouveau système wallet pro ---
+
+  @override
+  Future<Response?> getWallet() async {
+    return await apiClient.getData(AppConstants.proWalletUri);
+  }
+
+  @override
+  Future<Response?> getWalletTransactions() async {
+    return await apiClient.getData(AppConstants.proWalletTransactionsUri);
+  }
+
+  @override
+  Future<Response?> recharge(double amount, String paymentMethod, String phoneNumber, String reference) async {
+    return await apiClient.postData(AppConstants.proWalletRechargeUri, {
+      'amount': amount,
+      'payment_method': paymentMethod,
+      'phone_number': phoneNumber,
+      'reference': reference,
+    });
+  }
+
   @override
   Future add(value) {
-    // TODO: implement add
     throw UnimplementedError();
   }
 
   @override
   Future delete(int id) {
-    // TODO: implement delete
     throw UnimplementedError();
   }
 
   @override
   Future get(String id) {
-    // TODO: implement get
     throw UnimplementedError();
   }
 
   @override
   Future getList({int? offset = 1}) {
-    // TODO: implement getList
     throw UnimplementedError();
   }
 
   @override
   Future update(Map<String, dynamic> body, int id) {
-    // TODO: implement update
     throw UnimplementedError();
   }
 

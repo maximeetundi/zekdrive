@@ -84,6 +84,9 @@ import 'package:ride_sharing_user_app/theme/theme_controller.dart';
 import 'package:ride_sharing_user_app/util/app_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing_user_app/features/store/controllers/store_controller.dart';
+import 'package:ride_sharing_user_app/features/settings/controllers/country_controller.dart';
+import 'package:ride_sharing_user_app/features/settings/domain/repositories/country_repository.dart';
 
 Future<Map<String, Map<String, String>>> init() async {
   // Core
@@ -131,6 +134,15 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => BottomMenuController());
   Get.lazyPut(() => CouponController(couponServiceInterface: Get.find()));
   Get.lazyPut(() => OfferController(offerServiceInterface: Get.find()));
+  Get.lazyPut(() => StoreController(apiClient: Get.find()));
+  // Country feature
+  final countryRepo = CountryRepository(apiClient: Get.find());
+  Get.lazyPut(() => countryRepo);
+  Get.put(
+    CountryController(countryRepository: countryRepo, sharedPreferences: Get.find()),
+    tag: 'country',
+    permanent: true,
+  );
 
 
   AddressRepositoryInterface addressRepositoryInterface = AddressRepository(apiClient: Get.find());

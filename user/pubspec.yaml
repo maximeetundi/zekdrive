@@ -18,9 +18,9 @@ dependencies:
   connectivity_plus: ^5.0.1
   firebase_core: ^2.9.0
   firebase_messaging: ^14.7.4
-  flutter_local_notifications: ^16.3.0
-  path_provider: ^2.0.11
-  image_picker: ^1.0.4
+  flutter_local_notifications: ^17.2.1
+  path_provider: ^2.1.5
+  image_picker: ^1.1.2
   country_code_picker: ^3.0.0
   dotted_border: ^2.0.0+2
   percent_indicator: ^4.0.1
@@ -29,22 +29,22 @@ dependencies:
   pin_code_fields: ^8.0.1
   flutter_svg: ^2.0.9
   shimmer_animation: ^2.1.0+1
-  file_picker: ^6.1.1
-  permission_handler: ^11.0.1
+  file_picker: ^10.0.0
+  permission_handler: ^12.0.1
   syncfusion_flutter_datepicker: ^23.1.44
-  google_maps_flutter: ^2.6.1
+  google_maps_flutter: ^2.14.0
   geolocator: ^11.0.0
   flutter_animarker: ^3.2.0
-  carousel_slider: ^4.1.1
+  carousel_slider: ^5.0.0
   shimmer: ^3.0.0
   loading_overlay_pro: ^2.1.1
   modal_bottom_sheet: ^2.1.2
-  flutter_widget_from_html_core: ^0.14.7
+  flutter_widget_from_html_core: ^0.17.2
   flutter_typeahead: ^4.3.7
   dotted_line: ^3.1.0
   autocomplete_textfield: ^2.0.1
   web_socket_channel: ^2.3.0
-  flutter_inappwebview: ^5.7.2+3
+  flutter_inappwebview: ^6.1.5
   firebase_crashlytics: ^3.2.0
   screenshot: ^2.1.0
   cached_network_image: ^3.3.1
@@ -83,3 +83,13 @@ flutter:
           weight: 700
         - asset: assets/font/sf-pro-text-heavy.ttf
           weight: 900
+
+dependency_overrides:
+  pinenacl: ^0.6.0
+  win32: ^5.5.1
+  flutter_plugin_android_lifecycle: ^2.0.24
+  shared_preferences_android: ^2.2.3
+  url_launcher_android: 6.3.3
+
+
+

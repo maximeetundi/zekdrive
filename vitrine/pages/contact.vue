@@ -1,49 +1,51 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useScrollAnimation } from '~/composables/useScrollAnimation'
+import { useLanguage } from '~/composables/useLanguage'
 
+const { t, currentLang } = useLanguage()
 const { observe } = useScrollAnimation()
 
 useHead({
-  title: 'Contactez ZekDrive — Notre équipe est à votre écoute',
+  title: computed(() => t('contact.meta_title')),
   meta: [
-    { name: 'description', content: 'Une question, un partenariat ou besoin d\'assistance ? Contactez le support ZekDrive à Dakar, Abidjan et Bamako. Nous vous répondons sous 24h.' },
+    { name: 'description', content: computed(() => t('contact.meta_desc')) },
   ],
 })
 
 // Offices details
-const offices = [
+const offices = computed(() => [
   {
     city: 'Dakar',
-    country: 'Sénégal',
+    country: t('contact.country_senegal'),
     address: 'Rue des Écrivains, Point E, Dakar',
     phone: '+221 33 824 55 55',
     email: 'dakar@zekdrive.com',
-    hours: 'Lun - Ven : 8h00 - 18h00',
+    hours: t('contact.hours_dakar'),
     coords: { x: 120, y: 110 }
   },
   {
     city: 'Abidjan',
-    country: 'Côte d\'Ivoire',
+    country: t('contact.country_cotedivoire'),
     address: 'Boulevard de Marseille, Marcory, Abidjan',
     phone: '+225 27 22 44 88',
     email: 'abidjan@zekdrive.com',
-    hours: 'Lun - Ven : 8h00 - 18h00 / Sam : 9h00 - 13h00',
+    hours: t('contact.hours_abidjan'),
     coords: { x: 480, y: 290 }
   },
   {
     city: 'Bamako',
-    country: 'Mali',
+    country: t('contact.country_mali'),
     address: 'Avenue du Mali, ACI 2000, Bamako',
     phone: '+223 20 29 11 11',
     email: 'bamako@zekdrive.com',
-    hours: 'Lun - Ven : 8h00 - 17h30',
+    hours: t('contact.hours_bamako'),
     coords: { x: 310, y: 170 }
   }
-]
+])
 
 const selectedCityIndex = ref(0)
-const selectedCity = computed(() => offices[selectedCityIndex.value])
+const selectedCity = computed(() => offices.value[selectedCityIndex.value])
 
 // Contact Form State
 const form = ref({
@@ -66,27 +68,27 @@ function selectCity(index: number) {
 
 function validateForm() {
   const tempErrors: Record<string, string> = {}
-  if (!form.value.firstName.trim()) tempErrors.firstName = 'Le prénom est requis'
-  if (!form.value.lastName.trim()) tempErrors.lastName = 'Le nom est requis'
+  if (!form.value.firstName.trim()) tempErrors.firstName = t('contact.validate_firstname')
+  if (!form.value.lastName.trim()) tempErrors.lastName = t('contact.validate_lastname')
   
   if (!form.value.email.trim()) {
-    tempErrors.email = 'L\'adresse e-mail est requise'
+    tempErrors.email = t('contact.validate_email_req')
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
-    tempErrors.email = 'Format d\'adresse e-mail invalide'
+    tempErrors.email = t('contact.validate_email_inv')
   }
   
   if (!form.value.phone.trim()) {
-    tempErrors.phone = 'Le numéro de téléphone est requis'
+    tempErrors.phone = t('contact.validate_phone')
   }
   
   if (!form.value.subject) {
-    tempErrors.subject = 'Veuillez sélectionner un sujet'
+    tempErrors.subject = t('contact.validate_subject')
   }
   
   if (!form.value.message.trim()) {
-    tempErrors.message = 'Le message ne peut pas être vide'
+    tempErrors.message = t('contact.validate_message_empty')
   } else if (form.value.message.length < 10) {
-    tempErrors.message = 'Le message doit contenir au moins 10 caractères'
+    tempErrors.message = t('contact.validate_message_len')
   }
   
   errors.value = tempErrors
@@ -139,12 +141,12 @@ onMounted(() => {
         
         <div class="container" style="position:relative;z-index:1;">
           <div style="max-width:720px;margin:0 auto;text-align:center;">
-            <div class="section-tag fade-up">Contact & Support</div>
+            <div class="section-tag fade-up">{{ t('contact.tag') }}</div>
             <h1 class="section-title fade-up" style="font-size:clamp(2.2rem,5vw,3.6rem);">
-              Une question ?<br><span class="gradient-text">Notre équipe est là</span>
+              {{ t('contact.hero_title_1') }}<br><span class="gradient-text">{{ t('contact.hero_title_highlight') }}</span>
             </h1>
             <p class="section-subtitle fade-up" style="margin:0 auto;">
-              Que vous soyez passager, chauffeur ou entreprise, nous répondons à vos besoins de mobilité partout en Afrique de l'Ouest.
+              {{ t('contact.hero_sub') }}
             </p>
           </div>
         </div>
@@ -156,23 +158,23 @@ onMounted(() => {
           <div class="contact-info-grid">
             <div class="contact-info-card fade-up">
               <div class="contact-icon">📞</div>
-              <h3 class="contact-info-title">Téléphone</h3>
+              <h3 class="contact-info-title">{{ t('contact.card_phone') }}</h3>
               <p class="contact-info-value" style="margin-bottom:8px;">+221 33 824 55 55</p>
-              <p style="font-size:0.85rem;color:var(--text-muted);">Assistance 7j/7, 24h/24</p>
+              <p style="font-size:0.85rem;color:var(--text-muted);">{{ t('contact.card_phone_sub') }}</p>
             </div>
             
             <div class="contact-info-card fade-up" style="transition-delay:0.1s;">
               <div class="contact-icon">✉️</div>
-              <h3 class="contact-info-title">E-mail</h3>
+              <h3 class="contact-info-title">{{ t('contact.card_email') }}</h3>
               <p class="contact-info-value" style="margin-bottom:8px;">support@zekdrive.com</p>
-              <p style="font-size:0.85rem;color:var(--text-muted);">Réponse sous 24 heures ouvrées</p>
+              <p style="font-size:0.85rem;color:var(--text-muted);">{{ t('contact.card_email_sub') }}</p>
             </div>
             
             <div class="contact-info-card fade-up" style="transition-delay:0.2s;">
               <div class="contact-icon">📍</div>
-              <h3 class="contact-info-title">Siège social</h3>
-              <p class="contact-info-value" style="margin-bottom:8px;">Dakar, Sénégal</p>
-              <p style="font-size:0.85rem;color:var(--text-muted);">Point E, Rue des Écrivains</p>
+              <h3 class="contact-info-title">{{ t('contact.card_hq') }}</h3>
+              <p class="contact-info-value" style="margin-bottom:8px;">Dakar, Senegal</p>
+              <p style="font-size:0.85rem;color:var(--text-muted);">{{ t('contact.card_hq_sub') }}</p>
             </div>
           </div>
         </div>
@@ -184,9 +186,9 @@ onMounted(() => {
         
         <div class="container" style="position:relative;z-index:1;">
           <div class="section-header centered fade-up">
-            <div class="section-tag">Présence locale</div>
-            <h2 class="section-title">Nos <span class="gradient-text">bureaux régionaux</span></h2>
-            <p class="section-subtitle">Découvrez nos hubs de support et centres d'accueil pour chauffeurs partenaires.</p>
+            <div class="section-tag">{{ t('contact.presence_tag') }}</div>
+            <h2 class="section-title">{{ t('contact.presence_title_1') }}<span class="gradient-text">{{ t('contact.presence_title_highlight') }}</span></h2>
+            <p class="section-subtitle">{{ t('contact.presence_sub') }}</p>
           </div>
 
           <div class="map-section-grid">
@@ -195,7 +197,7 @@ onMounted(() => {
               <div class="map-header">
                 <span class="pulse-indicator"></span>
                 <span style="font-family:'Sora',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;">
-                  Carte interactive des hubs
+                  {{ t('contact.map_title') }}
                 </span>
               </div>
               <div class="map-svg-container">
@@ -209,7 +211,7 @@ onMounted(() => {
                   <rect width="100%" height="100%" fill="url(#dotGrid)" />
 
                   <!-- Stylized connection paths between hubs -->
-                  <path d="M120 110 Q220 120 310 170" stroke="rgba(124, 58, 237, 0.3)" stroke-width="2" stroke-dasharray="6 4" />
+                  <path d="M120 110 Q220 120 310 170" stroke="rgba(0, 115, 95, 0.3)" stroke-width="2" stroke-dasharray="6 4" />
                   <path d="M310 170 Q410 220 480 290" stroke="rgba(0, 229, 204, 0.3)" stroke-width="2" stroke-dasharray="6 4" />
                   <path d="M120 110 Q320 230 480 290" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" stroke-dasharray="4 4" />
 
@@ -218,9 +220,9 @@ onMounted(() => {
                         stroke="rgba(255, 255, 255, 0.05)" stroke-width="3" fill="none" />
 
                   <!-- Glowing animated connections (gradient overlays) -->
-                  <circle cx="120" cy="110" r="15" fill="rgba(124, 58, 237, 0.25)" class="glowing-circle" />
+                  <circle cx="120" cy="110" r="15" fill="rgba(0, 115, 95, 0.25)" class="glowing-circle" />
                   <circle cx="310" cy="170" r="15" fill="rgba(0, 229, 204, 0.2)" class="glowing-circle" />
-                  <circle cx="480" cy="290" r="15" fill="rgba(168, 85, 247, 0.2)" class="glowing-circle" />
+                  <circle cx="480" cy="290" r="15" fill="rgba(20, 177, 158, 0.2)" class="glowing-circle" />
 
                   <!-- Dakar Hub Interactive Node -->
                   <g class="map-node" :class="{ active: selectedCityIndex === 0 }" @click="selectCity(0)">
@@ -257,7 +259,7 @@ onMounted(() => {
                 <div class="office-info-item">
                   <div class="office-info-icon">📍</div>
                   <div>
-                    <h4 class="office-info-label">Adresse</h4>
+                    <h4 class="office-info-label">{{ currentLang === 'fr' ? 'Adresse' : 'Address' }}</h4>
                     <p class="office-info-text">{{ selectedCity.address }}</p>
                   </div>
                 </div>
@@ -265,7 +267,7 @@ onMounted(() => {
                 <div class="office-info-item">
                   <div class="office-info-icon">📞</div>
                   <div>
-                    <h4 class="office-info-label">Téléphone</h4>
+                    <h4 class="office-info-label">{{ t('contact.office_phone') }}</h4>
                     <a :href="'tel:' + selectedCity.phone.replace(/\s+/g, '')" class="office-info-text-link">
                       {{ selectedCity.phone }}
                     </a>
@@ -275,7 +277,7 @@ onMounted(() => {
                 <div class="office-info-item">
                   <div class="office-info-icon">✉️</div>
                   <div>
-                    <h4 class="office-info-label">E-mail Hub</h4>
+                    <h4 class="office-info-label">{{ t('contact.office_email') }} Hub</h4>
                     <a :href="'mailto:' + selectedCity.email" class="office-info-text-link">
                       {{ selectedCity.email }}
                     </a>
@@ -285,7 +287,7 @@ onMounted(() => {
                 <div class="office-info-item">
                   <div class="office-info-icon">⏰</div>
                   <div>
-                    <h4 class="office-info-label">Horaires d'ouverture</h4>
+                    <h4 class="office-info-label">{{ t('contact.office_hours') }}</h4>
                     <p class="office-info-text">{{ selectedCity.hours }}</p>
                   </div>
                 </div>
@@ -315,9 +317,9 @@ onMounted(() => {
         
         <div class="container" style="position:relative;z-index:1;max-width:960px;">
           <div class="section-header centered fade-up">
-            <div class="section-tag">Formulaire</div>
-            <h2 class="section-title">Envoyez-nous un <span class="gradient-text">message</span></h2>
-            <p class="section-subtitle">Notre support client est disponible pour vous assister rapidement.</p>
+            <div class="section-tag">{{ t('contact.form_tag') }}</div>
+            <h2 class="section-title">{{ t('contact.form_title_1') }}<span class="gradient-text">{{ t('contact.form_title_highlight') }}</span></h2>
+            <p class="section-subtitle">{{ t('contact.form_sub') }}</p>
           </div>
 
           <div class="form-section fade-up">
@@ -326,8 +328,7 @@ onMounted(() => {
               <div v-if="showSuccess" class="form-success-banner" style="margin-bottom:32px;">
                 <div class="success-icon">✓</div>
                 <div>
-                  <h4 style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:4px;">Message envoyé avec succès !</h4>
-                  <p style="font-size:0.9rem;opacity:0.9;">Merci de nous avoir contactés. Nos agents prendront contact avec vous sous 24 heures.</p>
+                  <h4 style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:4px;">{{ t('contact.success') }}</h4>
                 </div>
               </div>
             </transition>
@@ -336,70 +337,70 @@ onMounted(() => {
               <div class="form-grid">
                 <!-- Profile Type Select -->
                 <div class="form-group full-width">
-                  <label class="form-label">Vous êtes *</label>
+                  <label class="form-label">{{ t('contact.type_label') }}</label>
                   <div class="profile-type-grid">
                     <label class="profile-type-option" :class="{ active: form.type === 'passenger' }">
                       <input type="radio" v-model="form.type" value="passenger" style="display:none;" />
                       <span class="profile-icon">🚗</span>
-                      <span class="profile-label">Passager</span>
+                      <span class="profile-label">{{ t('contact.type_passenger') }}</span>
                     </label>
                     <label class="profile-type-option" :class="{ active: form.type === 'driver' }">
                       <input type="radio" v-model="form.type" value="driver" style="display:none;" />
                       <span class="profile-icon">🔑</span>
-                      <span class="profile-label">Chauffeur</span>
+                      <span class="profile-label">{{ t('contact.type_driver') }}</span>
                     </label>
                     <label class="profile-type-option" :class="{ active: form.type === 'business' }">
                       <input type="radio" v-model="form.type" value="business" style="display:none;" />
                       <span class="profile-icon">🏢</span>
-                      <span class="profile-label">Entreprise</span>
+                      <span class="profile-label">{{ t('contact.type_business') }}</span>
                     </label>
                     <label class="profile-type-option" :class="{ active: form.type === 'other' }">
                       <input type="radio" v-model="form.type" value="other" style="display:none;" />
                       <span class="profile-icon">🤝</span>
-                      <span class="profile-label">Partenaire</span>
+                      <span class="profile-label">{{ t('contact.type_other') }}</span>
                     </label>
                   </div>
                 </div>
 
                 <!-- Fields -->
                 <div class="form-group">
-                  <label class="form-label">Prénom *</label>
+                  <label class="form-label">{{ t('contact.first_name') }}</label>
                   <input 
                     v-model="form.firstName" 
                     type="text" 
                     class="form-input" 
                     :class="{ 'has-error': errors.firstName }"
-                    placeholder="Votre prénom" 
+                    placeholder="" 
                   />
                   <span v-if="errors.firstName" class="form-error-msg">{{ errors.firstName }}</span>
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label">Nom *</label>
+                  <label class="form-label">{{ t('contact.last_name') }}</label>
                   <input 
                     v-model="form.lastName" 
                     type="text" 
                     class="form-input" 
                     :class="{ 'has-error': errors.lastName }"
-                    placeholder="Votre nom" 
+                    placeholder="" 
                   />
                   <span v-if="errors.lastName" class="form-error-msg">{{ errors.lastName }}</span>
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label">Adresse e-mail *</label>
+                  <label class="form-label">{{ t('contact.email') }}</label>
                   <input 
                     v-model="form.email" 
                     type="email" 
                     class="form-input" 
                     :class="{ 'has-error': errors.email }"
-                    placeholder="nom@exemple.com" 
+                    placeholder="email@example.com" 
                   />
                   <span v-if="errors.email" class="form-error-msg">{{ errors.email }}</span>
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label">Téléphone *</label>
+                  <label class="form-label">{{ t('contact.phone') }}</label>
                   <input 
                     v-model="form.phone" 
                     type="tel" 
@@ -411,30 +412,29 @@ onMounted(() => {
                 </div>
 
                 <div class="form-group full-width">
-                  <label class="form-label">Sujet de votre demande *</label>
+                  <label class="form-label">{{ t('contact.subject') }}</label>
                   <select 
                     v-model="form.subject" 
                     class="form-select"
                     :class="{ 'has-error': errors.subject }"
                   >
-                    <option value="">Choisissez une option</option>
-                    <option value="support">Assistance avec un trajet / problème de l'application</option>
-                    <option value="recruitment">Recrutement / Devenir chauffeur partenaire</option>
-                    <option value="b2b">ZekDrive Pro & Facturation entreprise</option>
-                    <option value="partnership">Opportunité de partenariat commercial</option>
-                    <option value="legal">Demandes juridiques ou presse</option>
-                    <option value="other">Autre demande générale</option>
+                    <option value="">{{ t('contact.subject_placeholder') }}</option>
+                    <option value="support">{{ t('contact.subject_support') }}</option>
+                    <option value="recruitment">{{ t('contact.subject_career') }}</option>
+                    <option value="b2b">{{ t('contact.subject_billing') }}</option>
+                    <option value="partnership">{{ t('contact.subject_partner') }}</option>
+                    <option value="legal">{{ t('contact.subject_other') }}</option>
                   </select>
                   <span v-if="errors.subject" class="form-error-msg">{{ errors.subject }}</span>
                 </div>
 
                 <div class="form-group full-width">
-                  <label class="form-label">Message *</label>
+                  <label class="form-label">{{ t('contact.message') }}</label>
                   <textarea 
                     v-model="form.message" 
                     class="form-textarea" 
                     :class="{ 'has-error': errors.message }"
-                    placeholder="Écrivez votre message de manière détaillée afin de nous aider à mieux vous répondre..."
+                    :placeholder="t('contact.message_placeholder')"
                   />
                   <span v-if="errors.message" class="form-error-msg">{{ errors.message }}</span>
                 </div>
@@ -448,16 +448,16 @@ onMounted(() => {
                   style="width:100%; justify-content:center;"
                   :disabled="isSubmitting"
                 >
-                  <span v-if="isSubmitting">Envoi en cours...</span>
+                  <span v-if="isSubmitting">{{ t('contact.btn_submitting') }}</span>
                   <span v-else style="display:flex; align-items:center; gap:10px;">
-                    Envoyer mon message
+                    {{ t('contact.btn_submit') }}
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
                     </svg>
                   </span>
                 </button>
                 <p style="font-size:0.8rem;color:var(--text-subtle);text-align:center;">
-                  * En envoyant ce formulaire, vous consentez à ce que ZekDrive traite vos données pour répondre à votre demande.
+                  {{ t('driver.form_note') }}
                 </p>
               </div>
             </form>
@@ -470,8 +470,8 @@ onMounted(() => {
         <div class="container">
           <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:32px;">
             <div>
-              <h3 style="font-family:'Sora',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:8px;">Suivez-nous sur les réseaux</h3>
-              <p style="color:var(--text-muted);font-size:0.95rem;">Soyez informé de nos nouveautés, promotions et lancements de villes.</p>
+              <h3 style="font-family:'Sora',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:8px;">{{ currentLang === 'fr' ? 'Suivez-nous sur les réseaux' : 'Follow us on social media' }}</h3>
+              <p style="color:var(--text-muted);font-size:0.95rem;">{{ currentLang === 'fr' ? 'Soyez informé de nos nouveautés, promotions et lancements de villes.' : 'Stay informed about our news, promotions and new city launches.' }}</p>
             </div>
             
             <div style="display:flex;gap:16px;">
@@ -482,7 +482,7 @@ onMounted(() => {
               </a>
               <a href="https://instagram.com" target="_blank" rel="noopener" class="social-circle-link" aria-label="Instagram">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0 3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                 </svg>
               </a>
               <a href="https://facebook.com" target="_blank" rel="noopener" class="social-circle-link" aria-label="Facebook">
@@ -503,397 +503,3 @@ onMounted(() => {
     <TheFooter />
   </div>
 </template>
-
-<style scoped>
-/* Page Specific Hero Style */
-.contact-hero {
-  background: radial-gradient(ellipse at 50% 10%, rgba(124, 58, 237, 0.12) 0%, transparent 60%);
-}
-
-/* Map Grid Styles */
-.map-section-grid {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 32px;
-  margin-top: 40px;
-}
-
-.map-card {
-  background: var(--bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  height: 480px;
-}
-
-.map-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-  position: relative;
-  z-index: 2;
-}
-
-.pulse-indicator {
-  width: 8px;
-  height: 8px;
-  background-color: var(--teal);
-  border-radius: 50%;
-  box-shadow: 0 0 0 0 rgba(0, 229, 204, 0.7);
-  animation: pulse-dot 1.8s infinite;
-}
-
-@keyframes pulse-dot {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(0, 229, 204, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 8px rgba(0, 229, 204, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(0, 229, 204, 0);
-  }
-}
-
-.map-svg-container {
-  flex-grow: 1;
-  width: 100%;
-  position: relative;
-}
-
-/* Map Nodes Styling */
-.map-node {
-  cursor: pointer;
-  transition: transform var(--transition);
-}
-
-.map-node circle {
-  transition: r var(--transition), fill var(--transition), stroke var(--transition);
-}
-
-.map-node text {
-  font-family: 'Sora', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  fill: var(--text-muted);
-  transition: fill var(--transition), font-size var(--transition);
-  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-  pointer-events: none;
-}
-
-.map-node:hover text,
-.map-node.active text {
-  fill: #fff;
-  font-size: 13px;
-}
-
-.map-node:hover circle:first-child,
-.map-node.active circle:first-child {
-  r: 10px;
-  stroke-width: 3px;
-}
-
-.map-node.active circle:first-child {
-  fill: var(--teal);
-}
-
-/* Glowing Circles behind Nodes */
-.glowing-circle {
-  transform-origin: center;
-  animation: ripple 4s ease-out infinite;
-}
-
-@keyframes ripple {
-  0% {
-    r: 8px;
-    opacity: 0.8;
-  }
-  100% {
-    r: 35px;
-    opacity: 0;
-  }
-}
-
-.hover-area {
-  cursor: pointer;
-}
-
-/* Office Details Card */
-.office-details-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-lg);
-  padding: 40px 32px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  backdrop-filter: blur(10px);
-}
-
-.office-country-tag {
-  font-family: 'Sora', sans-serif;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--teal);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  background: var(--teal-dim);
-  border: 1px solid rgba(0, 229, 204, 0.15);
-  border-radius: 100px;
-  padding: 4px 12px;
-}
-
-.office-city-title {
-  font-family: 'Sora', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 800;
-  margin-top: 12px;
-  color: var(--text);
-  letter-spacing: -0.02em;
-}
-
-.office-info-list {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-.office-info-item {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-}
-
-.office-info-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--card-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  flex-shrink: 0;
-}
-
-.office-info-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-subtle);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 2px;
-}
-
-.office-info-text {
-  font-size: 0.95rem;
-  color: var(--text);
-  font-weight: 500;
-  line-height: 1.5;
-}
-
-.office-info-text-link {
-  font-size: 0.95rem;
-  color: var(--text);
-  font-weight: 600;
-  line-height: 1.5;
-  transition: color 0.3s;
-}
-
-.office-info-text-link:hover {
-  color: var(--teal);
-}
-
-/* Tabs inside details card */
-.city-selector-tabs {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  background: rgba(8, 11, 20, 0.4);
-  padding: 6px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--card-border);
-}
-
-.city-tab {
-  font-family: 'Sora', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 10px;
-  text-align: center;
-  border-radius: 6px;
-  color: var(--text-muted);
-  transition: all var(--transition);
-}
-
-.city-tab:hover {
-  color: var(--text);
-  background: rgba(255,255,255,0.02);
-}
-
-.city-tab.active {
-  color: #fff;
-  background: var(--violet);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-}
-
-/* Profile Type Options Styles */
-.profile-type-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.profile-type-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 8px;
-  background: var(--bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all var(--transition);
-  text-align: center;
-}
-
-.profile-type-option:hover {
-  border-color: rgba(255,255,255,0.15);
-  background: rgba(255, 255, 255, 0.01);
-}
-
-.profile-type-option.active {
-  border-color: var(--teal);
-  background: var(--teal-dim);
-  box-shadow: 0 0 12px rgba(0, 229, 204, 0.1);
-}
-
-.profile-icon {
-  font-size: 1.4rem;
-}
-
-.profile-label {
-  font-family: 'Sora', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-
-.profile-type-option.active .profile-label {
-  color: #fff;
-}
-
-/* Form Errors */
-.form-input.has-error,
-.form-select.has-error,
-.form-textarea.has-error {
-  border-color: #ef4444 !important;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
-}
-
-.form-error-msg {
-  font-size: 0.75rem;
-  color: #ef4444;
-  margin-top: 4px;
-  font-weight: 500;
-}
-
-/* Success Banner style */
-.form-success-banner {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  border-radius: var(--radius-md);
-  padding: 20px 24px;
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  color: #fff;
-}
-
-.success-icon {
-  width: 38px;
-  height: 38px;
-  background: #10b981;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  font-weight: 800;
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-/* Social link circles */
-.social-circle-link {
-  width: 48px;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--card-border);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  transition: all var(--transition);
-}
-
-.social-circle-link:hover {
-  background: var(--gradient);
-  border-color: transparent;
-  color: #fff;
-  transform: translateY(-3px);
-  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
-}
-
-/* Vue Transitions */
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
-}
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateY(-20px);
-  opacity: 0;
-}
-
-/* Media Queries */
-@media (max-width: 992px) {
-  .map-section-grid {
-    grid-template-columns: 1fr;
-  }
-  .map-card {
-    height: 380px;
-  }
-}
-
-@media (max-width: 600px) {
-  .profile-type-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  .map-card {
-    height: 280px;
-    padding: 16px;
-  }
-  .map-header {
-    margin-bottom: 10px;
-  }
-  .map-svg-container svg text {
-    font-size: 10px;
-  }
-}
-</style>

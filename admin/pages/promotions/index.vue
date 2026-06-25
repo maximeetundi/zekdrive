@@ -3,15 +3,15 @@
     <!-- Page Header -->
     <div class="page-header animate-fade-in">
       <div>
-        <h1 class="page-title">Coupons & Campaigns</h1>
-        <p class="page-desc">Manage promotional discount codes, usage limits, and campaign dates</p>
+        <h1 class="page-title">{{ lang === 'fr' ? 'Codes promotionnels' : 'Coupons & Campaigns' }}</h1>
+        <p class="page-desc">{{ lang === 'fr' ? 'Gérer les codes de réduction, les limites d\'utilisation et les campagnes de promotion' : 'Manage promotional discount codes, usage limits, and campaign dates' }}</p>
       </div>
       <div class="page-actions">
         <button class="btn btn-primary flex items-center gap-2" @click="openAddModal">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
-          <span>Create Coupon</span>
+          <span>{{ lang === 'fr' ? 'Créer un coupon' : 'Create Coupon' }}</span>
         </button>
       </div>
     </div>
@@ -30,14 +30,14 @@
         >
           <!-- Code cell (monospaced) -->
           <template #cell-code="{ item }">
-            <span style="font-family: monospace; font-size: 0.9375rem; font-weight: 700; color: var(--accent-primary); letter-spacing: 0.05em; background: rgba(108, 99, 255, 0.08); padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); border: 1px dashed rgba(108,99,255,0.2);">
+            <span style="font-family: monospace; font-size: 0.9375rem; font-weight: 700; color: var(--accent-primary); letter-spacing: 0.05em; background: rgba(20, 177, 158, 0.08); padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); border: 1px dashed rgba(20,177,158,0.2);">
               {{ item.code }}
             </span>
           </template>
 
           <template #cell-type="{ item }">
             <span class="text-xs font-semibold text-secondary" style="text-transform: capitalize;">
-              {{ item.type === 'percent' ? 'Percentage (%)' : 'Fixed Amount' }}
+              {{ item.type === 'percent' ? (lang === 'fr' ? 'Pourcentage (%)' : 'Percentage (%)') : (lang === 'fr' ? 'Montant Fixe' : 'Fixed Amount') }}
             </span>
           </template>
 
@@ -57,7 +57,7 @@
           <template #cell-expiry_date="{ item }">
             <span class="text-xs" :class="isExpired(item.expiry_date) ? 'text-red' : 'text-primary'">
               {{ formatDate(item.expiry_date) }}
-              <span v-if="isExpired(item.expiry_date)" class="text-xs block" style="font-weight: 500;">(Expired)</span>
+              <span v-if="isExpired(item.expiry_date)" class="text-xs block" style="font-weight: 500;">{{ lang === 'fr' ? '(Expiré)' : '(Expired)' }}</span>
             </span>
           </template>
 
@@ -67,11 +67,11 @@
 
           <template #cell-actions="{ item }">
             <div class="flex gap-2 justify-end">
-              <button class="btn btn-secondary btn-sm" @click="openEditModal(item)">Edit</button>
+              <button class="btn btn-secondary btn-sm" @click="openEditModal(item)">{{ t('edit') }}</button>
               <button class="btn btn-secondary btn-sm" @click="toggleStatus(item)">
-                {{ item.status ? 'Deactivate' : 'Activate' }}
+                {{ item.status ? (lang === 'fr' ? 'Désactiver' : 'Deactivate') : (lang === 'fr' ? 'Activer' : 'Activate') }}
               </button>
-              <button class="btn btn-danger btn-sm" @click="deleteCoupon(item.id)">Delete</button>
+              <button class="btn btn-danger btn-sm" @click="deleteCoupon(item.id)">{{ t('delete') }}</button>
             </div>
           </template>
         </AppDataTable>
@@ -81,50 +81,50 @@
     <!-- Create/Edit Modal -->
     <AppModal
       :show="showModal"
-      :title="isEditMode ? 'Edit Coupon Parameters' : 'Create Promo Coupon'"
+      :title="isEditMode ? (lang === 'fr' ? 'Modifier le coupon' : 'Edit Coupon Parameters') : (lang === 'fr' ? 'Créer un coupon promo' : 'Create Promo Coupon')"
       @close="showModal = false"
     >
       <form @submit.prevent="saveCoupon">
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Promotional Code</label>
-          <input v-model="form.code" type="text" class="form-control" style="text-transform: uppercase;" required placeholder="WELCOME250" />
+        <div class="form-group text-left" style="margin-bottom: 1rem;">
+          <label class="form-label">{{ lang === 'fr' ? 'Code promotionnel' : 'Promotional Code' }}</label>
+          <input v-model="form.code" type="text" class="form-input" style="text-transform: uppercase;" required placeholder="WELCOME250" />
         </div>
 
-        <div class="grid grid-cols-2 gap-4" style="grid-template-columns: 1fr 1fr; margin-bottom: 1rem;">
-          <div class="form-group">
-            <label class="form-label">Discount Method</label>
+        <div class="grid grid-cols-2 gap-4 modal-form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1rem;">
+          <div class="form-group text-left">
+            <label class="form-label">{{ lang === 'fr' ? 'Méthode de réduction' : 'Discount Method' }}</label>
             <select v-model="form.type" class="form-select">
-              <option value="percent">Percentage (%)</option>
-              <option value="flat">Fixed Amount (FCFA)</option>
+              <option value="percent">{{ lang === 'fr' ? 'Pourcentage (%)' : 'Percentage (%)' }}</option>
+              <option value="flat">{{ lang === 'fr' ? 'Montant fixe (FCFA)' : 'Fixed Amount (FCFA)' }}</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Discount Value</label>
-            <input v-model.number="form.value" type="number" class="form-control" required min="1" />
+          <div class="form-group text-left">
+            <label class="form-label">{{ lang === 'fr' ? 'Valeur de la réduction' : 'Discount Value' }}</label>
+            <input v-model.number="form.value" type="number" class="form-input" required min="1" />
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4" style="grid-template-columns: 1fr 1fr; margin-bottom: 1rem;">
-          <div class="form-group">
-            <label class="form-label">Usage Limit (Max Rides)</label>
-            <input v-model.number="form.usage_limit" type="number" class="form-control" required min="1" />
+        <div class="grid grid-cols-2 gap-4 modal-form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1rem;">
+          <div class="form-group text-left">
+            <label class="form-label">{{ lang === 'fr' ? 'Limite d\'utilisations' : 'Usage Limit (Max Rides)' }}</label>
+            <input v-model.number="form.usage_limit" type="number" class="form-input" required min="1" />
           </div>
-          <div class="form-group">
-            <label class="form-label">Expiration Date</label>
-            <input v-model="form.expiry_date" type="date" class="form-control" required />
+          <div class="form-group text-left">
+            <label class="form-label">{{ lang === 'fr' ? 'Date d\'expiration' : 'Expiration Date' }}</label>
+            <input v-model="form.expiry_date" type="date" class="form-input" required />
           </div>
         </div>
 
-        <div class="form-group flex items-center" style="margin-bottom: 1.5rem;">
+        <div class="form-group text-left" style="margin-bottom: 1.5rem;">
           <label class="flex items-center gap-2 cursor-pointer">
             <input v-model="form.status" type="checkbox" />
-            <span class="text-sm">Enabled & Redeemable</span>
+            <span class="text-sm">{{ lang === 'fr' ? 'Activé et utilisable' : 'Enabled & Redeemable' }}</span>
           </label>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 2rem;">
-          <button type="button" class="btn btn-secondary" @click="showModal = false">Cancel</button>
-          <button type="submit" class="btn btn-primary">Create Coupon</button>
+        <div class="modal-footer-actions" style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 2rem;">
+          <button type="button" class="btn btn-secondary" @click="showModal = false">{{ t('cancel') }}</button>
+          <button type="submit" class="btn btn-primary">{{ lang === 'fr' ? 'Enregistrer le coupon' : 'Save Coupon' }}</button>
         </div>
       </form>
     </AppModal>
@@ -132,12 +132,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from '~/composables/useI18n'
 
 definePageMeta({
   middleware: 'auth',
 })
 
+const { t, lang } = useI18n()
 const loading = ref(false)
 
 const coupons = ref([
@@ -183,15 +185,15 @@ const coupons = ref([
   }
 ])
 
-const headers = [
-  { key: 'code', label: 'Promo Code' },
+const headers = computed(() => [
+  { key: 'code', label: lang.value === 'fr' ? 'Code Promo' : 'Promo Code' },
   { key: 'type', label: 'Type' },
-  { key: 'value', label: 'Discount Value' },
-  { key: 'usage', label: 'Redemptions' },
-  { key: 'expiry_date', label: 'Expiration' },
-  { key: 'status', label: 'Status' },
-  { key: 'actions', label: 'Actions', style: { width: '220px', textAlign: 'right' } }
-]
+  { key: 'value', label: lang.value === 'fr' ? 'Valeur Réduction' : 'Discount Value' },
+  { key: 'usage', label: lang.value === 'fr' ? 'Utilisations' : 'Redemptions' },
+  { key: 'expiry_date', label: lang.value === 'fr' ? 'Expiration' : 'Expiration' },
+  { key: 'status', label: t('status') },
+  { key: 'actions', label: t('actions'), style: { width: '220px', textAlign: 'right' } }
+])
 
 // Modal Control
 const showModal = ref(false)
@@ -270,6 +272,7 @@ function toggleStatus(coupon: any) {
   coupon.status = !coupon.status
 }
 
+// Operational methods
 function deleteCoupon(id: string) {
   coupons.value = coupons.value.filter(c => c.id !== id)
 }
@@ -281,7 +284,7 @@ function isExpired(dateStr: string): boolean {
 function formatDate(dateStr: string): string {
   try {
     const d = new Date(dateStr)
-    return d.toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' })
+    return d.toLocaleDateString(lang.value === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })
   } catch {
     return dateStr
   }
@@ -291,3 +294,24 @@ function formatCurrency(val: number): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(val)
 }
 </script>
+
+<style scoped>
+.text-left {
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  .modal-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  .modal-footer-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem !important;
+  }
+  .modal-footer-actions .btn {
+    width: 100%;
+  }
+}
+</style>

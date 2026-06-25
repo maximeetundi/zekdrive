@@ -3,15 +3,15 @@
     <!-- Page Header -->
     <div class="page-header animate-fade-in">
       <div>
-        <h1 class="page-title">Transactions Ledger</h1>
-        <p class="page-desc">Review payments logs, platform commissions, gateway methods, and export ledgers</p>
+        <h1 class="page-title">{{ lang === 'fr' ? 'Registre des transactions' : 'Transactions Ledger' }}</h1>
+        <p class="page-desc">{{ lang === 'fr' ? 'Consulter les journaux de paiement, les commissions de la plateforme, les modes de règlement et exporter les rapports' : 'Review payments logs, platform commissions, gateway methods, and export ledgers' }}</p>
       </div>
       <div class="page-actions">
         <button class="btn btn-secondary flex items-center gap-2" @click="exportCSV">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
-          <span>Export CSV Ledger</span>
+          <span>{{ lang === 'fr' ? 'Exporter en CSV' : 'Export CSV Ledger' }}</span>
         </button>
       </div>
     </div>
@@ -24,33 +24,33 @@
           <input
             v-model="search"
             type="text"
-            class="form-control"
-            placeholder="Search by txn ID, client name, or trip ref..."
+            class="form-input"
+            :placeholder="lang === 'fr' ? 'Rechercher par ID transaction, nom client, réf course...' : 'Search by txn ID, client name, or trip ref...'"
           />
         </div>
 
         <!-- Payment Method Filter -->
         <div style="width: 170px;">
           <select v-model="methodFilter" class="form-select">
-            <option value="">All Payment Types</option>
+            <option value="">{{ lang === 'fr' ? 'Tous les paiements' : 'All Payment Types' }}</option>
             <option value="wave">Wave Mobile</option>
             <option value="orange_money">Orange Money</option>
-            <option value="cash">Cash Payment</option>
-            <option value="card">Credit Card</option>
+            <option value="cash">{{ lang === 'fr' ? 'Espèces' : 'Cash Payment' }}</option>
+            <option value="card">{{ lang === 'fr' ? 'Carte bancaire' : 'Credit Card' }}</option>
           </select>
         </div>
 
         <!-- Status Filter -->
         <div style="width: 170px;">
           <select v-model="statusFilter" class="form-select">
-            <option value="">All Statuses</option>
-            <option value="success">Success</option>
-            <option value="pending">Pending</option>
-            <option value="failed">Failed</option>
+            <option value="">{{ lang === 'fr' ? 'Tous les statuts' : 'All Statuses' }}</option>
+            <option value="success">{{ lang === 'fr' ? 'Réussi' : 'Success' }}</option>
+            <option value="pending">{{ lang === 'fr' ? 'En cours' : 'Pending' }}</option>
+            <option value="failed">{{ lang === 'fr' ? 'Échoué' : 'Failed' }}</option>
           </select>
         </div>
 
-        <button class="btn btn-secondary" style="height: 2.25rem;" @click="clearFilters">Reset</button>
+        <button class="btn btn-secondary" style="height: 2.25rem;" @click="clearFilters">{{ t('reset') }}</button>
       </div>
     </div>
 
@@ -100,11 +100,13 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useI18n } from '~/composables/useI18n'
 
 definePageMeta({
   middleware: 'auth',
 })
 
+const { t, lang } = useI18n()
 const loading = ref(false)
 
 const search = ref('')
@@ -129,16 +131,16 @@ const transactions = ref(Array.from({ length: 45 }, (_, i) => {
   }
 }))
 
-const headers = [
-  { key: 'id', label: 'Transaction ID' },
-  { key: 'trip_ref', label: 'Trip Reference' },
-  { key: 'customer_name', label: 'Customer' },
-  { key: 'driver_name', label: 'Driver' },
-  { key: 'amount', label: 'Amount Paid' },
-  { key: 'method', label: 'Payment Gateway' },
-  { key: 'status', label: 'Gateway Status' },
-  { key: 'created_at', label: 'Execution Date' }
-]
+const headers = computed(() => [
+  { key: 'id', label: lang.value === 'fr' ? 'ID Transaction' : 'Transaction ID' },
+  { key: 'trip_ref', label: lang.value === 'fr' ? 'Référence Course' : 'Trip Reference' },
+  { key: 'customer_name', label: lang.value === 'fr' ? 'Client' : 'Customer' },
+  { key: 'driver_name', label: lang.value === 'fr' ? 'Chauffeur' : 'Driver' },
+  { key: 'amount', label: lang.value === 'fr' ? 'Montant Payé' : 'Amount Paid' },
+  { key: 'method', label: lang.value === 'fr' ? 'Mode de paiement' : 'Payment Gateway' },
+  { key: 'status', label: lang.value === 'fr' ? 'Statut Passerelle' : 'Gateway Status' },
+  { key: 'created_at', label: lang.value === 'fr' ? 'Date d\'exécution' : 'Execution Date' }
+])
 
 const filteredTransactions = computed(() => {
   return transactions.value.filter(t => {
@@ -164,7 +166,9 @@ function clearFilters() {
 
 function exportCSV() {
   // Construct CSV Header
-  const headersRow = ['Transaction ID', 'Trip Reference', 'Customer', 'Driver', 'Amount (FCFA)', 'Payment Method', 'Status', 'Date']
+  const headersRow = lang.value === 'fr' 
+    ? ['ID Transaction', 'Référence Course', 'Client', 'Chauffeur', 'Montant (FCFA)', 'Mode de Paiement', 'Statut', 'Date']
+    : ['Transaction ID', 'Trip Reference', 'Customer', 'Driver', 'Amount (FCFA)', 'Payment Method', 'Status', 'Date']
   
   // Construct CSV Rows
   const rows = filteredTransactions.value.map(t => [
@@ -204,7 +208,7 @@ function formatCurrency(val: number): string {
 function formatDateTime(dateStr: string): string {
   try {
     const d = new Date(dateStr)
-    return d.toLocaleString('fr-FR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    return d.toLocaleString(lang.value === 'fr' ? 'fr-FR' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
   } catch {
     return dateStr
   }

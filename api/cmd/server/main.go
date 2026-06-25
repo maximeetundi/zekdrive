@@ -10,8 +10,11 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"github.com/zekdrive/api/internal/config"
 	"github.com/zekdrive/api/internal/database"
+	"github.com/zekdrive/api/internal/domain"
 	"github.com/zekdrive/api/internal/handler"
 	"github.com/zekdrive/api/internal/middleware"
 	"github.com/zekdrive/api/internal/repository"
@@ -45,12 +48,62 @@ func main() {
 
 	// 4. Initialize Repositories
 	userRepo := repository.NewUserRepository(pgDB)
+
+	// Seed Admin User if not exists
+	ctx := context.Background()
+	existingAdmin, err := userRepo.GetByEmail(ctx, "admin@zekdrive.com")
+	if err != nil {
+		log.Printf("Warning: Failed to check for existing admin: %v", err)
+	} else if existingAdmin == nil {
+		log.Println("Seeding default admin user...")
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
+		if err != nil {
+			log.Printf("Warning: Failed to hash admin password: %v", err)
+		} else {
+			adminUser := &domain.User{
+				ID:        uuid.New(),
+				Name:      "Super Admin ZekDrive",
+				Email:     "admin@zekdrive.com",
+				Password:  string(hashedPassword),
+				Phone:     "+221770000000",
+				Role:      domain.RoleAdmin,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+			if err := userRepo.Create(ctx, adminUser); err != nil {
+				log.Printf("Warning: Failed to seed admin user: %v", err)
+			} else {
+				log.Println("Default admin user successfully seeded (admin@zekdrive.com / admin123)")
+			}
+		}
+	}
+
+	// Seed admin_users RBAC: link admin@zekdrive.com → super_admin role
+	// (role UUID seeded in migration 008)
+	superAdminRoleID := uuid.MustParse("a0000001-0000-0000-0000-000000000001")
+	adminRoleRepo := repository.NewAdminRoleRepository(pgDB)
+	adminForRbac, rbacErr := userRepo.GetByEmail(ctx, "admin@zekdrive.com")
+	if rbacErr != nil {
+		log.Printf("Warning: Failed to fetch admin for RBAC: %v", rbacErr)
+	} else if adminForRbac != nil {
+		if err := adminRoleRepo.UpsertAdminUser(ctx, adminForRbac.ID, superAdminRoleID); err != nil {
+			log.Printf("Warning: RBAC seed failed: %v", err)
+		} else {
+			log.Println("RBAC seeded: admin@zekdrive.com → super_admin")
+		}
+	}
+
 	driverRepo := repository.NewDriverRepository(pgDB)
 	vehicleRepo := repository.NewVehicleRepository(pgDB)
 	zoneRepo := repository.NewZoneRepository(pgDB)
 	pricingRepo := repository.NewPricingRepository(redisClient)
 	tripRepo := repository.NewTripRepository(pgDB)
 	deliveryRepo := repository.NewDeliveryRepository(pgDB)
+	storeRepo := repository.NewStoreRepository(pgDB)
+	settingRepo := repository.NewSettingRepository(pgDB)
+	fleetRepo := repository.NewFleetRepository(pgDB)
+	countryRepo := repository.NewCountryRepository(pgDB)
+	walletRepo  := repository.NewWalletRepository(pgDB)
 
 	// 5. Initialize Services
 	authService := service.NewAuthService(cfg, userRepo, redisClient)
@@ -62,6 +115,9 @@ func main() {
 	notifierService := service.NewNotificationService(redisClient)
 	tripService := service.NewTripService(tripRepo, driverService, pricingService, matchingService, geoService, notifierService)
 	deliveryService := service.NewDeliveryService(deliveryRepo, driverService, pricingService, matchingService, notifierService)
+	storeService := service.NewStoreService(storeRepo, userRepo, driverRepo, pricingService, matchingService, notifierService)
+	settingService := service.NewSettingService(settingRepo)
+	fleetService := service.NewFleetService(fleetRepo, userRepo, driverRepo, storeRepo)
 
 	// 6. Initialize WebSocket Hub
 	wsHub := websocket.NewHub(redisClient)
@@ -70,8 +126,8 @@ func main() {
 
 	// 7. Initialize Handlers
 	authHandler := handler.NewAuthHandler(authService)
-	userHandler := handler.NewUserHandler(userService)
-	driverHandler := handler.NewDriverHandler(driverService)
+	userHandler := handler.NewUserHandler(userService, settingService)
+	driverHandler := handler.NewDriverHandler(driverService, settingService)
 	tripHandler := handler.NewTripHandler(tripService, driverService)
 	deliveryHandler := handler.NewDeliveryHandler(deliveryService, driverService)
 	vehicleHandler := handler.NewVehicleHandler(vehicleRepo, driverService)
@@ -80,6 +136,11 @@ func main() {
 	adminHandler := handler.NewAdminHandler(pgDB, zoneRepo)
 	wsHandler := handler.NewWSHandler(wsHub, authService, driverRepo)
 	mapHandler := handler.NewMapHandler(cfg, tripRepo, deliveryRepo, driverRepo)
+	storeHandler := handler.NewStoreHandler(storeService, driverService)
+	settingHandler := handler.NewSettingHandler(settingService)
+	fleetHandler := handler.NewFleetHandler(fleetService)
+	countryHandler := handler.NewCountryHandler(countryRepo)
+	walletHandler := handler.NewWalletHandler(walletRepo)
 
 	// 8. Initialize Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(authService)
@@ -97,6 +158,11 @@ func main() {
 		adminHandler,
 		wsHandler,
 		mapHandler,
+		storeHandler,
+		settingHandler,
+		fleetHandler,
+		countryHandler,
+		walletHandler,
 		authMiddleware,
 	)
 

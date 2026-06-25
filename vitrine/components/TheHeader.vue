@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useLanguage } from '~/composables/useLanguage'
 
 const scrolled = ref(false)
 const menuOpen = ref(false)
 const route = useRoute()
+const { currentLang, t, setLanguage, toggleLanguage } = useLanguage()
 
 function handleScroll() {
   scrolled.value = window.scrollY > 50
@@ -41,36 +43,42 @@ onUnmounted(() => {
         <div class="nav-inner">
           <!-- Logo -->
           <NuxtLink to="/" class="nav-logo" @click="closeMenu">
-            <div class="logo-mark">Z</div>
+            <img src="/logo.png" alt="ZekDrive Logo" class="logo-img" style="width: 38px; height: 38px; object-fit: contain; border-radius: 10px; box-shadow: 0 4px 16px rgba(0, 115, 95, 0.25);" />
             <span>ZekDrive</span>
           </NuxtLink>
 
           <!-- Desktop Links -->
           <ul class="nav-links">
             <li>
-              <NuxtLink to="/" :class="{ active: isActive('/') }">Accueil</NuxtLink>
+              <NuxtLink to="/" :class="{ active: isActive('/') }">{{ t('nav.home') }}</NuxtLink>
             </li>
             <li>
-              <NuxtLink to="/#services" :class="{ active: false }">Services</NuxtLink>
+              <NuxtLink to="/#services" :class="{ active: false }">{{ t('nav.services') }}</NuxtLink>
             </li>
             <li>
-              <NuxtLink to="/driver" :class="{ active: isActive('/driver') }">Devenir Chauffeur</NuxtLink>
+              <NuxtLink to="/driver" :class="{ active: isActive('/driver') }">{{ t('nav.becomeDriver') }}</NuxtLink>
             </li>
             <li>
-              <NuxtLink to="/pro" :class="{ active: isActive('/pro') }">Pro</NuxtLink>
+              <NuxtLink to="/pro" :class="{ active: isActive('/pro') }">{{ t('nav.pro') }}</NuxtLink>
             </li>
             <li>
-              <NuxtLink to="/contact" :class="{ active: isActive('/contact') }">Contact</NuxtLink>
+              <NuxtLink to="/contact" :class="{ active: isActive('/contact') }">{{ t('nav.contact') }}</NuxtLink>
             </li>
           </ul>
 
           <!-- CTA -->
           <div class="nav-cta">
+            <button @click="toggleLanguage" class="btn btn-secondary btn-sm lang-btn" style="padding: 8px 12px; display: flex; align-items: center; gap: 6px;">
+              <span>🌐</span>
+              <span style="font-weight: 600; font-size: 0.85rem;">{{ currentLang.toUpperCase() }}</span>
+            </button>
             <a href="#download" class="btn btn-primary btn-sm">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              Télécharger l'App
+              {{ t('nav.download') }}
             </a>
           </div>
 
@@ -86,13 +94,19 @@ onUnmounted(() => {
 
     <!-- Mobile Menu -->
     <div class="mobile-menu" :class="{ open: menuOpen }">
-      <NuxtLink to="/" @click="closeMenu">Accueil</NuxtLink>
-      <NuxtLink to="/#services" @click="closeMenu">Services</NuxtLink>
-      <NuxtLink to="/driver" @click="closeMenu">Devenir Chauffeur</NuxtLink>
-      <NuxtLink to="/pro" @click="closeMenu">Pro</NuxtLink>
-      <NuxtLink to="/contact" @click="closeMenu">Contact</NuxtLink>
-      <a href="#download" class="btn btn-primary" @click="closeMenu" style="margin-top: 16px;">
-        Télécharger l'App
+      <NuxtLink to="/" @click="closeMenu">{{ t('nav.home') }}</NuxtLink>
+      <NuxtLink to="/#services" @click="closeMenu">{{ t('nav.services') }}</NuxtLink>
+      <NuxtLink to="/driver" @click="closeMenu">{{ t('nav.becomeDriver') }}</NuxtLink>
+      <NuxtLink to="/pro" @click="closeMenu">{{ t('nav.pro') }}</NuxtLink>
+      <NuxtLink to="/contact" @click="closeMenu">{{ t('nav.contact') }}</NuxtLink>
+      
+      <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: center; width: 100%;">
+        <button @click="setLanguage('fr')" class="btn btn-sm" :class="currentLang === 'fr' ? 'btn-primary' : 'btn-secondary'" style="flex: 1; justify-content: center;">Français</button>
+        <button @click="setLanguage('en')" class="btn btn-sm" :class="currentLang === 'en' ? 'btn-primary' : 'btn-secondary'" style="flex: 1; justify-content: center;">English</button>
+      </div>
+
+      <a href="#download" class="btn btn-primary" @click="closeMenu" style="margin-top: 16px; width: 100%; justify-content: center;">
+        {{ t('nav.download') }}
       </a>
     </div>
   </header>

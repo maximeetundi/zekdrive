@@ -1,90 +1,92 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useScrollAnimation } from '~/composables/useScrollAnimation'
+import { useLanguage } from '~/composables/useLanguage'
 
+const { t, currentLang } = useLanguage()
 const { observe } = useScrollAnimation()
 
 useHead({
-  title: 'ZekDrive Pro — Solutions de mobilité pour entreprises',
+  title: computed(() => t('pro.meta_title')),
   meta: [
-    { name: 'description', content: 'ZekDrive Pro offre des solutions de mobilité clé en main pour les entreprises : courses professionnelles, livraisons, API et tarifs négociés.' },
+    { name: 'description', content: computed(() => t('pro.meta_desc')) },
   ],
 })
 
-const plans = [
+const plans = computed(() => [
   {
     tier: 'Starter',
     price: '0',
-    period: '/ mois',
-    desc: 'Parfait pour les petites équipes et startups.',
+    period: t('pro.plan_period'),
+    desc: t('pro.plan1_desc'),
     features: [
-      'Jusqu\'à 10 utilisateurs',
-      '50 courses/mois incluses',
-      'Tableau de bord basique',
-      'Facturation mensuelle',
-      'Support email',
+      t('pro.plan1_f1'),
+      t('pro.plan1_f2'),
+      t('pro.plan1_f3'),
+      t('pro.plan1_f4'),
+      t('pro.plan1_f5'),
     ],
-    cta: 'Commencer gratuitement',
+    cta: t('pro.plan_cta_starter'),
     featured: false,
   },
   {
     tier: 'Business',
-    price: '49 000',
-    period: '/ mois',
-    desc: 'La solution complète pour les PME en croissance.',
+    price: currentLang.value === 'fr' ? '49 000' : '49,000',
+    period: t('pro.plan_period'),
+    desc: t('pro.plan2_desc'),
     features: [
-      'Jusqu\'à 50 utilisateurs',
-      'Courses illimitées',
-      'Tableau de bord avancé',
-      'Facturation & exports CSV',
-      'API basique',
-      'Support prioritaire 24/7',
-      'Chauffeur dédié optionnel',
+      t('pro.plan2_f1'),
+      t('pro.plan2_f2'),
+      t('pro.plan2_f3'),
+      t('pro.plan2_f4'),
+      t('pro.plan2_f5'),
+      t('pro.plan2_f6'),
+      t('pro.plan2_f7'),
     ],
-    cta: 'Essai gratuit 30 jours',
+    cta: t('pro.plan_cta_business'),
     featured: true,
   },
   {
     tier: 'Enterprise',
-    price: 'Sur devis',
+    price: currentLang.value === 'fr' ? 'Sur devis' : 'On quote',
     period: '',
-    desc: 'Solutions sur mesure pour les grandes entreprises.',
+    desc: t('pro.plan3_desc'),
     features: [
-      'Utilisateurs illimités',
-      'SLA garanti 99.9%',
-      'API complète & webhooks',
-      'Intégration ERP/SAP',
-      'Manager dédié',
-      'Formation équipe',
-      'Contrat personnalisé',
+      t('pro.plan3_f1'),
+      t('pro.plan3_f2'),
+      t('pro.plan3_f3'),
+      t('pro.plan3_f4'),
+      t('pro.plan3_f5'),
+      t('pro.plan3_f6'),
+      t('pro.plan3_f7'),
     ],
-    cta: 'Contacter l\'équipe',
+    cta: t('pro.plan_cta_enterprise'),
     featured: false,
   },
-]
+])
 
-const useCases = [
+const useCases = computed(() => [
   {
     icon: '🏢',
-    title: 'Courses professionnelles',
-    desc: 'Gérez tous vos déplacements professionnels depuis un tableau de bord centralisé. Suivi en temps réel, rapports de dépenses automatiques.',
+    title: t('pro.sol1_title'),
+    desc: t('pro.sol1_desc'),
   },
   {
     icon: '📦',
-    title: 'Livraison pour entreprises',
-    desc: 'Expédiez vos documents, échantillons et colis grâce à notre flotte dédiée. Livraison express ou planifiée selon vos besoins.',
+    title: t('pro.sol2_title'),
+    desc: t('pro.sol2_desc'),
   },
   {
     icon: '🔗',
-    title: 'Intégration API',
-    desc: 'Intégrez ZekDrive directement dans vos outils métier via notre API REST. Documentée, sécurisée et supportée.',
+    title: t('pro.sol3_title'),
+    desc: t('pro.sol3_desc'),
   },
   {
     icon: '📊',
-    title: 'Reporting & Analytics',
-    desc: 'Visualisez vos dépenses de mobilité, optimisez vos coûts avec des rapports détaillés et des exports personnalisés.',
+    title: t('pro.sol4_title'),
+    desc: t('pro.sol4_desc'),
   },
-]
+])
 
 // Contact form
 const proForm = ref({
@@ -115,21 +117,21 @@ onMounted(() => {
 
         <div class="container" style="position:relative;z-index:1;">
           <div style="max-width:680px;">
-            <div class="section-tag">Pour les entreprises</div>
+            <div class="section-tag">{{ t('pro.tag') }}</div>
             <h1 class="section-title" style="font-size:clamp(2.5rem,5vw,4rem);">
-              La mobilité pro<br><span class="gradient-text">sans compromis</span>
+              {{ t('pro.hero_title_1') }}<br><span class="gradient-text">{{ t('pro.hero_title_highlight') }}</span>
             </h1>
             <p style="font-size:1.15rem;color:var(--text-muted);line-height:1.7;margin-bottom:40px;max-width:540px;">
-              Gérez tous vos déplacements professionnels avec une solution tout-en-un. Facturation centralisée, API, tableau de bord et support dédié.
+              {{ t('pro.hero_desc') }}
             </p>
             <div style="display:flex;gap:16px;flex-wrap:wrap;">
-              <a href="#contact-pro" class="btn btn-primary btn-lg">Demander une démo</a>
-              <a href="#pricing" class="btn btn-secondary btn-lg">Voir les tarifs</a>
+              <a href="#contact-pro" class="btn btn-primary btn-lg">{{ t('pro.btn_demo') }}</a>
+              <a href="#pricing" class="btn btn-secondary btn-lg">{{ t('pro.btn_prices') }}</a>
             </div>
 
             <!-- Trust logos -->
             <div style="margin-top:56px;padding-top:40px;border-top:1px solid var(--card-border);">
-              <p style="font-size:0.8rem;color:var(--text-subtle);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:20px;">Ils nous font confiance</p>
+              <p style="font-size:0.8rem;color:var(--text-subtle);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:20px;">{{ t('pro.trust_label') }}</p>
               <div style="display:flex;gap:32px;align-items:center;flex-wrap:wrap;">
                 <div v-for="brand in ['Ecobank', 'MTN Business', 'Orange Pro', 'Société Générale', 'Jumia']" :key="brand"
                   style="font-family:'Sora',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text-subtle);letter-spacing:0.05em;">
@@ -146,8 +148,8 @@ onMounted(() => {
         <div class="orb orb-violet" style="width:400px;height:400px;left:-100px;center:0;opacity:0.3;" />
         <div class="container" style="position:relative;z-index:1;">
           <div class="section-header centered fade-up">
-            <div class="section-tag">Solutions</div>
-            <h2 class="section-title">Tout ce dont votre<br><span class="gradient-text">entreprise a besoin</span></h2>
+            <div class="section-tag">{{ t('pro.sol_tag') }}</div>
+            <h2 class="section-title">{{ t('pro.sol_title_1') }}<br><span class="gradient-text">{{ t('pro.sol_title_highlight') }}</span></h2>
           </div>
 
           <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px;">
@@ -170,9 +172,9 @@ onMounted(() => {
 
         <div class="container" style="position:relative;z-index:1;">
           <div class="section-header centered fade-up">
-            <div class="section-tag">Tarifs</div>
-            <h2 class="section-title">Des plans adaptés à<br><span class="gradient-text">chaque besoin</span></h2>
-            <p class="section-subtitle">Commencez gratuitement, évoluez à votre rythme. Tous les plans incluent un essai de 30 jours.</p>
+            <div class="section-tag">{{ t('pro.pricing_tag') }}</div>
+            <h2 class="section-title">{{ t('pro.pricing_title_1') }}<br><span class="gradient-text">{{ t('pro.pricing_title_highlight') }}</span></h2>
+            <p class="section-subtitle">{{ t('pro.pricing_sub') }}</p>
           </div>
 
           <div class="pricing-grid fade-up">
@@ -182,7 +184,7 @@ onMounted(() => {
               class="pricing-card"
               :class="{ featured: plan.featured }"
             >
-              <div v-if="plan.featured" class="pricing-badge">Le plus choisi</div>
+              <div v-if="plan.featured" class="pricing-badge">{{ t('pro.plan_featured') }}</div>
               <div class="pricing-tier">{{ plan.tier }}</div>
               <div class="pricing-price">
                 {{ plan.price }}
@@ -215,56 +217,60 @@ onMounted(() => {
 
         <div class="container" style="position:relative;z-index:1;max-width:800px;margin:0 auto;">
           <div class="section-header centered fade-up">
-            <div class="section-tag">Contact Pro</div>
-            <h2 class="section-title">Parlons de votre <span class="gradient-text">projet</span></h2>
-            <p class="section-subtitle">Décrivez vos besoins et notre équipe vous contactera sous 24h.</p>
+            <div class="section-tag">{{ t('pro.form_tag') }}</div>
+            <h2 class="section-title">{{ t('pro.form_title_1') }}<span class="gradient-text">{{ t('pro.form_title_highlight') }}</span></h2>
+            <p class="section-subtitle">{{ t('pro.form_sub') }}</p>
           </div>
 
           <div class="form-section fade-up">
             <div class="form-grid">
               <div class="form-group">
-                <label class="form-label">Entreprise *</label>
-                <input v-model="proForm.entreprise" type="text" class="form-input" placeholder="Nom de votre entreprise" />
+                <label class="form-label">{{ t('pro.company') }}</label>
+                <input v-model="proForm.entreprise" type="text" class="form-input" :placeholder="t('pro.company_placeholder')" />
               </div>
               <div class="form-group">
-                <label class="form-label">Votre nom *</label>
-                <input v-model="proForm.nom" type="text" class="form-input" placeholder="Prénom Nom" />
+                <label class="form-label">{{ t('pro.name') }}</label>
+                <input v-model="proForm.nom" type="text" class="form-input" :placeholder="t('pro.name_placeholder')" />
               </div>
               <div class="form-group">
-                <label class="form-label">Email professionnel *</label>
-                <input v-model="proForm.email" type="email" class="form-input" placeholder="vous@entreprise.com" />
+                <label class="form-label">{{ t('pro.email_pro') }}</label>
+                <input v-model="proForm.email" type="email" class="form-input" :placeholder="t('pro.email_pro_placeholder')" />
               </div>
               <div class="form-group">
-                <label class="form-label">Téléphone</label>
+                <label class="form-label">{{ t('driver.phone') }}</label>
                 <input v-model="proForm.telephone" type="tel" class="form-input" placeholder="+221 77 000 00 00" />
               </div>
               <div class="form-group">
-                <label class="form-label">Effectif de l'entreprise</label>
+                <label class="form-label">{{ t('pro.employees') }}</label>
                 <select v-model="proForm.effectif" class="form-select">
-                  <option value="">Sélectionnez</option>
-                  <option>1 à 10 employés</option>
-                  <option>11 à 50 employés</option>
-                  <option>51 à 200 employés</option>
-                  <option>200+ employés</option>
+                  <option value="">{{ t('pro.emp_placeholder') }}</option>
+                  <option v-if="currentLang === 'fr'">1 à 10 employés</option>
+                  <option v-else>1 to 10 employees</option>
+                  <option v-if="currentLang === 'fr'">11 à 50 employés</option>
+                  <option v-else>11 to 50 employees</option>
+                  <option v-if="currentLang === 'fr'">51 à 200 employés</option>
+                  <option v-else>51 to 200 employees</option>
+                  <option v-if="currentLang === 'fr'">200+ employés</option>
+                  <option v-else>200+ employees</option>
                 </select>
               </div>
               <div class="form-group">
-                <label class="form-label">Plan souhaité</label>
+                <label class="form-label">{{ t('pro.plan_desired') }}</label>
                 <select v-model="proForm.besoins" class="form-select">
-                  <option value="">Sélectionnez un plan</option>
-                  <option>Starter (Gratuit)</option>
-                  <option>Business (49 000 FCFA/mois)</option>
-                  <option>Enterprise (Sur devis)</option>
+                  <option value="">{{ t('pro.plan_placeholder') }}</option>
+                  <option>Starter ({{ currentLang === 'fr' ? 'Gratuit' : 'Free' }})</option>
+                  <option>Business (49 000 FCFA/{{ currentLang === 'fr' ? 'mois' : 'month' }})</option>
+                  <option>Enterprise ({{ currentLang === 'fr' ? 'Sur devis' : 'On quote' }})</option>
                 </select>
               </div>
               <div class="form-group full-width">
-                <label class="form-label">Décrivez vos besoins</label>
-                <textarea v-model="proForm.message" class="form-textarea" placeholder="Parlez-nous de votre activité, vos besoins en mobilité, le volume mensuel estimé..." />
+                <label class="form-label">{{ t('pro.desc_needs') }}</label>
+                <textarea v-model="proForm.message" class="form-textarea" :placeholder="t('pro.desc_needs_placeholder')" />
               </div>
             </div>
 
             <button type="button" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:24px;">
-              Envoyer ma demande
+              {{ t('pro.btn_submit') }}
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
               </svg>

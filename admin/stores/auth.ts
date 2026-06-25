@@ -1,6 +1,6 @@
 // stores/auth.ts
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 
 export interface AdminUser {
   id: string
@@ -11,24 +11,14 @@ export interface AdminUser {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string | null>(null)
-  const refreshToken = ref<string | null>(null)
-  const user = ref<AdminUser | null>(null)
+  const token = useCookie<string | null>('zekdrive_token', { default: () => null })
+  const refreshToken = useCookie<string | null>('zekdrive_refresh_token', { default: () => null })
+  const user = useCookie<AdminUser | null>('zekdrive_user', { default: () => null })
 
   const isAuthenticated = computed(() => !!token.value)
 
-  // Initialize from localStorage on client
   function init() {
-    if (process.client) {
-      token.value = localStorage.getItem('zekdrive_token')
-      refreshToken.value = localStorage.getItem('zekdrive_refresh_token')
-      const stored = localStorage.getItem('zekdrive_user')
-      if (stored) {
-        try {
-          user.value = JSON.parse(stored)
-        } catch {}
-      }
-    }
+    // Session state is automatically initialized and synced via useCookie
   }
 
   async function login(
@@ -39,14 +29,13 @@ export const useAuthStore = defineStore('auth', () => {
     const baseUrl = config.public.apiUrl
 
     try {
-      const res = await fetch(`${baseUrl}/admin/auth/login`, {
+      const res = await fetch(`${baseUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       })
 
       if (!res.ok) {
-        // Try to parse error
         let msg = 'Invalid credentials'
         try {
           const body = await res.json()
@@ -57,15 +46,9 @@ export const useAuthStore = defineStore('auth', () => {
 
       const body = await res.json()
 
-      token.value = body.access_token || body.token
+      token.value = body.access_token || body.token || null
       refreshToken.value = body.refresh_token || null
       user.value = body.user || body.admin || null
-
-      if (process.client) {
-        if (token.value) localStorage.setItem('zekdrive_token', token.value)
-        if (refreshToken.value) localStorage.setItem('zekdrive_refresh_token', refreshToken.value)
-        if (user.value) localStorage.setItem('zekdrive_user', JSON.stringify(user.value))
-      }
 
       return { success: true }
     } catch (err) {
@@ -80,11 +63,6 @@ export const useAuthStore = defineStore('auth', () => {
         }
         token.value = mockToken
         user.value = mockUser
-
-        if (process.client) {
-          localStorage.setItem('zekdrive_token', mockToken)
-          localStorage.setItem('zekdrive_user', JSON.stringify(mockUser))
-        }
         return { success: true }
       }
       return { success: false, error: 'Connection failed. Use admin@zekdrive.com / admin123 for demo.' }
@@ -97,9 +75,6 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
 
     if (process.client) {
-      localStorage.removeItem('zekdrive_token')
-      localStorage.removeItem('zekdrive_refresh_token')
-      localStorage.removeItem('zekdrive_user')
       window.location.href = '/auth/login'
     }
   }
@@ -111,7 +86,7 @@ export const useAuthStore = defineStore('auth', () => {
     const baseUrl = config.public.apiUrl
 
     try {
-      const res = await fetch(`${baseUrl}/admin/auth/refresh`, {
+      const res = await fetch(`${baseUrl}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refresh_token: refreshToken.value }),
@@ -120,9 +95,6 @@ export const useAuthStore = defineStore('auth', () => {
 
       const body = await res.json()
       token.value = body.access_token
-      if (process.client) {
-        localStorage.setItem('zekdrive_token', body.access_token)
-      }
       return true
     } catch {
       return false

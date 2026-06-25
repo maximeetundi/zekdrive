@@ -60,7 +60,7 @@ services:
         condition: service_healthy
     command: air -c .air.toml
     healthcheck:
-      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:8080/health']
+      test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1:8080/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -75,7 +75,8 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      NUXT_PUBLIC_API_URL: http://api:8080/api/v1
+      NUXT_PUBLIC_API_URL: https://api.driver.maximeetundi.store/api
+      NUXT_PUBLIC_WS_URL: wss://api.driver.maximeetundi.store/ws
     ports:
       - '3003:3001'
     depends_on:
@@ -90,21 +91,57 @@ services:
     container_name: zekdrive_vitrine
     restart: unless-stopped
     ports:
-      - '3000:80'
+      - '3000:3000'
     networks:
       - zekdrive_net
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: zekdrive_pgadmin
+  openwa:
+    image: openwa-openwa
+    container_name: openwa-api
     restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@zekdrive.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-pgadmin_password}
+    security_opt:
+      - 'no-new-privileges:true'
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    read_only: true
+    tmpfs:
+      - /tmp
+    pids_limit: 512
+    mem_limit: 2g
     ports:
-      - '5050:80'
-    depends_on:
-      - postgres
+      - '127.0.0.1:2785:2785'
+    environment:
+      - NODE_ENV=development
+      - PORT=2785
+      - HOME=/tmp
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_CACHE_HOME=/tmp/.cache
+      - DATABASE_TYPE=sqlite
+      - DATABASE_NAME=/app/data/openwa.sqlite
+      - DATABASE_SYNCHRONIZE=true
+      - ENGINE_TYPE=whatsapp-web.js
+      - SESSION_DATA_PATH=/app/data/sessions
+      - PUPPETEER_HEADLESS=true
+      - PUPPETEER_ARGS=--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-gpu
+      - STORAGE_TYPE=local
+      - STORAGE_LOCAL_PATH=/app/data/media
+      - WEBHOOK_TIMEOUT=10000
+      - WEBHOOK_MAX_RETRIES=3
+      - QUEUE_ENABLED=false
+    volumes:
+      - /root/app/OpenWA/data:/app/data
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:2785/api/health/ready']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     networks:
       - zekdrive_net
 

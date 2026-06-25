@@ -190,6 +190,50 @@ zekdrive/
 └── README.md
 ```
 
+## Applications Mobiles 📱
+
+Le projet inclut deux applications Flutter situées dans les dossiers suivants :
+*   **ZekDrive Pro (Chauffeur)** : [pro](file:///root/zekdrive/pro)
+*   **ZekDrive User (Passager)** : [user](file:///root/zekdrive/user)
+
+### Compilation & Build (APK)
+
+Les APK de release signés sont compilés et sauvegardés dans [release_apks](file:///root/zekdrive/release_apks/) :
+*   `zekdrive-chauffeur.apk` (Chauffeur pro app)
+*   `zekdrive-user.apk` (Passenger user app)
+
+Pour compiler les APKs manuellement sur le serveur :
+
+```bash
+# Variables d'environnement (configurées de manière globale dans /root/.bashrc)
+export PATH=/opt/flutter/bin:$PATH
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+export ANDROID_HOME=/opt/android-sdk
+
+# Compiler ZekDrive Pro (Chauffeur)
+cd /root/zekdrive/pro
+flutter clean && flutter pub get && flutter build apk --release
+cp build/app/outputs/flutter-apk/app-release.apk /root/zekdrive/release_apks/zekdrive-chauffeur.apk
+
+# Compiler ZekDrive User (Passager)
+cd /root/zekdrive/user
+flutter clean && flutter pub get && flutter build apk --release
+cp build/app/outputs/flutter-apk/app-release.apk /root/zekdrive/release_apks/zekdrive-user.apk
+```
+
+### Log des Modifications & Résolutions Techniques
+
+*   **SDK & Java 21** : Configuration complète sous JDK 21 avec le SDK Flutter 3.32.2.
+*   **Globalisation des variables** : Ajout permanent des variables d'environnement Flutter, Java, et Android SDK dans `/root/.bashrc`.
+*   **Gestion dynamique des Namespaces** : Injection automatique des namespaces pour les sous-projets Android dans les fichiers `build.gradle` afin de corriger les erreurs de compilation des anciennes dépendances.
+*   **Résolution V1 Embedding (Registrar)** : 
+    *   Mise à niveau de `permission_handler` vers `^12.0.1`.
+    *   Épinglage de `url_launcher_android` à la version exacte `6.3.3` pour éviter les erreurs Kotlin DSL de Gradle.
+    *   Override de `shared_preferences_android` vers `^2.2.3`.
+*   **Désactivation de Jetifier** : Passage de `android.enableJetifier` à `false` dans `user/android/gradle.properties` pour résoudre les erreurs `JetifyTransform` avec les formats de bytecode Java récents (ex: `byte-buddy`).
+*   **Signature de Release** : Liaison des configurations Gradle de compilation de release aux fichiers `key.properties` et aux keystores de développement générés (`zekdrive-pro.jks` et `zekdrive-user.jks`).
+*   **Favicons Réelles** : Remplacement des favicons absentes par un fichier vectoriel SVG personnalisé premium dans `/public/favicon.svg` pour les projets `vitrine` et `admin`.
+
 ---
 
 ## License

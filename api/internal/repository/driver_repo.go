@@ -21,17 +21,17 @@ func NewDriverRepository(db *database.PostgresDB) domain.DriverRepository {
 
 func (r *driverRepo) Create(ctx context.Context, d *domain.Driver) error {
 	query := `
-		INSERT INTO drivers (id, user_id, license_number, status, rating, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO drivers (id, user_id, license_number, status, rating, country, kyc_status, kyc_document, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 	`
-	_, err := r.db.ExecContext(ctx, query, d.ID, d.UserID, d.LicenseNumber, d.Status, d.Rating, d.CreatedAt, d.UpdatedAt)
+	_, err := r.db.ExecContext(ctx, query, d.ID, d.UserID, d.LicenseNumber, d.Status, d.Rating, d.Country, d.KycStatus, d.KycDocument, d.CreatedAt, d.UpdatedAt)
 	return err
 }
 
 func (r *driverRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.Driver, error) {
 	query := `
 		SELECT 
-			d.id, d.user_id, d.license_number, d.status, d.rating, d.created_at, d.updated_at,
+			d.id, d.user_id, d.license_number, d.status, d.rating, d.country, d.kyc_status, d.kyc_document, d.created_at, d.updated_at,
 			ST_Y(d.location::geometry) as latitude,
 			ST_X(d.location::geometry) as longitude,
 			u.id as "user_id_fk", u.name, u.email, u.phone, u.role
@@ -46,7 +46,7 @@ func (r *driverRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.Driver,
 func (r *driverRepo) GetByUserID(ctx context.Context, userID uuid.UUID) (*domain.Driver, error) {
 	query := `
 		SELECT 
-			d.id, d.user_id, d.license_number, d.status, d.rating, d.created_at, d.updated_at,
+			d.id, d.user_id, d.license_number, d.status, d.rating, d.country, d.kyc_status, d.kyc_document, d.created_at, d.updated_at,
 			ST_Y(d.location::geometry) as latitude,
 			ST_X(d.location::geometry) as longitude,
 			u.id as "user_id_fk", u.name, u.email, u.phone, u.role
@@ -63,18 +63,18 @@ func (r *driverRepo) Update(ctx context.Context, d *domain.Driver) error {
 	if d.Latitude != nil && d.Longitude != nil {
 		query := `
 			UPDATE drivers 
-			SET license_number = $1, status = $2, rating = $3, 
-				location = ST_SetSRID(ST_MakePoint($4, $5), 4326), updated_at = $6
-			WHERE id = $7
+			SET license_number = $1, status = $2, rating = $3, country = $4, kyc_status = $5, kyc_document = $6,
+				location = ST_SetSRID(ST_MakePoint($7, $8), 4326), updated_at = $9
+			WHERE id = $10
 		`
-		_, err = r.db.ExecContext(ctx, query, d.LicenseNumber, d.Status, d.Rating, *d.Longitude, *d.Latitude, d.UpdatedAt, d.ID)
+		_, err = r.db.ExecContext(ctx, query, d.LicenseNumber, d.Status, d.Rating, d.Country, d.KycStatus, d.KycDocument, *d.Longitude, *d.Latitude, d.UpdatedAt, d.ID)
 	} else {
 		query := `
 			UPDATE drivers 
-			SET license_number = $1, status = $2, rating = $3, updated_at = $4
-			WHERE id = $5
+			SET license_number = $1, status = $2, rating = $3, country = $4, kyc_status = $5, kyc_document = $6, updated_at = $7
+			WHERE id = $8
 		`
-		_, err = r.db.ExecContext(ctx, query, d.LicenseNumber, d.Status, d.Rating, d.UpdatedAt, d.ID)
+		_, err = r.db.ExecContext(ctx, query, d.LicenseNumber, d.Status, d.Rating, d.Country, d.KycStatus, d.KycDocument, d.UpdatedAt, d.ID)
 	}
 	return err
 }
@@ -102,7 +102,7 @@ func (r *driverRepo) UpdateStatus(ctx context.Context, driverID uuid.UUID, statu
 func (r *driverRepo) FindNearby(ctx context.Context, lat, lng float64, radiusMeters float64, limit int) ([]domain.Driver, error) {
 	query := `
 		SELECT 
-			d.id, d.user_id, d.license_number, d.status, d.rating, d.created_at, d.updated_at,
+			d.id, d.user_id, d.license_number, d.status, d.rating, d.country, d.kyc_status, d.kyc_document, d.created_at, d.updated_at,
 			ST_Y(d.location::geometry) as latitude,
 			ST_X(d.location::geometry) as longitude,
 			u.id as "user_id_fk", u.name, u.email, u.phone, u.role
@@ -137,7 +137,7 @@ func (r *driverRepo) List(ctx context.Context, status domain.DriverStatus, limit
 	if status != "" {
 		query := `
 			SELECT 
-				d.id, d.user_id, d.license_number, d.status, d.rating, d.created_at, d.updated_at,
+				d.id, d.user_id, d.license_number, d.status, d.rating, d.country, d.kyc_status, d.kyc_document, d.created_at, d.updated_at,
 				ST_Y(d.location::geometry) as latitude,
 				ST_X(d.location::geometry) as longitude,
 				u.id as "user_id_fk", u.name, u.email, u.phone, u.role
@@ -151,7 +151,7 @@ func (r *driverRepo) List(ctx context.Context, status domain.DriverStatus, limit
 	} else {
 		query := `
 			SELECT 
-				d.id, d.user_id, d.license_number, d.status, d.rating, d.created_at, d.updated_at,
+				d.id, d.user_id, d.license_number, d.status, d.rating, d.country, d.kyc_status, d.kyc_document, d.created_at, d.updated_at,
 				ST_Y(d.location::geometry) as latitude,
 				ST_X(d.location::geometry) as longitude,
 				u.id as "user_id_fk", u.name, u.email, u.phone, u.role
@@ -187,7 +187,7 @@ func scanDriver(row *sql.Row) (*domain.Driver, error) {
 	var userIDFk uuid.UUID
 
 	err := row.Scan(
-		&d.ID, &d.UserID, &d.LicenseNumber, &d.Status, &d.Rating, &d.CreatedAt, &d.UpdatedAt,
+		&d.ID, &d.UserID, &d.LicenseNumber, &d.Status, &d.Rating, &d.Country, &d.KycStatus, &d.KycDocument, &d.CreatedAt, &d.UpdatedAt,
 		&lat, &lng,
 		&userIDFk, &u.Name, &u.Email, &u.Phone, &u.Role,
 	)
@@ -217,7 +217,7 @@ func scanDriverRows(rows *sql.Rows) (*domain.Driver, error) {
 	var userIDFk uuid.UUID
 
 	err := rows.Scan(
-		&d.ID, &d.UserID, &d.LicenseNumber, &d.Status, &d.Rating, &d.CreatedAt, &d.UpdatedAt,
+		&d.ID, &d.UserID, &d.LicenseNumber, &d.Status, &d.Rating, &d.Country, &d.KycStatus, &d.KycDocument, &d.CreatedAt, &d.UpdatedAt,
 		&lat, &lng,
 		&userIDFk, &u.Name, &u.Email, &u.Phone, &u.Role,
 	)

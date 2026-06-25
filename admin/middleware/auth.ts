@@ -3,11 +3,9 @@ export default defineNuxtRouteMiddleware((to) => {
   // Skip auth check for login page
   if (to.path.startsWith('/auth')) return
 
-  const token = process.client
-    ? localStorage.getItem('zekdrive_token')
-    : null
+  const token = useCookie('zekdrive_token')
 
-  if (!token) {
+  if (!token.value) {
     return navigateTo('/auth/login')
   }
 })

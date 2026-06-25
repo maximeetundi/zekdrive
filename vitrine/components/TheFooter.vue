@@ -1,26 +1,30 @@
 <script setup lang="ts">
-// Footer links data
-const footerLinks = {
+import { computed } from 'vue'
+import { useLanguage } from '~/composables/useLanguage'
+
+const { t } = useLanguage()
+
+const footerLinks = computed(() => ({
   services: [
-    { label: 'VTC Premium', href: '/#services' },
-    { label: 'Moto-Taxi', href: '/#services' },
-    { label: 'Vélo', href: '/#services' },
-    { label: 'Livraison', href: '/#services' },
+    { label: t('services.vtc_title'), href: '/#services' },
+    { label: t('services.moto_title'), href: '/#services' },
+    { label: t('services.bike_title'), href: '/#services' },
+    { label: t('services.delivery_title'), href: '/#services' },
   ],
   entreprise: [
-    { label: 'À propos', href: '/' },
-    { label: 'Devenir Chauffeur', href: '/driver' },
-    { label: 'ZekDrive Pro', href: '/pro' },
-    { label: 'Carrières', href: '/' },
-    { label: 'Presse', href: '/' },
+    { label: t('footer.about'), href: '/' },
+    { label: t('nav.becomeDriver'), href: '/driver' },
+    { label: t('nav.pro'), href: '/pro' },
+    { label: t('footer.careers'), href: '/' },
+    { label: t('footer.press'), href: '/' },
   ],
   legal: [
-    { label: 'Conditions d\'utilisation', href: '/' },
-    { label: 'Politique de confidentialité', href: '/' },
-    { label: 'Cookies', href: '/' },
-    { label: 'Accessibilité', href: '/' },
+    { label: t('footer.terms'), href: '/' },
+    { label: t('footer.privacy'), href: '/' },
+    { label: t('footer.cookies'), href: '/' },
+    { label: t('footer.accessibility'), href: '/' },
   ],
-}
+}))
 
 const socials = [
   {
@@ -53,29 +57,29 @@ const socials = [
         <!-- Brand column -->
         <div class="footer-brand">
           <NuxtLink to="/" class="nav-logo" style="margin-bottom: 16px; display: inline-flex;">
-            <div class="logo-mark">Z</div>
+            <img src="/logo.png" alt="ZekDrive Logo" class="logo-img" style="width: 38px; height: 38px; object-fit: contain; border-radius: 10px; box-shadow: 0 4px 16px rgba(0, 115, 95, 0.25); margin-right: 10px;" />
             <span>ZekDrive</span>
           </NuxtLink>
           <p class="footer-tagline">
-            La mobilité urbaine réinventée en Afrique. VTC, moto-taxi, vélo et livraison — rapide, fiable, abordable.
+            {{ t('footer.tagline') }}
           </p>
           <div class="footer-socials">
             <a
-              v-for="social in socials"
-              :key="social.name"
-              :href="social.href"
-              class="social-btn"
-              :aria-label="social.name"
-              target="_blank"
-              rel="noopener"
-              v-html="social.icon"
-            />
+               v-for="social in socials"
+               :key="social.name"
+               :href="social.href"
+               class="social-btn"
+               :aria-label="social.name"
+               target="_blank"
+               rel="noopener"
+               v-html="social.icon"
+               />
           </div>
         </div>
 
         <!-- Services -->
         <div class="footer-col">
-          <h4>Services</h4>
+          <h4>{{ t('footer.services') }}</h4>
           <ul class="footer-links">
             <li v-for="link in footerLinks.services" :key="link.label">
               <a :href="link.href">{{ link.label }}</a>
@@ -85,7 +89,7 @@ const socials = [
 
         <!-- Entreprise -->
         <div class="footer-col">
-          <h4>Entreprise</h4>
+          <h4>{{ t('footer.entreprise') }}</h4>
           <ul class="footer-links">
             <li v-for="link in footerLinks.entreprise" :key="link.label">
               <NuxtLink :to="link.href">{{ link.label }}</NuxtLink>
@@ -95,7 +99,7 @@ const socials = [
 
         <!-- Légal -->
         <div class="footer-col">
-          <h4>Légal</h4>
+          <h4>{{ t('footer.legal') }}</h4>
           <ul class="footer-links">
             <li v-for="link in footerLinks.legal" :key="link.label">
               <a :href="link.href">{{ link.label }}</a>
@@ -103,14 +107,14 @@ const socials = [
           </ul>
 
           <div style="margin-top: 28px;">
-            <h4>Télécharger</h4>
+            <h4>{{ t('footer.download') }}</h4>
             <div class="footer-app-badges" style="flex-direction: column; gap: 10px; margin-top: 0;">
               <a href="#" class="store-badge">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
                 </svg>
                 <div class="store-badge-text">
-                  <span>Disponible sur</span>
+                  <span>{{ t('download.store_ios_lbl') }}</span>
                   <span>App Store</span>
                 </div>
               </a>
@@ -119,7 +123,7 @@ const socials = [
                   <path d="M3.18 23.76c.38.21.82.22 1.22.03l12.62-7.28-2.68-2.68-11.16 9.93zM.54 2.23C.2 2.63 0 3.19 0 3.9v16.2c0 .71.2 1.27.54 1.67l.09.09 9.08-9.08v-.21L.63 2.14l-.09.09zM20.4 10.43l-2.6-1.5-2.98 2.98 2.98 2.98 2.62-1.51c.75-.43.75-1.12 0-1.95zM4.4.21L17.02 7.49l-2.68 2.68L3.18.24A1.14 1.14 0 0 1 4.4.21z"/>
                 </svg>
                 <div class="store-badge-text">
-                  <span>Disponible sur</span>
+                  <span>{{ t('download.store_android_lbl') }}</span>
                   <span>Google Play</span>
                 </div>
               </a>
@@ -130,23 +134,23 @@ const socials = [
 
       <div class="footer-bottom">
         <p class="footer-copyright">
-          © 2025 ZekDrive. Tous droits réservés. Conçu avec ❤️ pour l'Afrique.
+          {{ t('footer.copyright') }}
         </p>
         <div style="display: flex; gap: 20px;">
           <a href="/" style="font-size: 0.85rem; color: var(--text-subtle); transition: color 0.3s;" 
              onmouseover="this.style.color='var(--teal)'" 
              onmouseout="this.style.color='var(--text-subtle)'">
-            Confidentialité
+            {{ t('footer.privacy') }}
           </a>
           <a href="/" style="font-size: 0.85rem; color: var(--text-subtle); transition: color 0.3s;"
              onmouseover="this.style.color='var(--teal)'" 
              onmouseout="this.style.color='var(--text-subtle)'">
-            Conditions
+            {{ t('footer.terms') }}
           </a>
           <a href="/" style="font-size: 0.85rem; color: var(--text-subtle); transition: color 0.3s;"
              onmouseover="this.style.color='var(--teal)'" 
              onmouseout="this.style.color='var(--text-subtle)'">
-            Cookies
+            {{ t('footer.cookies') }}
           </a>
         </div>
       </div>

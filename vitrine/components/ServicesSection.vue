@@ -1,40 +1,42 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useScrollAnimation } from '~/composables/useScrollAnimation'
+import { useLanguage } from '~/composables/useLanguage'
 
+const { t } = useLanguage()
 const { observe } = useScrollAnimation()
 const sectionRef = ref<HTMLElement | null>(null)
 
-const services = [
+const services = computed(() => [
   {
     icon: '🚗',
-    title: 'VTC Premium',
-    desc: 'Confortez-vous à bord d\'un véhicule climatisé avec des chauffeurs professionnels. Idéal pour vos déplacements d\'affaires et sorties en toute élégance.',
-    tag: 'Le plus populaire',
-    color: '#7c3aed',
+    title: t('services.vtc_title'),
+    desc: t('services.vtc_desc'),
+    tag: t('services.vtc_tag'),
+    color: '#00735f',
   },
   {
     icon: '🏍️',
-    title: 'Moto-Taxi',
-    desc: 'Traversez la ville en un éclair grâce à nos moto-taxis agiles. Évitez les embouteillages et arrivez à l\'heure, à chaque fois.',
-    tag: 'Express',
+    title: t('services.moto_title'),
+    desc: t('services.moto_desc'),
+    tag: t('services.moto_tag'),
     color: '#00e5cc',
   },
   {
     icon: '🚲',
-    title: 'Vélo',
-    desc: 'Déplacez-vous de manière écologique et économique avec notre service de vélo. Parfait pour les courtes distances en zone urbaine.',
-    tag: 'Éco-responsable',
+    title: t('services.bike_title'),
+    desc: t('services.bike_desc'),
+    tag: t('services.bike_tag'),
     color: '#4ade80',
   },
   {
     icon: '📦',
-    title: 'Livraison',
-    desc: 'Envoyez vos colis en toute sécurité partout dans la ville. Suivi en temps réel, livraison garantie et assurance incluse.',
-    tag: 'Fiable & Rapide',
+    title: t('services.delivery_title'),
+    desc: t('services.delivery_desc'),
+    tag: t('services.delivery_tag'),
     color: '#f59e0b',
   },
-]
+])
 
 onMounted(() => {
   const cards = sectionRef.value?.querySelectorAll('.service-card')
@@ -52,10 +54,10 @@ onMounted(() => {
 
     <div class="container" style="position:relative;z-index:1;">
       <div class="section-header fade-up">
-        <div class="section-tag">Nos Services</div>
-        <h2 class="section-title">Tout ce dont vous avez besoin,<br><span class="gradient-text">en un seul clic</span></h2>
+        <div class="section-tag">{{ t('services.tag') }}</div>
+        <h2 class="section-title">{{ t('services.title_1') }}<br><span class="gradient-text">{{ t('services.title_highlight') }}</span></h2>
         <p class="section-subtitle">
-          Que vous ayez besoin d'un VTC, d'une moto-taxi ou d'une livraison, ZekDrive vous couvre 24h/24, 7j/7.
+          {{ t('services.subtitle') }}
         </p>
       </div>
 

@@ -545,5 +545,12 @@
   "discount_applied_for_this_ride": "تم تطبيق الخصم على هذه الرحلة",
   "seems_you_are_not_reached_near_your": "يبدو أنك لست بالقرب من الخاص بك",
   "permanently_delete_confirm_msg": "هل أنت متأكد؟ تريد حذف حسابك نهائيًا. لا يمكنك استرداد هذا الحساب في المستقبل",
-  "for_demo_purpose_use": "لأغراض العرض التوضيحي، استخدم 0000 كمستخدم لمرة واحدة (OTP)."
+  "for_demo_purpose_use": "لأغراض العرض التوضيحي، استخدم 0000 كمستخدم لمرة واحدة (OTP).",
+  "restaurant": "مطعم",
+  "boutique": "بوتيك",
+  "grocery": "بقالة",
+  "pharmacy": "صيدلية",
+  "other": "أخرى",
+  "store_type": "نوع المتجر",
+  "store_category": "الفئة"
 }

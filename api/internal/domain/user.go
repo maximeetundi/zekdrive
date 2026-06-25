@@ -13,25 +13,34 @@ const (
 	RoleRider  UserRole = "rider"
 	RoleDriver UserRole = "driver"
 	RoleAdmin  UserRole = "admin"
+	RoleStore  UserRole = "store"
+	RolePro    UserRole = "pro" // Unified Pro user: can have multiple sub-profiles
 )
 
 type User struct {
-	ID        uuid.UUID `json:"id" db:"id"`
-	Name      string    `json:"name" db:"name"`
-	Email     string    `json:"email" db:"email"`
-	Password  string    `json:"-" db:"password"`
-	Phone     string    `json:"phone" db:"phone"`
-	Role      UserRole  `json:"role" db:"role"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	ID          uuid.UUID `json:"id" db:"id"`
+	Name        string    `json:"name" db:"name"`
+	Email       string    `json:"email" db:"email"`
+	Password    string    `json:"-" db:"password"`
+	Phone       string    `json:"phone" db:"phone"`
+	Role        UserRole  `json:"role" db:"role"`
+	Country     string    `json:"country" db:"country"`
+	KycStatus   string    `json:"kyc_status" db:"kyc_status"`
+	KycDocument string    `json:"kyc_document" db:"kyc_document"`
+	// ProProfiles: comma-separated active Pro sub-profiles ("driver", "fleet_owner", "merchant")
+	// Only relevant when Role == "pro" (or legacy "driver"/"store")
+	ProProfiles string    `json:"pro_profiles" db:"pro_profiles"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
 
 type RegisterRequest struct {
-	Name     string   `json:"name" validate:"required,min=2,max=100"`
-	Email    string   `json:"email" validate:"required,email"`
-	Password string   `json:"password" validate:"required,min=6"`
-	Phone    string   `json:"phone" validate:"required,min=8,max=20"`
-	Role     UserRole `json:"role" validate:"required,oneof=rider driver admin"`
+	Name        string         `json:"name" validate:"required,min=2,max=100"`
+	Email       string         `json:"email" validate:"required,email"`
+	Password    string         `json:"password" validate:"required,min=6"`
+	Phone       string         `json:"phone" validate:"required,min=8,max=20"`
+	Role        UserRole       `json:"role" validate:"required,oneof=rider driver admin store pro"`
+	ProProfiles string         `json:"pro_profiles"` // e.g. "driver" or "driver,fleet_owner" or "merchant"
 }
 
 type LoginRequest struct {

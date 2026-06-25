@@ -12,10 +12,8 @@ export function useApi() {
   const baseUrl = config.public.apiUrl
 
   function getToken(): string | null {
-    if (process.client) {
-      return localStorage.getItem('zekdrive_token')
-    }
-    return null
+    const token = useCookie('zekdrive_token')
+    return token.value || null
   }
 
   function getHeaders(): Record<string, string> {
@@ -45,10 +43,13 @@ export function useApi() {
 
       if (res.status === 401) {
         // Token expired — clear and redirect
+        const token = useCookie('zekdrive_token')
+        const refreshToken = useCookie('zekdrive_refresh_token')
+        const userCookie = useCookie('zekdrive_user')
+        token.value = null
+        refreshToken.value = null
+        userCookie.value = null
         if (process.client) {
-          localStorage.removeItem('zekdrive_token')
-          localStorage.removeItem('zekdrive_refresh_token')
-          localStorage.removeItem('zekdrive_user')
           window.location.href = '/auth/login'
         }
         return { data: null, error: 'Unauthorized' }

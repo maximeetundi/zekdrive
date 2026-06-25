@@ -3,8 +3,8 @@
     <!-- Page Header -->
     <div class="page-header animate-fade-in">
       <div>
-        <h1 class="page-title">Drivers Registry</h1>
-        <p class="page-desc">Monitor driver approvals, vehicle classes, earnings, and locations</p>
+        <h1 class="page-title">{{ t('drivers_directory') }}</h1>
+        <p class="page-desc">{{ t('drivers_desc') }}</p>
       </div>
     </div>
 
@@ -16,8 +16,8 @@
           <input
             v-model="searchTerm"
             type="text"
-            class="form-control"
-            placeholder="Search by name, plate number, or email..."
+            class="form-input"
+            :placeholder="lang === 'fr' ? 'Rechercher par nom, plaque ou e-mail...' : 'Search by name, plate number, or email...'"
             @input="onFilterChange"
           />
         </div>
@@ -25,24 +25,24 @@
         <!-- Availability Filter -->
         <div style="width: 170px;">
           <select v-model="availabilityFilter" class="form-select" @change="onFilterChange">
-            <option value="">All Statuses</option>
-            <option value="available">Available</option>
-            <option value="busy">Busy</option>
-            <option value="offline">Offline</option>
+            <option value="">{{ t('all_statuses') }}</option>
+            <option value="available">{{ lang === 'fr' ? 'Disponible' : 'Available' }}</option>
+            <option value="busy">{{ lang === 'fr' ? 'Occupé' : 'Busy' }}</option>
+            <option value="offline">{{ lang === 'fr' ? 'Hors ligne' : 'Offline' }}</option>
           </select>
         </div>
 
         <!-- Approval status Filter -->
         <div style="width: 170px;">
           <select v-model="approvalFilter" class="form-select" @change="onFilterChange">
-            <option value="">All Approvals</option>
-            <option value="approved">Approved</option>
-            <option value="pending">Pending</option>
-            <option value="rejected">Rejected</option>
+            <option value="">{{ lang === 'fr' ? 'Toutes les approbations' : 'All Approvals' }}</option>
+            <option value="approved">{{ lang === 'fr' ? 'Approuvé' : 'Approved' }}</option>
+            <option value="pending">{{ lang === 'fr' ? 'En attente' : 'Pending' }}</option>
+            <option value="rejected">{{ lang === 'fr' ? 'Rejeté' : 'Rejected' }}</option>
           </select>
         </div>
 
-        <button class="btn btn-secondary" style="height: 2.25rem;" @click="clearFilters">Reset</button>
+        <button class="btn btn-secondary" style="height: 2.25rem;" @click="clearFilters">{{ t('reset') }}</button>
       </div>
     </div>
 
@@ -67,6 +67,14 @@
             </div>
           </template>
 
+          <!-- Country Cell -->
+          <template #cell-country="{ item }">
+            <span class="flex items-center gap-1">
+              <span>{{ item.country === 'SN' ? '🇸🇳' : item.country === 'CI' ? '🇨🇮' : item.country === 'ML' ? '🇲🇱' : '🌍' }}</span>
+              <span class="text-xs font-semibold" style="margin-left: 2px;">{{ item.country || 'SN' }}</span>
+            </span>
+          </template>
+
           <!-- Vehicle Cell -->
           <template #cell-vehicle="{ item }">
             <div>
@@ -81,6 +89,11 @@
           <!-- Availability Cell -->
           <template #cell-availability="{ item }">
             <AppStatusBadge :status="item.availability" />
+          </template>
+
+          <!-- KYC status Cell -->
+          <template #cell-kyc_status="{ item }">
+            <AppStatusBadge :status="item.kyc_status || 'unsubmitted'" />
           </template>
 
           <!-- Approval Status Cell -->
@@ -104,13 +117,13 @@
           <!-- Actions Cell -->
           <template #cell-actions="{ item }">
             <div class="flex gap-2">
-              <button class="btn btn-secondary btn-sm" @click="openMapModal(item)">Map</button>
-              <button class="btn btn-secondary btn-sm" @click="openEditModal(item)">Edit</button>
+              <button class="btn btn-secondary btn-sm" @click="openMapModal(item)">{{ lang === 'fr' ? 'Carte' : 'Map' }}</button>
+              <button class="btn btn-secondary btn-sm" @click="openEditModal(item)">{{ t('edit') }}</button>
               
               <!-- Quick Approval Flow -->
               <template v-if="item.approval_status === 'pending'">
-                <button class="btn btn-success btn-sm" @click="approveDriver(item.id)">Approve</button>
-                <button class="btn btn-danger btn-sm" @click="rejectDriver(item.id)">Reject</button>
+                <button class="btn btn-success btn-sm" @click="approveDriver(item.id)">{{ lang === 'fr' ? 'Approuver' : 'Approve' }}</button>
+                <button class="btn btn-danger btn-sm" @click="rejectDriver(item.id)">{{ lang === 'fr' ? 'Rejeter' : 'Reject' }}</button>
               </template>
             </div>
           </template>
@@ -121,54 +134,102 @@
     <!-- Edit Driver Modal -->
     <AppModal
       :show="showEditModal"
-      title="Edit Driver Details"
+      :title="lang === 'fr' ? 'Modifier les détails du chauffeur' : 'Edit Driver Details'"
       @close="closeEditModal"
     >
       <form @submit.prevent="saveDriver">
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Full Name</label>
-          <input v-model="editForm.name" type="text" class="form-control" required />
+        <div class="form-group text-left" style="margin-bottom: 1.25rem;">
+          <label class="form-label">{{ t('fullname') }}</label>
+          <input v-model="editForm.name" type="text" class="form-input" required />
         </div>
         
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Phone Number</label>
-          <input v-model="editForm.phone" type="text" class="form-control" required />
+        <div class="form-group text-left" style="margin-bottom: 1.25rem;">
+          <label class="form-label">{{ t('phone') }}</label>
+          <input v-model="editForm.phone" type="text" class="form-input" required />
         </div>
 
-        <div class="grid grid-cols-2 gap-4" style="grid-template-columns: 1fr 1fr; margin-bottom: 1rem;">
-          <div class="form-group">
-            <label class="form-label">Vehicle Model</label>
-            <input v-model="editForm.vehicle_model" type="text" class="form-control" required />
+        <div class="grid grid-cols-2 gap-4 modal-form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1.25rem;">
+          <div class="form-group text-left">
+            <label class="form-label">{{ lang === 'fr' ? 'Modèle véhicule' : 'Vehicle Model' }}</label>
+            <input v-model="editForm.vehicle_model" type="text" class="form-input" required />
           </div>
-          <div class="form-group">
-            <label class="form-label">License Plate</label>
-            <input v-model="editForm.vehicle_plate" type="text" class="form-control" required />
+          <div class="form-group text-left">
+            <label class="form-label">{{ lang === 'fr' ? 'Plaque d\'immatriculation' : 'License Plate' }}</label>
+            <input v-model="editForm.vehicle_plate" type="text" class="form-input" required />
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4" style="grid-template-columns: 1fr 1fr; margin-bottom: 1rem;">
-          <div class="form-group">
-            <label class="form-label">Vehicle Category</label>
+        <div class="grid grid-cols-2 gap-4 modal-form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1.25rem;">
+          <div class="form-group text-left">
+            <label class="form-label">{{ lang === 'fr' ? 'Catégorie véhicule' : 'Vehicle Category' }}</label>
             <select v-model="editForm.vehicle_type" class="form-select">
-              <option value="car">Car</option>
-              <option value="moto">Moto</option>
-              <option value="bicycle">Bicycle</option>
-              <option value="truck">Truck</option>
+              <option value="car">{{ lang === 'fr' ? 'Voiture' : 'Car' }}</option>
+              <option value="moto">{{ lang === 'fr' ? 'Moto' : 'Moto' }}</option>
+              <option value="bicycle">{{ lang === 'fr' ? 'Vélo / Trottinette' : 'Bicycle' }}</option>
+              <option value="truck">{{ lang === 'fr' ? 'Camion' : 'Truck' }}</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Availability</label>
+          <div class="form-group text-left">
+            <label class="form-label">{{ lang === 'fr' ? 'Disponibilité' : 'Availability' }}</label>
             <select v-model="editForm.availability" class="form-select">
-              <option value="available">Available</option>
-              <option value="busy">Busy</option>
-              <option value="offline">Offline</option>
+              <option value="available">{{ lang === 'fr' ? 'Disponible' : 'Available' }}</option>
+              <option value="busy">{{ lang === 'fr' ? 'Occupé' : 'Busy' }}</option>
+              <option value="offline">{{ lang === 'fr' ? 'Hors ligne' : 'Offline' }}</option>
             </select>
           </div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 2rem;">
-          <button type="button" class="btn btn-secondary" @click="closeEditModal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
+        <div class="grid grid-cols-2 gap-4 modal-form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1.25rem;">
+          <div class="form-group text-left">
+            <label class="form-label">{{ t('country') }}</label>
+            <select v-model="editForm.country" class="form-select" required>
+              <option value="SN">🇸🇳 Sénégal (SN)</option>
+              <option value="CI">🇨🇮 Côte d'Ivoire (CI)</option>
+              <option value="ML">🇲🇱 Mali (ML)</option>
+            </select>
+          </div>
+          <div class="form-group text-left">
+            <label class="form-label">{{ t('kyc_status') }}</label>
+            <select v-model="editForm.kyc_status" class="form-select">
+              <option value="unsubmitted">{{ t('unsubmitted') }}</option>
+              <option value="pending">{{ t('pending') }}</option>
+              <option value="approved">{{ t('approved') }}</option>
+              <option value="rejected">{{ t('rejected') }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Driver License / Documents Verification -->
+        <div class="kyc-verification-panel text-left animate-fade-in" style="margin-top: 1.5rem; padding: 1rem; border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 1.25rem;">
+          <h3 class="text-sm font-bold text-primary" style="margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+            <span>🛡️ {{ lang === 'fr' ? 'Validation Permis de Conduire (KYC)' : 'Drivers License Verification (KYC)' }}</span>
+            <AppStatusBadge :status="editForm.kyc_status" />
+          </h3>
+          
+          <div v-if="editForm.kyc_document" class="kyc-doc-preview" style="margin-bottom: 1rem;">
+            <div class="doc-mock-card" style="width: 100%; height: 130px; border-radius: var(--radius-sm); border: 1px dashed rgba(255, 255, 255, 0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.3); position: relative; overflow: hidden; padding: 1rem;">
+              <span style="font-size: 2rem;">🪪</span>
+              <span class="text-xs font-semibold text-primary" style="margin-top: 0.5rem;">{{ editForm.kyc_document }}</span>
+              <span class="text-[10px] text-muted">{{ t('license_number') }} : {{ selectedDriver?.id }}</span>
+            </div>
+          </div>
+          <div v-else style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.8125rem; font-style: italic;">
+            {{ lang === 'fr' ? 'Aucun permis de conduire KYC soumis.' : 'No driver\'s license KYC document submitted.' }}
+          </div>
+
+          <div v-if="editForm.kyc_status === 'pending'" class="flex gap-2" style="justify-content: flex-end;">
+            <button type="button" class="btn btn-success btn-sm" @click="editForm.kyc_status = 'approved'">
+              {{ t('approve_kyc') }}
+            </button>
+            <button type="button" class="btn btn-danger btn-sm" @click="editForm.kyc_status = 'rejected'">
+              {{ t('reject_kyc') }}
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-footer-actions" style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 2rem;">
+          <button type="button" class="btn btn-secondary" @click="closeEditModal">{{ t('cancel') }}</button>
+          <button type="submit" class="btn btn-primary">{{ t('save_changes') }}</button>
         </div>
       </form>
     </AppModal>
@@ -176,14 +237,14 @@
     <!-- Map Location Modal -->
     <AppModal
       :show="showMapModal"
-      :title="selectedDriver ? 'Location Map — ' + selectedDriver.name : 'Driver Location'"
+      :title="selectedDriver ? (lang === 'fr' ? 'Localisation en direct — ' : 'Live Location — ') + selectedDriver.name : (lang === 'fr' ? 'Localisation du chauffeur' : 'Driver Location')"
       size="lg"
       @close="closeMapModal"
     >
-      <div v-if="selectedDriver" style="padding-bottom: 0.5rem;">
-        <div class="flex justify-between items-center" style="margin-bottom: 1rem;">
+      <div v-if="selectedDriver" style="padding-bottom: 0.5rem; text-align: left;">
+        <div class="flex justify-between items-center modal-map-header" style="margin-bottom: 1rem;">
           <div>
-            <span class="text-sm text-muted">Last Seen: </span>
+            <span class="text-sm text-muted">{{ lang === 'fr' ? 'Vu pour la dernière fois : ' : 'Last Seen: ' }}</span>
             <span class="text-sm font-semibold text-primary">{{ formatTime(selectedDriver.last_seen || '') }}</span>
           </div>
           <div class="flex items-center gap-2">
@@ -216,9 +277,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDriversStore, type Driver } from '~/stores/drivers'
+import { useI18n } from '~/composables/useI18n'
 
 definePageMeta({
   middleware: 'auth',
@@ -226,21 +288,24 @@ definePageMeta({
 
 const driversStore = useDriversStore()
 const { list, total, page, perPage, totalPages, loading } = storeToRefs(driversStore)
+const { t, lang } = useI18n()
 
 const searchTerm = ref('')
 const availabilityFilter = ref('')
 const approvalFilter = ref('')
 
-const headers = [
-  { key: 'name', label: 'Driver Details' },
-  { key: 'phone', label: 'Phone' },
-  { key: 'vehicle', label: 'Vehicle details' },
-  { key: 'availability', label: 'Availability' },
-  { key: 'approval_status', label: 'Approval' },
-  { key: 'rating', label: 'Rating' },
-  { key: 'earnings_total', label: 'Total Earnings' },
-  { key: 'actions', label: 'Actions', style: { width: '260px', textAlign: 'right' } },
-]
+const headers = computed(() => [
+  { key: 'name', label: lang.value === 'fr' ? 'Détails Chauffeur' : 'Driver Details' },
+  { key: 'phone', label: t('phone') },
+  { key: 'country', label: t('country') },
+  { key: 'vehicle', label: lang.value === 'fr' ? 'Détails Véhicule' : 'Vehicle details' },
+  { key: 'availability', label: lang.value === 'fr' ? 'Disponibilité' : 'Availability' },
+  { key: 'approval_status', label: lang.value === 'fr' ? 'Approbation' : 'Approval' },
+  { key: 'kyc_status', label: t('kyc_status') },
+  { key: 'rating', label: lang.value === 'fr' ? 'Note' : 'Rating' },
+  { key: 'earnings_total', label: lang.value === 'fr' ? 'Gains Totaux' : 'Total Earnings' },
+  { key: 'actions', label: t('actions'), style: { width: '260px', textAlign: 'right' } },
+])
 
 // Modal control state
 const showEditModal = ref(false)
@@ -254,6 +319,9 @@ const editForm = ref({
   vehicle_plate: '',
   vehicle_type: 'car' as Driver['vehicle_type'],
   availability: 'offline' as Driver['availability'],
+  country: 'SN',
+  kyc_status: 'unsubmitted' as Driver['kyc_status'],
+  kyc_document: '',
 })
 
 onMounted(() => {
@@ -288,6 +356,9 @@ function openEditModal(driver: Driver) {
     vehicle_plate: driver.vehicle_plate,
     vehicle_type: driver.vehicle_type,
     availability: driver.availability,
+    country: driver.country || 'SN',
+    kyc_status: driver.kyc_status || 'unsubmitted',
+    kyc_document: driver.kyc_document || '',
   }
   showEditModal.value = true
 }
@@ -317,10 +388,20 @@ function closeMapModal() {
 
 async function approveDriver(id: string) {
   await driversStore.approveDriver(id)
+  const idx = list.value.findIndex(d => d.id === id)
+  if (idx !== -1) {
+    list.value[idx].kyc_status = 'approved'
+    list.value[idx].approval_status = 'approved'
+  }
 }
 
 async function rejectDriver(id: string) {
   await driversStore.rejectDriver(id)
+  const idx = list.value.findIndex(d => d.id === id)
+  if (idx !== -1) {
+    list.value[idx].kyc_status = 'rejected'
+    list.value[idx].approval_status = 'rejected'
+  }
 }
 
 function formatCurrency(val: number): string {
@@ -328,12 +409,38 @@ function formatCurrency(val: number): string {
 }
 
 function formatTime(dateStr: string): string {
-  if (!dateStr) return 'Offline'
+  if (!dateStr) return lang.value === 'fr' ? 'Hors ligne' : 'Offline'
   try {
     const d = new Date(dateStr)
-    return d.toLocaleString('fr-FR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    return d.toLocaleString(lang.value === 'fr' ? 'fr-FR' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
   } catch {
     return dateStr
   }
 }
 </script>
+
+<style scoped>
+.text-left {
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  .modal-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  .modal-footer-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem !important;
+  }
+  .modal-footer-actions .btn {
+    width: 100%;
+  }
+  .modal-map-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+</style>

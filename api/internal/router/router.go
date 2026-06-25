@@ -19,6 +19,11 @@ type Router struct {
 	adminHandler    *handler.AdminHandler
 	wsHandler       *handler.WSHandler
 	mapHandler      *handler.MapHandler
+	storeHandler    *handler.StoreHandler
+	settingHandler  *handler.SettingHandler
+	fleetHandler    *handler.FleetHandler
+	countryHandler  *handler.CountryHandler
+	walletHandler   *handler.WalletHandler
 
 	authMiddleware fiber.Handler
 }
@@ -35,6 +40,11 @@ func NewRouter(
 	adminHandler *handler.AdminHandler,
 	wsHandler *handler.WSHandler,
 	mapHandler *handler.MapHandler,
+	storeHandler *handler.StoreHandler,
+	settingHandler *handler.SettingHandler,
+	fleetHandler *handler.FleetHandler,
+	countryHandler *handler.CountryHandler,
+	walletHandler  *handler.WalletHandler,
 	authMiddleware fiber.Handler,
 ) *Router {
 	return &Router{
@@ -49,6 +59,11 @@ func NewRouter(
 		adminHandler:    adminHandler,
 		wsHandler:       wsHandler,
 		mapHandler:      mapHandler,
+		storeHandler:    storeHandler,
+		settingHandler:  settingHandler,
+		fleetHandler:    fleetHandler,
+		countryHandler:  countryHandler,
+		walletHandler:   walletHandler,
 		authMiddleware:  authMiddleware,
 	}
 }
@@ -73,6 +88,10 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	app.Post("/broadcasting/auth", r.wsHandler.PusherAuth)
 
 	api := app.Group("/api")
+
+	// Public: countries & currencies (no auth — mobile apps need this at startup)
+	api.Get("/countries", r.countryHandler.PublicListActive)
+	api.Get("/countries/:code/config", r.countryHandler.PublicGetConfig)
 
 	// Public Auth Group
 	auth := api.Group("/auth")
@@ -151,6 +170,63 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	pricing := protected.Group("/pricing")
 	pricing.Post("/estimate", r.pricingHandler.Estimate)
 
+	// Store Owner Routes
+	storeGroup := protected.Group("/store", middleware.RequireRole(domain.RoleStore))
+	storeGroup.Post("/", r.storeHandler.CreateOrUpdateStore)
+	storeGroup.Get("/profile", r.storeHandler.GetStoreProfile)
+	storeGroup.Put("/schedules", r.storeHandler.UpdateSchedules)
+	storeGroup.Post("/products", r.storeHandler.CreateProduct)
+	storeGroup.Put("/products/:id", r.storeHandler.UpdateProduct)
+	storeGroup.Delete("/products/:id", r.storeHandler.DeleteProduct)
+	storeGroup.Get("/products", r.storeHandler.ListStoreProducts)
+	storeGroup.Get("/orders", r.storeHandler.ListStoreOrders)
+	storeGroup.Put("/orders/:id/status", r.storeHandler.UpdateOrderStatusByStore)
+
+	// Customer Store Routes
+	customerStores := protected.Group("/customer/stores")
+	customerStores.Get("/", r.storeHandler.ListNearbyStores)
+	customerStores.Get("/:id", r.storeHandler.GetStoreDetails)
+	customerStores.Get("/:id/products", r.storeHandler.ListCustomerProducts)
+	customerStores.Post("/orders", r.storeHandler.CreateOrder)
+	customerStores.Get("/orders", r.storeHandler.ListCustomerOrders)
+	customerStores.Get("/orders/:id", r.storeHandler.GetOrderDetails)
+
+	// Driver Store Courier Routes
+	driverStores := protected.Group("/driver/store/orders", middleware.RequireRole(domain.RoleDriver))
+	driverStores.Get("/", r.storeHandler.ListDriverOrders)
+	driverStores.Post("/:id/accept", r.storeHandler.AcceptDeliveryOrder)
+	driverStores.Put("/:id/status", r.storeHandler.UpdateOrderStatusByDriver)
+
+	// ── PRO USER MULTI-PROFILE ROUTES ─────────────────────────────────────────
+	// Any authenticated user can activate Pro profiles and manage their fleets.
+	// Access is controlled at the service level (checking ownership).
+	pro := protected.Group("/pro")
+
+	// Pro profile summary (who am I as a Pro user?)
+	pro.Get("/profile-summary", r.fleetHandler.GetProProfileSummary)
+	// Activate a new sub-profile (driver | fleet_owner | merchant)
+	pro.Post("/activate-profile", r.fleetHandler.ActivateProProfile)
+
+	// Fleet management (for fleet_owner profile)
+	pro.Get("/fleets", r.fleetHandler.ListMyFleets)
+	pro.Post("/fleets", r.fleetHandler.CreateFleet)
+	pro.Get("/fleets/:id", r.fleetHandler.GetFleet)
+	pro.Put("/fleets/:id", r.fleetHandler.UpdateFleet)
+	pro.Delete("/fleets/:id", r.fleetHandler.DeleteFleet)
+	pro.Post("/fleets/:id/vehicles", r.fleetHandler.AddVehicleToFleet)
+	pro.Get("/fleets/:id/vehicles", r.fleetHandler.ListFleetVehicles)
+	pro.Get("/fleets/:id/assignments", r.fleetHandler.ListFleetAssignments)
+
+	// Vehicle management (all vehicles owned by the Pro user)
+	pro.Get("/vehicles", r.fleetHandler.ListAllMyVehicles)
+	pro.Post("/vehicles/:id/assign-driver", r.fleetHandler.AssignDriver)
+	pro.Delete("/vehicles/:id/assign-driver", r.fleetHandler.UnassignDriver)
+
+	// ── WALLET CHAUFFEUR (compte pro — modèle Yango) ────────────────────────
+	pro.Get("/wallet", r.walletHandler.GetMyWallet)
+	pro.Get("/wallet/transactions", r.walletHandler.ListMyTransactions)
+	pro.Post("/wallet/recharge", r.walletHandler.Recharge)
+
 	// Zone view routes
 	zones := protected.Group("/zones")
 	zones.Get("/", r.zoneHandler.List)
@@ -163,6 +239,10 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	admin := protected.Group("/admin", middleware.RequireRole(domain.RoleAdmin))
 	admin.Get("/stats", r.adminHandler.GetSystemStats)
 	admin.Put("/zones/:id/surge", r.adminHandler.UpdateZoneSurge)
+	admin.Get("/settings", r.settingHandler.GetSettings)
+	admin.Post("/settings", r.settingHandler.SaveSettings)
+	// Admin: manage stores (restaurants & boutiques)
+	admin.Get("/stores", r.storeHandler.AdminListStores)
 
 	// ── CUSTOMER & DRIVER MOBILE COMPATIBILITY & OPEN-SOURCE MAPS LAYER (PROTECTED) ──
 	app.Post("/api/customer/config/get-routes", r.authMiddleware, r.mapHandler.GetRoutes)
@@ -175,4 +255,38 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	app.Put("/api/driver/update/profile", r.authMiddleware, r.userHandler.UpdateProfile)
 	app.Post("/api/driver/update-online-status", r.authMiddleware, r.driverHandler.UpdateStatus)
 	app.Post("/api/user/store-live-location", r.authMiddleware, r.driverHandler.UpdateLocation)
+
+	// ── COUNTRY & CURRENCY ROUTES ─────────────────────────────────────────────
+	// Public: mobile apps fetch active countries + pricing
+	app.Get("/api/countries", r.countryHandler.PublicListActive)
+	app.Get("/api/countries/:code/config", r.countryHandler.PublicGetConfig)
+
+	// Admin: full management
+	admin.Get("/countries", r.countryHandler.ListAll)
+	admin.Get("/countries/active", r.countryHandler.ListActive)
+	admin.Get("/countries/:code", r.countryHandler.GetByCode)
+	admin.Put("/countries/:code/active", r.countryHandler.SetActive)
+	admin.Get("/countries/:code/config", r.countryHandler.GetConfig)
+	admin.Put("/countries/:code/config", r.countryHandler.UpsertConfig)
+
+	// Admin: KYC management
+	admin.Get("/kyc", r.adminHandler.ListKYC)
+	admin.Put("/kyc/:id/approve", r.adminHandler.ApproveKYC)
+	admin.Put("/kyc/:id/reject", r.adminHandler.RejectKYC)
+
+	// Admin: roles & permissions
+	admin.Get("/roles", r.adminHandler.ListRoles)
+	admin.Get("/permissions", r.adminHandler.ListPermissions)
+	admin.Put("/roles/:id/permissions", r.adminHandler.UpdateRolePermissions)
+	admin.Get("/admin-users", r.adminHandler.ListAdminUsers)
+	admin.Post("/admin-users", r.adminHandler.UpsertAdminUser)
+	admin.Put("/admin-users/:id/deactivate", r.adminHandler.DeactivateAdminUser)
+
+	// ── Admin: Wallets chauffeurs (modèle Yango) ──────────────────────────────
+	admin.Get("/wallets", r.walletHandler.AdminListWallets)
+	admin.Get("/wallets/:driverID/transactions", r.walletHandler.AdminListTransactions)
+	admin.Post("/wallets/:driverID/recharge", r.walletHandler.AdminRecharge)
+	admin.Post("/wallets/:driverID/bonus", r.walletHandler.AdminAddBonus)
+	admin.Put("/wallets/:driverID/min-balance", r.walletHandler.AdminSetMinBalance)
+	admin.Put("/wallets/:driverID/lock", r.walletHandler.AdminLockWallet)
 }

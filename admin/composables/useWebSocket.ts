@@ -22,7 +22,7 @@ export function useWebSocket() {
       reconnectionAttempts: 5,
       reconnectionDelay: 2000,
       auth: {
-        token: localStorage.getItem('zekdrive_token') || '',
+        token: useCookie('zekdrive_token').value || '',
       },
     })
 

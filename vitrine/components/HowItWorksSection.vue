@@ -1,29 +1,31 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useLanguage } from '~/composables/useLanguage'
 
+const { t } = useLanguage()
 const connectorRef = ref<HTMLElement | null>(null)
 const sectionRef = ref<HTMLElement | null>(null)
 
-const steps = [
+const steps = computed(() => [
   {
     number: '01',
     icon: '📱',
-    title: 'Téléchargez l\'app',
-    desc: 'Disponible gratuitement sur App Store et Google Play. Créez votre compte en moins de 2 minutes.',
+    title: t('howItWorks.step1_title'),
+    desc: t('howItWorks.step1_desc'),
   },
   {
     number: '02',
     icon: '🗺️',
-    title: 'Réservez votre trajet',
-    desc: 'Entrez votre destination, choisissez votre type de véhicule et trouvez un chauffeur en moins de 3 min.',
+    title: t('howItWorks.step2_title'),
+    desc: t('howItWorks.step2_desc'),
   },
   {
     number: '03',
     icon: '✅',
-    title: 'Arrivez à destination',
-    desc: 'Suivez votre chauffeur en temps réel et arrivez à destination en toute sécurité et confort.',
+    title: t('howItWorks.step3_title'),
+    desc: t('howItWorks.step3_desc'),
   },
-]
+])
 
 onMounted(() => {
   const observer = new IntersectionObserver(
@@ -48,10 +50,10 @@ onMounted(() => {
     <div class="orb orb-violet" style="width:500px;height:500px;left:50%;top:50%;transform:translate(-50%,-50%);opacity:0.3;" />
     <div class="container" style="position:relative;z-index:1;">
       <div class="section-header centered fade-up">
-        <div class="section-tag">Comment ça marche</div>
-        <h2 class="section-title">Simple comme <span class="gradient-text">bonjour</span></h2>
+        <div class="section-tag">{{ t('howItWorks.tag') }}</div>
+        <h2 class="section-title">{{ t('howItWorks.title_1') }}<span class="gradient-text">{{ t('howItWorks.title_highlight') }}</span></h2>
         <p class="section-subtitle">
-          Trois étapes simples pour commencer à profiter de ZekDrive.
+          {{ t('howItWorks.subtitle') }}
         </p>
       </div>
 

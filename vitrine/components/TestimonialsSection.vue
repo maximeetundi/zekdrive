@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useLanguage } from '~/composables/useLanguage'
 
-const testimonials = [
+const { t } = useLanguage()
+
+const testimonials = computed(() => [
   {
-    text: 'Incroyable ! J\'arrive au bureau en 10 minutes maintenant. Les chauffeurs sont toujours ponctuels et les voitures sont impeccables. Je recommande vivement !',
+    text: t('testimonials.t1_text'),
     name: 'Fatou D.',
     city: 'Dakar, Sénégal',
     initials: 'FD',
-    color: '#7c3aed',
+    color: '#00735f',
     stars: 5,
   },
   {
-    text: 'Les chauffeurs sont très professionnels et courtois. L\'application est super simple à utiliser. C\'est la meilleure plateforme de VTC que j\'ai utilisée en Afrique.',
+    text: t('testimonials.t2_text'),
     name: 'Kofi A.',
     city: 'Abidjan, Côte d\'Ivoire',
     initials: 'KA',
@@ -19,7 +22,7 @@ const testimonials = [
     stars: 5,
   },
   {
-    text: 'La livraison est super rapide et fiable. J\'utilise ZekDrive pour envoyer mes colis chaque semaine. Le suivi en temps réel est fantastique !',
+    text: t('testimonials.t3_text'),
     name: 'Aminata S.',
     city: 'Bamako, Mali',
     initials: 'AS',
@@ -27,7 +30,7 @@ const testimonials = [
     stars: 5,
   },
   {
-    text: 'J\'utilise le service moto-taxi tous les jours pour éviter les embouteillages. C\'est rapide, abordable et les tarifs sont transparents. Bravo ZekDrive !',
+    text: t('testimonials.t4_text'),
     name: 'Jean-Pierre M.',
     city: 'Kinshasa, RDC',
     initials: 'JP',
@@ -35,7 +38,7 @@ const testimonials = [
     stars: 5,
   },
   {
-    text: 'Excellent service ! Le paiement via Orange Money est super pratique. Je n\'ai plus besoin d\'avoir du liquide sur moi. L\'application est parfaite.',
+    text: t('testimonials.t5_text'),
     name: 'Sandrine B.',
     city: 'Douala, Cameroun',
     initials: 'SB',
@@ -43,17 +46,17 @@ const testimonials = [
     stars: 5,
   },
   {
-    text: 'ZekDrive Pro est parfait pour notre entreprise. On gère toutes nos courses professionnelles depuis un seul compte. Service client très réactif aussi !',
+    text: t('testimonials.t6_text'),
     name: 'Oumar T.',
     city: 'Dakar, Sénégal',
     initials: 'OT',
     color: '#60a5fa',
     stars: 5,
   },
-]
+])
 
 const current = ref(0)
-const maxIndex = computed(() => Math.max(0, testimonials.length - 3))
+const maxIndex = computed(() => Math.max(0, testimonials.value.length - 3))
 let autoplayInterval: ReturnType<typeof setInterval>
 
 function prev() {
@@ -91,10 +94,10 @@ function stars(n: number) {
 
     <div class="container" style="position:relative;z-index:1;">
       <div class="section-header centered fade-up">
-        <div class="section-tag">Témoignages</div>
-        <h2 class="section-title">Ce que disent nos <span class="gradient-text">utilisateurs</span></h2>
+        <div class="section-tag">{{ t('testimonials.tag') }}</div>
+        <h2 class="section-title">{{ t('testimonials.title_1') }}<span class="gradient-text">{{ t('testimonials.title_highlight') }}</span></h2>
         <p class="section-subtitle">
-          Des milliers de personnes font confiance à ZekDrive pour leurs déplacements quotidiens.
+          {{ t('testimonials.subtitle') }}
         </p>
       </div>
 

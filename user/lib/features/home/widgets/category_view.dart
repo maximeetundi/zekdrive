@@ -7,6 +7,7 @@ import 'package:ride_sharing_user_app/features/parcel/screens/parcel_screen.dart
 import 'package:ride_sharing_user_app/features/ride/controllers/ride_controller.dart';
 import 'package:ride_sharing_user_app/features/set_destination/screens/set_destination_screen.dart';
 import 'package:ride_sharing_user_app/features/splash/controllers/config_controller.dart';
+import 'package:ride_sharing_user_app/features/store/screens/store_list_screen.dart';
 import 'package:ride_sharing_user_app/util/dimensions.dart';
 import 'package:ride_sharing_user_app/util/images.dart';
 import 'package:ride_sharing_user_app/util/styles.dart';
@@ -28,7 +29,7 @@ class CategoryView extends StatelessWidget {
                   children: [
                     Expanded(
                       child: InkWell(
-                        onTap: () => Get.to(() => const ParcelScreen()),
+                        onTap: () => Get.to(() => const StoreListScreen()),
                         child: Container(
                           margin: const EdgeInsets.all(
                               Dimensions.paddingSizeExtraSmall),

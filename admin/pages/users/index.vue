@@ -3,15 +3,15 @@
     <!-- Page Header -->
     <div class="page-header animate-fade-in">
       <div>
-        <h1 class="page-title">Users Directory</h1>
-        <p class="page-desc">Manage customers, admins, account statuses, and metrics</p>
+        <h1 class="page-title">{{ t('users_directory') }}</h1>
+        <p class="page-desc">{{ t('users_desc') }}</p>
       </div>
       <div class="page-actions">
         <button class="btn btn-primary flex items-center gap-2" @click="openCreateModal">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
-          <span>Add New User</span>
+          <span>{{ t('add_new_user') }}</span>
         </button>
       </div>
     </div>
@@ -24,8 +24,8 @@
           <input
             v-model="searchTerm"
             type="text"
-            class="form-control"
-            placeholder="Search by name, email, or phone..."
+            class="form-input"
+            :placeholder="t('search_placeholder')"
             @input="onFilterChange"
           />
         </div>
@@ -33,23 +33,23 @@
         <!-- Role Filter -->
         <div style="width: 160px;">
           <select v-model="roleFilter" class="form-select" @change="onFilterChange">
-            <option value="">All Roles</option>
-            <option value="customer">Customer</option>
-            <option value="admin">Admin</option>
+            <option value="">{{ t('all_roles') }}</option>
+            <option value="customer">{{ t('customer') }}</option>
+            <option value="admin">{{ t('admin') }}</option>
           </select>
         </div>
 
         <!-- Status Filter -->
         <div style="width: 160px;">
           <select v-model="statusFilter" class="form-select" @change="onFilterChange">
-            <option value="">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="banned">Banned</option>
+            <option value="">{{ t('all_statuses') }}</option>
+            <option value="active">{{ t('active') }}</option>
+            <option value="inactive">{{ t('inactive') }}</option>
+            <option value="banned">{{ t('banned') }}</option>
           </select>
         </div>
 
-        <button class="btn btn-secondary" style="height: 2.25rem;" @click="clearFilters">Reset</button>
+        <button class="btn btn-secondary" style="height: 2.25rem;" @click="clearFilters">{{ t('reset') }}</button>
       </div>
     </div>
 
@@ -66,9 +66,22 @@
           :totalPages="totalPages"
           @update:page="setPage"
         >
+          <!-- Custom Country Cell -->
+          <template #cell-country="{ item }">
+            <span class="flex items-center gap-1">
+              <span>{{ item.country === 'SN' ? '🇸🇳' : item.country === 'CI' ? '🇨🇮' : item.country === 'ML' ? '🇲🇱' : '🌍' }}</span>
+              <span class="text-xs font-semibold" style="margin-left: 2px;">{{ item.country || 'SN' }}</span>
+            </span>
+          </template>
+
           <!-- Custom Role Cell -->
           <template #cell-role="{ item }">
             <AppStatusBadge :status="item.role" />
+          </template>
+
+          <!-- Custom KYC Cell -->
+          <template #cell-kyc_status="{ item }">
+            <AppStatusBadge :status="item.kyc_status || 'unsubmitted'" />
           </template>
 
           <!-- Custom Status Cell -->
@@ -89,15 +102,15 @@
           <!-- Custom Actions Cell -->
           <template #cell-actions="{ item }">
             <div class="flex gap-2">
-              <button class="btn btn-secondary btn-sm" @click="openEditModal(item)">Edit</button>
+              <button class="btn btn-secondary btn-sm" @click="openEditModal(item)">{{ t('edit') }}</button>
               <button
                 class="btn btn-sm"
                 :class="item.status === 'banned' ? 'btn-success' : 'btn-danger'"
                 @click="toggleUserStatus(item)"
               >
-                {{ item.status === 'banned' ? 'Unban' : 'Ban' }}
+                {{ item.status === 'banned' ? t('unban') : t('ban') }}
               </button>
-              <button class="btn btn-danger btn-sm" @click="confirmDelete(item)">Delete</button>
+              <button class="btn btn-danger btn-sm" @click="confirmDelete(item)">{{ t('delete') }}</button>
             </div>
           </template>
         </AppDataTable>
@@ -107,46 +120,94 @@
     <!-- Create/Edit Modal -->
     <AppModal
       :show="showFormModal"
-      :title="isEditMode ? 'Edit User Profile' : 'Add New User'"
+      :title="isEditMode ? t('edit_user_profile') : t('add_new_user')"
       @close="closeFormModal"
     >
       <form @submit.prevent="saveUser">
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Full Name</label>
-          <input v-model="form.name" type="text" class="form-control" required placeholder="Amadou Ba" />
+        <div class="form-group text-left" style="margin-bottom: 1.25rem;">
+          <label class="form-label">{{ t('fullname') }}</label>
+          <input v-model="form.name" type="text" class="form-input" required placeholder="Amadou Ba" />
         </div>
         
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Email Address</label>
-          <input v-model="form.email" type="email" class="form-control" required placeholder="amadou@example.com" />
+        <div class="form-group text-left" style="margin-bottom: 1.25rem;">
+          <label class="form-label">{{ t('email') }}</label>
+          <input v-model="form.email" type="email" class="form-input" required placeholder="amadou@example.com" />
         </div>
 
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Phone Number</label>
-          <input v-model="form.phone" type="text" class="form-control" required placeholder="+221 77 123 4567" />
+        <div class="form-group text-left" style="margin-bottom: 1.25rem;">
+          <label class="form-label">{{ t('phone') }}</label>
+          <input v-model="form.phone" type="text" class="form-input" required placeholder="+221 77 123 4567" />
         </div>
 
-        <div class="grid grid-cols-2 gap-4" style="grid-template-columns: 1fr 1fr; margin-bottom: 1rem;">
-          <div class="form-group">
-            <label class="form-label">Role</label>
+        <div class="grid grid-cols-2 gap-4 modal-form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1.25rem;">
+          <div class="form-group text-left">
+            <label class="form-label">{{ t('role') }}</label>
             <select v-model="form.role" class="form-select">
-              <option value="customer">Customer</option>
-              <option value="admin">Admin</option>
+              <option value="customer">{{ t('customer') }}</option>
+              <option value="admin">{{ t('admin') }}</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Status</label>
+          <div class="form-group text-left">
+            <label class="form-label">{{ t('status') }}</label>
             <select v-model="form.status" class="form-select">
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="banned">Banned</option>
+              <option value="active">{{ t('active') }}</option>
+              <option value="inactive">{{ t('inactive') }}</option>
+              <option value="banned">{{ t('banned') }}</option>
             </select>
           </div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 2rem;">
-          <button type="button" class="btn btn-secondary" @click="closeFormModal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
+        <div class="grid grid-cols-2 gap-4 modal-form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1.25rem;">
+          <div class="form-group text-left">
+            <label class="form-label">{{ t('country') }}</label>
+            <select v-model="form.country" class="form-select" required>
+              <option value="SN">🇸🇳 Sénégal (SN)</option>
+              <option value="CI">🇨🇮 Côte d'Ivoire (CI)</option>
+              <option value="ML">🇲🇱 Mali (ML)</option>
+            </select>
+          </div>
+          <div class="form-group text-left">
+            <label class="form-label">{{ t('kyc_status') }}</label>
+            <select v-model="form.kyc_status" class="form-select">
+              <option value="unsubmitted">{{ t('unsubmitted') }}</option>
+              <option value="pending">{{ t('pending') }}</option>
+              <option value="approved">{{ t('approved') }}</option>
+              <option value="rejected">{{ t('rejected') }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- KYC Identity Verification Section -->
+        <div v-if="isEditMode" class="kyc-verification-panel text-left animate-fade-in" style="margin-top: 1.5rem; padding: 1rem; border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 1.25rem;">
+          <h3 class="text-sm font-bold text-primary" style="margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+            <span>🛡️ {{ t('verify_kyc') }}</span>
+            <AppStatusBadge :status="form.kyc_status" />
+          </h3>
+          
+          <div v-if="form.kyc_document" class="kyc-doc-preview" style="margin-bottom: 1rem;">
+            <div class="doc-mock-card" style="width: 100%; height: 130px; border-radius: var(--radius-sm); border: 1px dashed rgba(255, 255, 255, 0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.3); position: relative; overflow: hidden; padding: 1rem;">
+              <span style="font-size: 2rem;">🪪</span>
+              <span class="text-xs font-semibold text-primary" style="margin-top: 0.5rem;">{{ form.kyc_document }}</span>
+              <span class="text-[10px] text-muted">{{ lang === 'fr' ? 'Carte Nationale d\'Identité (CNI) / Passeport' : 'National Identity Card (CNI) / Passport' }}</span>
+            </div>
+          </div>
+          <div v-else style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.8125rem; font-style: italic;">
+            {{ lang === 'fr' ? 'Aucun document KYC soumis pour le moment.' : 'No KYC document submitted yet.' }}
+          </div>
+
+          <div v-if="form.kyc_status === 'pending'" class="flex gap-2" style="justify-content: flex-end;">
+            <button type="button" class="btn btn-success btn-sm" @click="form.kyc_status = 'approved'">
+              {{ t('approve_kyc') }}
+            </button>
+            <button type="button" class="btn btn-danger btn-sm" @click="form.kyc_status = 'rejected'">
+              {{ t('reject_kyc') }}
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-footer-actions" style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 2rem;">
+          <button type="button" class="btn btn-secondary" @click="closeFormModal">{{ t('cancel') }}</button>
+          <button type="submit" class="btn btn-primary">{{ t('save_changes') }}</button>
         </div>
       </form>
     </AppModal>
@@ -154,25 +215,26 @@
     <!-- Delete Confirmation Modal -->
     <AppModal
       :show="showDeleteModal"
-      title="Confirm Delete"
+      :title="t('confirm_delete')"
       @close="showDeleteModal = false"
     >
-      <div style="padding: 0.5rem 0 1.5rem;">
-        <p>Are you sure you want to permanently delete the user account for <strong>{{ userToDelete?.name }}</strong>?</p>
-        <p style="margin-top: 0.5rem; color: var(--accent-warning); font-size: 0.8125rem;">This action cannot be undone and will delete all operational references.</p>
+      <div style="padding: 0.5rem 0 1.5rem; text-align: left;">
+        <p>{{ t('confirm_delete_text', { name: userToDelete?.name || '' }) }}</p>
+        <p style="margin-top: 0.5rem; color: var(--accent-warning); font-size: 0.8125rem;">{{ t('confirm_delete_warning') }}</p>
       </div>
       <template #footer>
-        <button class="btn btn-secondary" @click="showDeleteModal = false">Cancel</button>
-        <button class="btn btn-danger" @click="executeDelete">Delete User</button>
+        <button class="btn btn-secondary" @click="showDeleteModal = false">{{ t('cancel') }}</button>
+        <button class="btn btn-danger" @click="executeDelete">{{ t('delete') }}</button>
       </template>
     </AppModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUsersStore, type User } from '~/stores/users'
+import { useI18n } from '~/composables/useI18n'
 
 definePageMeta({
   middleware: 'auth',
@@ -180,22 +242,25 @@ definePageMeta({
 
 const usersStore = useUsersStore()
 const { list, total, page, perPage, totalPages, loading } = storeToRefs(usersStore)
+const { t } = useI18n()
 
 const searchTerm = ref('')
 const roleFilter = ref('')
 const statusFilter = ref('')
 
-const headers = [
-  { key: 'name', label: 'Full Name' },
-  { key: 'email', label: 'Email' },
-  { key: 'phone', label: 'Phone' },
-  { key: 'role', label: 'Role' },
-  { key: 'status', label: 'Status' },
-  { key: 'trips_count', label: 'Trips' },
-  { key: 'total_spent', label: 'Total Spent' },
-  { key: 'created_at', label: 'Registered' },
-  { key: 'actions', label: 'Actions', style: { width: '220px', textAlign: 'right' } },
-]
+const headers = computed(() => [
+  { key: 'name', label: t('fullname') },
+  { key: 'email', label: t('email') },
+  { key: 'phone', label: t('phone') },
+  { key: 'country', label: t('country') },
+  { key: 'role', label: t('role') },
+  { key: 'kyc_status', label: t('kyc_status') },
+  { key: 'status', label: t('status') },
+  { key: 'trips_count', label: t('trips') },
+  { key: 'total_spent', label: t('total_spent') },
+  { key: 'created_at', label: t('registered') },
+  { key: 'actions', label: t('actions'), style: { width: '220px', textAlign: 'right' } },
+])
 
 // Form Modal State
 const showFormModal = ref(false)
@@ -207,6 +272,9 @@ const form = ref({
   phone: '',
   role: 'customer' as User['role'],
   status: 'active' as User['status'],
+  country: 'SN',
+  kyc_status: 'unsubmitted' as User['kyc_status'],
+  kyc_document: '',
 })
 
 // Delete Modal State
@@ -246,6 +314,9 @@ function openCreateModal() {
     phone: '',
     role: 'customer',
     status: 'active',
+    country: 'SN',
+    kyc_status: 'unsubmitted',
+    kyc_document: '',
   }
   showFormModal.value = true
 }
@@ -259,6 +330,9 @@ function openEditModal(user: User) {
     phone: user.phone,
     role: user.role,
     status: user.status,
+    country: user.country || 'SN',
+    kyc_status: user.kyc_status || 'unsubmitted',
+    kyc_document: user.kyc_document || '',
   }
   showFormModal.value = true
 }
@@ -316,3 +390,24 @@ function formatDate(dateStr: string): string {
   }
 }
 </script>
+
+<style scoped>
+.text-left {
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  .modal-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  .modal-footer-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem !important;
+  }
+  .modal-footer-actions .btn {
+    width: 100%;
+  }
+}
+</style>

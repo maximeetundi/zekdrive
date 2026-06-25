@@ -20,8 +20,8 @@ func NewVehicleRepository(db *database.PostgresDB) domain.VehicleRepository {
 
 func (r *vehicleRepo) Create(ctx context.Context, v *domain.Vehicle) error {
 	query := `
-		INSERT INTO vehicles (id, driver_id, make, model, year, plate_number, color, type, created_at, updated_at)
-		VALUES (:id, :driver_id, :make, :model, :year, :plate_number, :color, :type, :created_at, :updated_at)
+		INSERT INTO vehicles (id, driver_id, make, model, year, plate_number, color, type, kyc_status, kyc_document, created_at, updated_at)
+		VALUES (:id, :driver_id, :make, :model, :year, :plate_number, :color, :type, :kyc_status, :kyc_document, :created_at, :updated_at)
 	`
 	_, err := r.db.NamedExecContext(ctx, query, v)
 	return err
@@ -29,7 +29,7 @@ func (r *vehicleRepo) Create(ctx context.Context, v *domain.Vehicle) error {
 
 func (r *vehicleRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.Vehicle, error) {
 	var v domain.Vehicle
-	query := `SELECT id, driver_id, make, model, year, plate_number, color, type, created_at, updated_at FROM vehicles WHERE id = $1`
+	query := `SELECT id, driver_id, make, model, year, plate_number, color, type, kyc_status, kyc_document, created_at, updated_at FROM vehicles WHERE id = $1`
 	err := r.db.GetContext(ctx, &v, query, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -42,7 +42,7 @@ func (r *vehicleRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.Vehicl
 
 func (r *vehicleRepo) GetByDriverID(ctx context.Context, driverID uuid.UUID) (*domain.Vehicle, error) {
 	var v domain.Vehicle
-	query := `SELECT id, driver_id, make, model, year, plate_number, color, type, created_at, updated_at FROM vehicles WHERE driver_id = $1`
+	query := `SELECT id, driver_id, make, model, year, plate_number, color, type, kyc_status, kyc_document, created_at, updated_at FROM vehicles WHERE driver_id = $1`
 	err := r.db.GetContext(ctx, &v, query, driverID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -56,7 +56,7 @@ func (r *vehicleRepo) GetByDriverID(ctx context.Context, driverID uuid.UUID) (*d
 func (r *vehicleRepo) Update(ctx context.Context, v *domain.Vehicle) error {
 	query := `
 		UPDATE vehicles 
-		SET make = :make, model = :model, year = :year, plate_number = :plate_number, color = :color, type = :type, updated_at = :updated_at
+		SET make = :make, model = :model, year = :year, plate_number = :plate_number, color = :color, type = :type, kyc_status = :kyc_status, kyc_document = :kyc_document, updated_at = :updated_at
 		WHERE id = :id
 	`
 	_, err := r.db.NamedExecContext(ctx, query, v)
@@ -67,4 +67,20 @@ func (r *vehicleRepo) Delete(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM vehicles WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
+}
+
+func (r *vehicleRepo) ListByOwnerID(ctx context.Context, ownerID uuid.UUID) ([]domain.Vehicle, error) {
+	query := `
+		SELECT id, driver_id, make, model, year, plate_number, color, type,
+		       kyc_status, kyc_document, created_at, updated_at
+		FROM vehicles
+		WHERE owner_id = $1
+		ORDER BY created_at DESC
+	`
+	var vehicles []domain.Vehicle
+	err := r.db.SelectContext(ctx, &vehicles, query, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	return vehicles, nil
 }

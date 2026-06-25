@@ -46,7 +46,7 @@ const props = defineProps({
 const iconStyle = computed(() => {
   // Extract hex or css variable to create a 12% opacity background
   const c = props.color
-  const bg = c.startsWith('var') ? `rgba(108, 99, 255, 0.12)` : `${c}1f`
+  const bg = c.startsWith('var') ? `rgba(20, 177, 158, 0.12)` : `${c}1f`
   return {
     color: c,
     background: bg,

@@ -23,6 +23,9 @@ type Driver struct {
 	Rating        float64      `json:"rating" db:"rating"`
 	Latitude      *float64     `json:"latitude" db:"latitude"`
 	Longitude     *float64     `json:"longitude" db:"longitude"`
+	Country       string       `json:"country" db:"country"`
+	KycStatus     string       `json:"kyc_status" db:"kyc_status"`
+	KycDocument   string       `json:"kyc_document" db:"kyc_document"`
 	CreatedAt     time.Time    `json:"created_at" db:"created_at"`
 	UpdatedAt     time.Time    `json:"updated_at" db:"updated_at"`
 

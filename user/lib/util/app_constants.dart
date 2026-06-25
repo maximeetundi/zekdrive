@@ -6,7 +6,7 @@ import 'package:ride_sharing_user_app/util/images.dart';
 
 class AppConstants {
   static const String appName = 'Guelablé';
-  static const String baseUrl = 'http://82.165.55.190:8088';
+  static const String baseUrl = 'https://api.driver.maximeetundi.store';
   static const Color lightPrimary = Color(0xFF14B19E);
   static const Color darkPrimary = Color(0xFF00735f);
   static const String fontFamily = 'SFProText';
@@ -99,6 +99,10 @@ class AppConstants {
   static const String bestOfferList =
       '/api/customer/discount/list?limit=10&offset=';
   static const String changeLanguage = '/api/customer/change-language';
+
+  /// Country endpoints
+  static const String countriesUri = '/api/countries';
+  static const String countryConfigUri = '/api/countries';
 
   ///Pusher web socket
   static const String appKey = 'drivemond';

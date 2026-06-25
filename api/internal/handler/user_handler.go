@@ -6,15 +6,20 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/zekdrive/api/internal/domain"
 	"github.com/zekdrive/api/internal/service"
 )
 
 type UserHandler struct {
-	userService service.UserService
+	userService    service.UserService
+	settingService domain.SettingService
 }
 
-func NewUserHandler(userService service.UserService) *UserHandler {
-	return &UserHandler{userService: userService}
+func NewUserHandler(userService service.UserService, settingService domain.SettingService) *UserHandler {
+	return &UserHandler{
+		userService:    userService,
+		settingService: settingService,
+	}
 }
 
 func (h *UserHandler) GetMe(c *fiber.Ctx) error {
@@ -85,6 +90,55 @@ func (h *UserHandler) GetCustomerConfig(c *fiber.Ctx) error {
 	baseURL := fmt.Sprintf("%s://%s/api/", scheme, fullHost)
 	imageBaseURLStr := fmt.Sprintf("%s://%s/uploads/", scheme, fullHost)
 
+	settings, err := h.settingService.GetSettings(c.Context())
+	dispatchTimeout := 10
+	searchRadius := 10000.0
+	supportEmail := "support@zekdrive.com"
+	supportPhone := "+221 33 800 0000"
+	var paymentGateways []interface{} = []interface{}{}
+
+	if err == nil && settings != nil {
+		if appConfig, ok := settings["app_config"].(map[string]interface{}); ok {
+			if dt, ok := appConfig["dispatchTimeout"].(float64); ok {
+				dispatchTimeout = int(dt)
+			} else if dtInt, ok := appConfig["dispatchTimeout"].(int); ok {
+				dispatchTimeout = dtInt
+			}
+			if sr, ok := appConfig["searchRadius"].(float64); ok {
+				searchRadius = sr * 1000.0
+			} else if srInt, ok := appConfig["searchRadius"].(int); ok {
+				searchRadius = float64(srInt) * 1000.0
+			}
+			if se, ok := appConfig["supportEmail"].(string); ok {
+				supportEmail = se
+			}
+			if sp, ok := appConfig["supportPhone"].(string); ok {
+				supportPhone = sp
+			}
+		}
+
+		if gateways, ok := settings["gateways"].([]interface{}); ok {
+			for _, gwVal := range gateways {
+				if gw, ok := gwVal.(map[string]interface{}); ok {
+					enabled := false
+					if en, ok := gw["enabled"].(bool); ok {
+						enabled = en
+					}
+					if enabled {
+						idStr, _ := gw["id"].(string)
+						nameStr, _ := gw["name"].(string)
+						gatewayKey := strings.Replace(idStr, "gw_", "", 1)
+						paymentGateways = append(paymentGateways, fiber.Map{
+							"gateway":       gatewayKey,
+							"gateway_title": nameStr,
+							"gateway_image": gatewayKey + ".png",
+						})
+					}
+				}
+			}
+		}
+	}
+
 	configMap := fiber.Map{
 		"is_demo":                    true,
 		"maintenance_mode":           false,
@@ -93,12 +147,12 @@ func (h *UserHandler) GetCustomerConfig(c *fiber.Ctx) error {
 		"business_name":              "ZekDrive",
 		"logo":                       "logo.png",
 		"bid_on_fare":                false,
-		"country_code":               "FR",
-		"business_address":           "Paris, France",
-		"business_contact_phone":     "+33100000000",
-		"business_contact_email":     "contact@zekdrive.com",
-		"business_support_phone":     "+33100000000",
-		"business_support_email":     "support@zekdrive.com",
+		"country_code":               "SN",
+		"business_address":           "Dakar, Senegal",
+		"business_contact_phone":     supportPhone,
+		"business_contact_email":     supportEmail,
+		"business_support_phone":     supportPhone,
+		"business_support_email":     supportEmail,
 		"conversion_status":          false,
 		"conversion_rate":            0.0,
 		"websocket_url":              host,
@@ -107,7 +161,7 @@ func (h *UserHandler) GetCustomerConfig(c *fiber.Ctx) error {
 		"base_url":                   baseURL,
 		"review_status":              true,
 		"level_status":               false,
-		"search_radius":              10000.0,
+		"search_radius":              searchRadius,
 		"popular_tips":               5,
 		"driver_completion_radius":   1000.0,
 		"image_base_url": fiber.Map{
@@ -125,11 +179,11 @@ func (h *UserHandler) GetCustomerConfig(c *fiber.Ctx) error {
 			"parcel":                 imageBaseURLStr + "parcel/category",
 			"payment_method":         imageBaseURLStr + "payment_modules/gateway_image",
 		},
-		"currency_decimal_point":   "2",
-		"trip_request_active_time": 10,
-		"currency_code":            "EUR",
-		"currency_symbol":          "€",
-		"currency_symbol_position": "left",
+		"currency_decimal_point":   "0",
+		"trip_request_active_time": dispatchTimeout,
+		"currency_code":            "XOF",
+		"currency_symbol":          "FCFA",
+		"currency_symbol_position": "right",
 		"about_us": fiber.Map{
 			"image":             "",
 			"name":              "About Us",
@@ -161,7 +215,7 @@ func (h *UserHandler) GetCustomerConfig(c *fiber.Ctx) error {
 		"google_login":       false,
 		"otp_resend_time":    60,
 		"vat_tax":            1.0,
-		"payment_gateways":   []interface{}{},
+		"payment_gateways":   paymentGateways,
 	}
 
 	return c.JSON(configMap)

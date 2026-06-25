@@ -11,6 +11,8 @@ import 'package:ride_sharing_user_app/util/styles.dart';
 import 'package:ride_sharing_user_app/features/auth/screens/reset_password_screen.dart';
 import 'package:ride_sharing_user_app/common_widgets/app_bar_widget.dart';
 import 'package:ride_sharing_user_app/common_widgets/body_widget.dart';
+import 'package:ride_sharing_user_app/features/settings/controllers/country_controller.dart';
+import 'package:ride_sharing_user_app/features/settings/widget/country_select_bottomsheet.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -151,6 +153,52 @@ class _SettingScreenState extends State<SettingScreen> {
               onTap: () => Get.to(() =>  const ResetPasswordScreen(fromChangePassword: true, phoneNumber: '')),
               title: Text('change_password'.tr,style: textMedium.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color)),
               leading: Image.asset(Images.password, width: 20, height: 20, color: Theme.of(context).primaryColor),
+            ),
+
+            const SizedBox(height: Dimensions.paddingSize),
+            GetBuilder<CountryController>(
+              tag: 'country',
+              builder: (countryController) {
+                final country = countryController.selectedCountry;
+                final displayName = country != null
+                    ? '${country.flagEmoji} ${countryController.countryDisplayName(country)}'
+                    : 'select_country'.tr;
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: Dimensions.paddingSizeDefault,
+                      vertical: Dimensions.paddingSize),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(Dimensions.paddingSize),
+                    border: Border.all(color: Theme.of(context).primaryColor, width: .5),
+                  ),
+                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Row(children: [
+                      Icon(Icons.public, color: Theme.of(context).primaryColor, size: 20),
+                      const SizedBox(width: Dimensions.paddingSizeLarge),
+                      Text('country'.tr,
+                          style: textRegular.copyWith(
+                              fontSize: Dimensions.fontSizeLarge,
+                              color: Theme.of(context).textTheme.bodyLarge!.color)),
+                    ]),
+                    InkWell(
+                      onTap: () {
+                        showModalBottomSheet(
+                          backgroundColor: Theme.of(context).cardColor,
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (context) => const CountrySelectBottomSheet(),
+                        );
+                      },
+                      child: Row(children: [
+                        Text(displayName,
+                            style: textRegular.copyWith(fontSize: Dimensions.fontSizeLarge)),
+                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                        Icon(Icons.arrow_forward_ios_outlined, size: Dimensions.fontSizeLarge),
+                      ]),
+                    ),
+                  ]),
+                );
+              },
             ),
 
           ]),

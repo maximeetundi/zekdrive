@@ -5,28 +5,28 @@
    ============================================================ */
 
 :root {
-  --bg: #080b14;
-  --bg-2: #0d1120;
-  --bg-3: #111827;
-  --card-bg: rgba(255, 255, 255, 0.04);
-  --card-bg-hover: rgba(255, 255, 255, 0.07);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --card-border-hover: rgba(124, 58, 237, 0.5);
-  --violet: #7c3aed;
-  --violet-light: #a855f7;
-  --violet-dim: rgba(124, 58, 237, 0.15);
-  --teal: #00e5cc;
-  --teal-dark: #00b09b;
-  --teal-dim: rgba(0, 229, 204, 0.12);
-  --text: #f8fafc;
-  --text-muted: rgba(248, 250, 252, 0.55);
-  --text-subtle: rgba(248, 250, 252, 0.35);
-  --gradient: linear-gradient(135deg, #7c3aed, #00e5cc);
-  --gradient-rev: linear-gradient(135deg, #00e5cc, #7c3aed);
-  --gradient-text: linear-gradient(135deg, #a855f7 0%, #00e5cc 100%);
-  --glow-violet: 0 0 60px rgba(124, 58, 237, 0.3);
-  --glow-teal: 0 0 60px rgba(0, 229, 204, 0.2);
-  --glow-card: 0 8px 40px rgba(0, 0, 0, 0.4);
+  --bg: #ffffff;
+  --bg-2: #f8fafc;
+  --bg-3: #f1f5f9;
+  --card-bg: #ffffff;
+  --card-bg-hover: #f8fafc;
+  --card-border: rgba(15, 23, 42, 0.08);
+  --card-border-hover: rgba(0, 115, 95, 0.4);
+  --violet: #00735f;
+  --violet-light: #14b19e;
+  --violet-dim: rgba(20, 177, 158, 0.08);
+  --teal: #14b19e;
+  --teal-dark: #00735f;
+  --teal-dim: rgba(20, 177, 158, 0.06);
+  --text: #0f172a;
+  --text-muted: #475569;
+  --text-subtle: #64748b;
+  --gradient: linear-gradient(135deg, #00735f, #14b19e);
+  --gradient-rev: linear-gradient(135deg, #14b19e, #00735f);
+  --gradient-text: linear-gradient(135deg, #00735f 0%, #14b19e 100%);
+  --glow-violet: 0 0 60px rgba(0, 115, 95, 0.1);
+  --glow-teal: 0 0 60px rgba(20, 177, 158, 0.08);
+  --glow-card: 0 8px 30px rgba(15, 23, 42, 0.05);
   --radius-sm: 8px;
   --radius-md: 16px;
   --radius-lg: 24px;
@@ -212,28 +212,28 @@ button {
 .btn-primary {
   background: var(--gradient);
   color: #fff;
-  box-shadow: 0 4px 24px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 4px 24px rgba(0, 115, 95, 0.35);
 }
 
 .btn-primary::before {
-  background: linear-gradient(135deg, #8b47ff, #00f5d4);
+  background: var(--gradient-rev);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 115, 95, 0.5);
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--bg-2);
   color: var(--text);
   border: 1px solid var(--card-border);
-  backdrop-filter: blur(10px);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--bg-3);
+  border-color: rgba(0, 115, 95, 0.2);
+  color: var(--violet);
   transform: translateY(-2px);
 }
 
@@ -297,7 +297,7 @@ button {
   background: var(--card-bg-hover);
   border-color: var(--card-border-hover);
   transform: translateY(-6px);
-  box-shadow: var(--glow-card), 0 0 0 1px rgba(124, 58, 237, 0.2);
+  box-shadow: var(--glow-card), 0 0 0 1px rgba(0, 115, 95, 0.2);
 }
 
 .card-glow {
@@ -346,7 +346,7 @@ button {
 }
 
 .orb-violet {
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.35), transparent 70%);
+  background: radial-gradient(circle, rgba(0, 115, 95, 0.35), transparent 70%);
 }
 
 .orb-teal {
@@ -354,7 +354,7 @@ button {
 }
 
 .orb-purple {
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.2), transparent 70%);
+  background: radial-gradient(circle, rgba(20, 177, 158, 0.2), transparent 70%);
 }
 
 @keyframes float-orb {
@@ -379,11 +379,12 @@ button {
 }
 
 .nav.scrolled {
-  background: rgba(8, 11, 20, 0.85);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
   padding: 12px 0;
+  box-shadow: 0 4px 30px rgba(15, 23, 42, 0.03);
 }
 
 .nav-inner {
@@ -415,7 +416,7 @@ button {
   font-size: 1.1rem;
   font-weight: 900;
   color: #fff;
-  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 115, 95, 0.4);
 }
 
 .nav-links {
@@ -488,17 +489,20 @@ button {
 .mobile-menu {
   position: fixed;
   inset: 0;
-  background: rgba(8, 11, 20, 0.97);
-  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
   z-index: 999;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding: 100px 24px 40px;
   gap: 24px;
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--transition);
+  overflow-y: auto;
 }
 
 .mobile-menu.open {
@@ -508,15 +512,16 @@ button {
 
 .mobile-menu a {
   font-family: 'Sora', sans-serif;
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: var(--text-muted);
   transition: all var(--transition);
   text-decoration: none;
 }
 
-.mobile-menu a:hover {
-  color: var(--text);
+.mobile-menu a:hover,
+.mobile-menu a.active {
+  color: var(--violet);
   transform: translateX(8px);
 }
 
@@ -536,9 +541,9 @@ button {
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.15) 0%, transparent 60%),
+  background: radial-gradient(ellipse at 20% 50%, rgba(0, 115, 95, 0.15) 0%, transparent 60%),
               radial-gradient(ellipse at 80% 30%, rgba(0, 229, 204, 0.1) 0%, transparent 50%),
-              radial-gradient(ellipse at 50% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+              radial-gradient(ellipse at 50% 80%, rgba(20, 177, 158, 0.08) 0%, transparent 50%);
 }
 
 .hero-grid {
@@ -557,12 +562,13 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(20, 177, 158, 0.08);
+  border: 1px solid rgba(20, 177, 158, 0.15);
   border-radius: 100px;
   padding: 8px 16px;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--violet);
   margin-bottom: 32px;
   animation: fade-in-up 0.6s ease both;
 }
@@ -702,7 +708,7 @@ button {
 
 .phone-wrapper {
   position: relative;
-  filter: drop-shadow(0 40px 80px rgba(124, 58, 237, 0.4));
+  filter: drop-shadow(0 40px 80px rgba(0, 115, 95, 0.4));
   animation: phone-float 6s ease-in-out infinite;
 }
 
@@ -812,7 +818,7 @@ button {
 .service-card:hover {
   border-color: transparent;
   transform: translateY(-8px);
-  box-shadow: 0 24px 60px rgba(124, 58, 237, 0.25);
+  box-shadow: 0 24px 60px rgba(0, 115, 95, 0.25);
 }
 
 .service-card:hover::after {
@@ -828,7 +834,7 @@ button {
   width: 72px;
   height: 72px;
   background: var(--violet-dim);
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  border: 1px solid rgba(0, 115, 95, 0.2);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -839,7 +845,7 @@ button {
 }
 
 .service-card:hover .service-icon-wrap {
-  background: rgba(124, 58, 237, 0.25);
+  background: rgba(0, 115, 95, 0.25);
   transform: scale(1.05);
 }
 
@@ -917,7 +923,7 @@ button {
   margin: 0 auto 28px;
   position: relative;
   z-index: 1;
-  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 115, 95, 0.4);
   transition: transform var(--transition);
 }
 
@@ -967,7 +973,7 @@ button {
 
 .feature-card:hover {
   background: var(--card-bg-hover);
-  border-color: rgba(124, 58, 237, 0.3);
+  border-color: rgba(0, 115, 95, 0.3);
   transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
 }
@@ -986,7 +992,7 @@ button {
 }
 
 .feature-card:hover .feature-icon {
-  background: rgba(124, 58, 237, 0.25);
+  background: rgba(0, 115, 95, 0.25);
 }
 
 .feature-title {
@@ -1044,7 +1050,7 @@ button {
   left: -80px;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.12), transparent 70%);
+  background: radial-gradient(circle, rgba(0, 115, 95, 0.12), transparent 70%);
   pointer-events: none;
 }
 
@@ -1164,7 +1170,7 @@ button {
 }
 
 .testimonial-card:hover {
-  border-color: rgba(124, 58, 237, 0.3);
+  border-color: rgba(0, 115, 95, 0.3);
   transform: translateY(-4px);
 }
 
@@ -1284,7 +1290,7 @@ button {
 }
 
 .faq-item.open {
-  border-color: rgba(124, 58, 237, 0.3);
+  border-color: rgba(0, 115, 95, 0.3);
 }
 
 .faq-question {
@@ -1323,7 +1329,7 @@ button {
 }
 
 .faq-item.open .faq-icon {
-  background: rgba(124, 58, 237, 0.25);
+  background: rgba(0, 115, 95, 0.25);
   transform: rotate(45deg);
 }
 
@@ -1604,7 +1610,7 @@ button {
   border-radius: 50%;
   background: var(--gradient);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 115, 95, 0.5);
 }
 
 .calc-slider::-moz-range-thumb {
@@ -1614,7 +1620,7 @@ button {
   background: var(--gradient);
   cursor: pointer;
   border: none;
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 115, 95, 0.5);
 }
 
 .calc-result {
@@ -1685,7 +1691,7 @@ button {
 .form-select:focus,
 .form-textarea:focus {
   border-color: var(--violet);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 115, 95, 0.1);
 }
 
 .form-input::placeholder,
@@ -1732,8 +1738,8 @@ button {
 }
 
 .pricing-card.featured {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(0, 229, 204, 0.06));
-  border-color: rgba(124, 58, 237, 0.4);
+  background: linear-gradient(135deg, rgba(0, 115, 95, 0.12), rgba(0, 229, 204, 0.06));
+  border-color: rgba(0, 115, 95, 0.4);
   transform: scale(1.04);
 }
 
@@ -1836,7 +1842,7 @@ button {
 }
 
 .contact-info-card:hover {
-  border-color: rgba(124, 58, 237, 0.3);
+  border-color: rgba(0, 115, 95, 0.3);
   transform: translateY(-4px);
 }
 
@@ -1921,6 +1927,15 @@ button {
    ============================================================ */
 
 @media (max-width: 1024px) {
+  .nav-links,
+  .nav-cta {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
   .hero-grid {
     gap: 40px;
   }
@@ -1991,13 +2006,8 @@ button {
     order: -1;
   }
 
-  .nav-links,
-  .nav-cta {
-    display: none;
-  }
-
-  .hamburger {
-    display: flex;
+  .section-header {
+    margin-bottom: 32px;
   }
 
   .stats-grid {
@@ -2006,6 +2016,35 @@ button {
 
   .services-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .service-card {
+    padding: 20px;
+    border-radius: var(--radius-md);
+  }
+
+  .service-icon-wrap {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+  }
+
+  .service-card-title {
+    font-size: 1.15rem;
+    margin-bottom: 6px;
+  }
+
+  .service-card-desc {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .service-card-tag {
+    padding: 3px 10px;
+    font-size: 0.75rem;
   }
 
   .hiw-grid {

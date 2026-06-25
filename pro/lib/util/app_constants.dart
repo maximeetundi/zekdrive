@@ -5,7 +5,7 @@ class AppConstants {
   static const String appName = 'Guelable Pro';
   static const String polylineMapKey =
       'AIzaSyBLzkqJWnCO_OucXE-aoUdj9rtqfcuZo54';
-  static const String baseUrl = 'http://82.165.55.190:8088';
+  static const String baseUrl = 'https://api.driver.maximeetundi.store';
   static const String configUri = '/api/driver/configuration';
   static const String registration = '/api/driver/auth/registration';
   static const String loginUri = '/api/driver/auth/login';
@@ -86,6 +86,11 @@ class AppConstants {
   static const String parcelUnpaidList =
       '/api/driver/ride/unpaid-parcel-list?limit=100&offset=1';
   static const String changeLanguage = '/api/driver/change-language';
+
+  // --- Nouveau système wallet pro (modèle Yango) ---
+  static const String proWalletUri = '/api/pro/wallet';
+  static const String proWalletTransactionsUri = '/api/pro/wallet/transactions';
+  static const String proWalletRechargeUri = '/api/pro/wallet/recharge';
 
   ///Pusher web socket
   static const String appKey = 'drivemond';

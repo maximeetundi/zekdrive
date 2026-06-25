@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useScrollAnimation } from '~/composables/useScrollAnimation'
 import { useCounter } from '~/composables/useCounter'
+import { useLanguage } from '~/composables/useLanguage'
 
+const { t } = useLanguage()
 const { observe } = useScrollAnimation()
 const sectionRef = ref<HTMLElement | null>(null)
 
-const stats = [
-  { target: 50000, suffix: 'K+', label: 'Utilisateurs actifs', prefix: '' },
-  { target: 500, suffix: '+', label: 'Chauffeurs vérifiés', prefix: '' },
-  { target: 100000, suffix: 'K+', label: 'Trajets effectués', prefix: '' },
-  { target: 49, suffix: '', label: 'Note moyenne', prefix: '4.' },
-]
+const stats = computed(() => [
+  { target: 50000, suffix: 'K+', label: t('stats.users'), prefix: '' },
+  { target: 500, suffix: '+', label: t('stats.drivers'), prefix: '' },
+  { target: 100000, suffix: 'K+', label: t('stats.trips'), prefix: '' },
+  { target: 49, suffix: '', label: t('stats.rating'), prefix: '4.' },
+])
 
-const counters = stats.map(s => {
+const counters = stats.value.map(s => {
   const display = s.target >= 1000 ? Math.round(s.target / 1000) : s.target
   return useCounter(display, 2000)
 })

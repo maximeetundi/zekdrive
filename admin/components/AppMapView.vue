@@ -122,8 +122,8 @@ function renderMapData() {
     props.zones.forEach(zone => {
       if (zone.coordinates && zone.coordinates.length > 0) {
         const poly = Leaflet.polygon(zone.coordinates, {
-          color: zone.color || '#6c63ff',
-          fillColor: zone.color || '#6c63ff',
+          color: zone.color || '#14b19e',
+          fillColor: zone.color || '#14b19e',
           fillOpacity: 0.2,
           weight: 2,
         }).addTo(zonesLayer.value)

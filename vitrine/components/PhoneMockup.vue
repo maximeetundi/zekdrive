@@ -1,5 +1,60 @@
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useLanguage } from '~/composables/useLanguage'
+
+const props = defineProps<{
+  forceMode?: 'vtc' | 'delivery'
+}>()
+
+const { currentLang, t } = useLanguage()
+const localActiveTab = ref<'vtc' | 'delivery'>('vtc')
+
+const activeTab = computed(() => {
+  return props.forceMode || localActiveTab.value
+})
+
+let intervalId: ReturnType<typeof setInterval>
+
+function switchTab(tab: 'vtc' | 'delivery') {
+  if (props.forceMode) return
+  localActiveTab.value = tab
+  resetAutoplay()
+}
+
+function startAutoplay() {
+  if (props.forceMode) return
+  intervalId = setInterval(() => {
+    localActiveTab.value = localActiveTab.value === 'vtc' ? 'delivery' : 'vtc'
+  }, 6000)
+}
+
+function resetAutoplay() {
+  if (intervalId) clearInterval(intervalId)
+  startAutoplay()
+}
+
+onMounted(() => {
+  startAutoplay()
+})
+
+onUnmounted(() => {
+  if (intervalId) clearInterval(intervalId)
+})
+</script>
+
 <template>
   <div class="phone-wrapper">
+    <!-- App Tabs (HTML overlay inside phone screen, hidden if forceMode is active) -->
+    <div v-if="!forceMode" class="phone-tabs">
+      <button @click="switchTab('vtc')" :class="{ active: activeTab === 'vtc' }">
+        🚗 VTC
+      </button>
+      <button @click="switchTab('delivery')" :class="{ active: activeTab === 'delivery' }">
+        📦 {{ t('mockup.delivery_tab') }}
+      </button>
+    </div>
+
+    <!-- Phone Shell SVG -->
     <svg
       width="280"
       height="560"
@@ -7,188 +62,363 @@
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <!-- Phone frame -->
+      <!-- Phone frame - Premium Light Silver/Titanium Metallic -->
       <rect x="8" y="8" width="264" height="544" rx="40" fill="url(#phoneGrad)" stroke="url(#frameGrad)" stroke-width="1.5"/>
       
-      <!-- Screen area -->
-      <rect x="16" y="16" width="248" height="528" rx="34" fill="#0a0e1a"/>
+      <!-- Screen area (Light Background) -->
+      <rect x="16" y="16" width="248" height="528" rx="34" fill="#f8fafc"/>
       
       <!-- Notch/Camera island -->
-      <rect x="100" y="24" width="80" height="24" rx="12" fill="#0d1220"/>
-      <circle cx="156" cy="36" r="5" fill="#1a1f35"/>
-      <circle cx="156" cy="36" r="2.5" fill="#0a0e1a"/>
+      <rect x="100" y="24" width="80" height="24" rx="12" fill="#0f172a"/>
+      <circle cx="156" cy="36" r="5" fill="#1e293b"/>
+      <circle cx="156" cy="36" r="2.5" fill="#0f172a"/>
 
       <!-- Status bar -->
-      <text x="28" y="50" font-family="Inter,sans-serif" font-size="11" fill="rgba(248,250,252,0.7)">9:41</text>
-      <g transform="translate(212, 40)">
-        <rect x="0" y="0" width="18" height="10" rx="2" stroke="rgba(248,250,252,0.5)" stroke-width="1.2" fill="none"/>
-        <rect x="1.5" y="1.5" width="12" height="7" rx="1" fill="url(#battGrad)"/>
-        <rect x="18.5" y="3" width="2" height="4" rx="1" fill="rgba(248,250,252,0.3)"/>
-        <rect x="30" y="1" width="10" height="8" rx="2" fill="rgba(248,250,252,0.5)"/>
-        <rect x="24" y="2.5" width="5" height="5" rx="1" fill="rgba(248,250,252,0.5)"/>
+      <text x="32" y="44" font-family="Inter,sans-serif" font-weight="600" font-size="11" fill="#0f172a">9:41</text>
+      <g transform="translate(206, 34)" fill="#0f172a">
+        <!-- Signal strength -->
+        <rect x="0" y="6" width="3" height="4" rx="0.5"/>
+        <rect x="5" y="4" width="3" height="6" rx="0.5"/>
+        <rect x="10" y="2" width="3" height="8" rx="0.5"/>
+        <rect x="15" y="0" width="3" height="10" rx="0.5"/>
+        <!-- Battery -->
+        <rect x="22" y="1" width="18" height="9" rx="2" stroke="#0f172a" stroke-width="1" fill="none"/>
+        <rect x="24" y="3" width="11" height="5" rx="0.5"/>
       </g>
 
-      <!-- Map background (gradient) -->
-      <rect x="16" y="58" width="248" height="350" rx="4" fill="url(#mapGrad)"/>
+      <!-- App Header Area -->
+      <g transform="translate(16, 58)">
+        <rect x="0" y="0" width="248" height="48" fill="#ffffff" />
+        <line x1="0" y1="48" x2="248" y2="48" stroke="#e2e8f0" stroke-width="1" />
+        
+        <!-- Animated Title depending on Tab & Language -->
+        <text v-if="activeTab === 'vtc'" x="16" y="30" font-family="Sora,sans-serif" font-weight="700" font-size="14" fill="#0f172a">
+          {{ t('mockup.vtc_title') }}
+        </text>
+        <text v-else x="16" y="30" font-family="Sora,sans-serif" font-weight="700" font-size="14" fill="#0f172a">
+          {{ t('mockup.delivery_title') }}
+        </text>
+
+        <!-- Service Tag -->
+        <rect x="176" y="11" width="56" height="22" rx="11" fill="#14b19e" fill-opacity="0.1" stroke="#14b19e" stroke-width="1"/>
+        <text x="204" y="26" font-family="Inter,sans-serif" font-weight="600" font-size="10" fill="#00735f" text-anchor="middle">
+          {{ activeTab === 'vtc' ? 'VTC' : 'PRO' }}
+        </text>
+      </g>
+
+      <!-- Map Area Background (Warm light beige Google Map style) -->
+      <rect x="16" y="106" width="248" height="300" fill="#f4f3f0"/>
+
+      <!-- Map Elements: River and Park -->
+      <path d="M 16 130 Q 120 110, 180 150 T 264 160" stroke="#aad3df" stroke-width="16" fill="none" opacity="0.8" />
+      <rect x="162" y="202" width="38" height="46" rx="6" fill="#d2ecd4" />
       
-      <!-- Map grid lines (streets) -->
+      <!-- Map Grid Lines (Streets - White with proper spacing) -->
       <!-- Horizontal streets -->
-      <line x1="16" y1="100" x2="264" y2="100" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
-      <line x1="16" y1="150" x2="264" y2="150" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
-      <line x1="16" y1="200" x2="264" y2="200" stroke="rgba(255,255,255,0.07)" stroke-width="12"/>
-      <line x1="16" y1="260" x2="264" y2="260" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
-      <line x1="16" y1="320" x2="264" y2="320" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
+      <line x1="16" y1="190" x2="264" y2="190" stroke="#ffffff" stroke-width="8"/>
+      <line x1="16" y1="260" x2="264" y2="260" stroke="#ffffff" stroke-width="8"/>
+      <line x1="16" y1="340" x2="264" y2="340" stroke="#ffffff" stroke-width="10"/>
       
       <!-- Vertical streets -->
-      <line x1="70" y1="58" x2="70" y2="408" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
-      <line x1="140" y1="58" x2="140" y2="408" stroke="rgba(255,255,255,0.07)" stroke-width="12"/>
-      <line x1="200" y1="58" x2="200" y2="408" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
+      <line x1="80" y1="106" x2="80" y2="406" stroke="#ffffff" stroke-width="10"/>
+      <line x1="150" y1="106" x2="150" y2="406" stroke="#ffffff" stroke-width="8"/>
+      <line x1="210" y1="106" x2="210" y2="406" stroke="#ffffff" stroke-width="10"/>
 
-      <!-- Block fills (buildings) -->
-      <rect x="24" y="106" width="38" height="36" rx="4" fill="rgba(255,255,255,0.04)"/>
-      <rect x="78" y="106" width="54" height="36" rx="4" fill="rgba(255,255,255,0.04)"/>
-      <rect x="148" y="106" width="44" height="36" rx="4" fill="rgba(255,255,255,0.03)"/>
-      <rect x="208" y="106" width="48" height="36" rx="4" fill="rgba(255,255,255,0.04)"/>
-      <rect x="24" y="156" width="38" height="36" rx="4" fill="rgba(255,255,255,0.04)"/>
-      <rect x="78" y="156" width="54" height="36" rx="4" fill="rgba(255,255,255,0.03)"/>
-      <rect x="148" y="156" width="44" height="36" rx="4" fill="rgba(255,255,255,0.04)"/>
-      <rect x="208" y="156" width="48" height="36" rx="4" fill="rgba(255,255,255,0.04)"/>
-      <rect x="24" y="210" width="38" height="40" rx="4" fill="rgba(255,255,255,0.04)"/>
-      <rect x="78" y="210" width="54" height="40" rx="4" fill="rgba(255,255,255,0.04)"/>
-      <rect x="148" y="210" width="44" height="40" rx="4" fill="rgba(255,255,255,0.03)"/>
-      <rect x="208" y="210" width="48" height="40" rx="4" fill="rgba(255,255,255,0.04)"/>
-      <rect x="24" y="268" width="38" height="44" rx="4" fill="rgba(255,255,255,0.03)"/>
-      <rect x="78" y="268" width="54" height="44" rx="4" fill="rgba(255,255,255,0.04)"/>
-      <rect x="148" y="268" width="44" height="44" rx="4" fill="rgba(255,255,255,0.04)"/>
-      <rect x="208" y="268" width="48" height="44" rx="4" fill="rgba(255,255,255,0.03)"/>
+      <!-- Stylized building blocks -->
+      <rect x="24" y="114" width="48" height="60" rx="4" fill="rgba(15, 23, 42, 0.03)" stroke="rgba(15, 23, 42, 0.05)"/>
+      <rect x="92" y="114" width="48" height="60" rx="4" fill="rgba(15, 23, 42, 0.03)" stroke="rgba(15, 23, 42, 0.05)"/>
+      <rect x="218" y="114" width="38" height="60" rx="4" fill="rgba(15, 23, 42, 0.02)" stroke="rgba(15, 23, 42, 0.04)"/>
 
-      <!-- Route path (gradient highlight) -->
-      <path
-        d="M 70 350 L 70 200 L 140 200 L 140 150 L 200 150"
-        stroke="url(#routeGrad)"
-        stroke-width="5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        fill="none"
-        stroke-dasharray="8 4"
-      />
-      <path
-        d="M 70 350 L 70 200 L 140 200 L 140 150 L 200 150"
-        stroke="url(#routeGrad)"
-        stroke-width="8"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        fill="none"
-        opacity="0.3"
-      />
+      <rect x="24" y="202" width="48" height="46" rx="4" fill="rgba(15, 23, 42, 0.02)" stroke="rgba(15, 23, 42, 0.04)"/>
+      <rect x="92" y="202" width="48" height="46" rx="4" fill="rgba(15, 23, 42, 0.03)" stroke="rgba(15, 23, 42, 0.05)"/>
 
-      <!-- Pickup marker (teal) -->
-      <circle cx="70" cy="350" r="10" fill="#00e5cc" opacity="0.2"/>
-      <circle cx="70" cy="350" r="6" fill="#00e5cc"/>
-      <circle cx="70" cy="350" r="3" fill="white"/>
+      <rect x="24" y="272" width="48" height="56" rx="4" fill="rgba(15, 23, 42, 0.03)" stroke="rgba(15, 23, 42, 0.05)"/>
+      <rect x="92" y="272" width="48" height="56" rx="4" fill="rgba(15, 23, 42, 0.02)" stroke="rgba(15, 23, 42, 0.04)"/>
+      <rect x="162" y="272" width="38" height="56" rx="4" fill="rgba(15, 23, 42, 0.03)" stroke="rgba(15, 23, 42, 0.05)"/>
 
-      <!-- Dropoff marker (violet) -->
-      <g transform="translate(192, 132)">
-        <path d="M8 0C3.58 0 0 3.58 0 8c0 5.25 8 16 8 16s8-10.75 8-16c0-4.42-3.58-8-8-8zm0 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="#7c3aed"/>
-        <circle cx="8" cy="8" r="3" fill="white"/>
-      </g>
-
-      <!-- Moving car icon with animation -->
-      <g class="car-icon">
-        <animateTransform
-          attributeName="transform"
-          type="translate"
-          values="62,342; 62,202; 132,202; 132,142; 192,142"
-          keyTimes="0; 0.3; 0.5; 0.7; 1"
-          dur="4s"
-          repeatCount="indefinite"
-          calcMode="linear"
+      <!-- ============================================================
+           ANIMATION 1: VTC RIDE HAILING (🚗)
+           ============================================================ -->
+      <g v-if="activeTab === 'vtc'">
+        <!-- Route path -->
+        <path
+          d="M 80 340 L 80 260 L 150 260 L 150 190 L 210 190"
+          stroke="url(#vtcRouteGrad)"
+          stroke-width="5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"
+          stroke-dasharray="6 3"
         />
-        <rect x="-12" y="-8" width="24" height="16" rx="4" fill="url(#carGrad)"/>
-        <rect x="-8" y="-14" width="16" height="10" rx="2" fill="url(#carGrad)" opacity="0.8"/>
-        <circle cx="-7" cy="8" r="4" fill="#1a1f35"/>
-        <circle cx="-7" cy="8" r="2" fill="#2a2f45"/>
-        <circle cx="7" cy="8" r="4" fill="#1a1f35"/>
-        <circle cx="7" cy="8" r="2" fill="#2a2f45"/>
-        <rect x="-5" y="-12" width="4" height="3" rx="1" fill="rgba(255,220,100,0.6)"/>
-        <rect x="1" y="-12" width="4" height="3" rx="1" fill="rgba(255,220,100,0.6)"/>
+        <path
+          d="M 80 340 L 80 260 L 150 260 L 150 190 L 210 190"
+          stroke="url(#vtcRouteGrad)"
+          stroke-width="8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"
+          opacity="0.2"
+        />
+
+        <!-- Pickup pin -->
+        <circle cx="80" cy="340" r="10" fill="#14b19e" opacity="0.2"/>
+        <circle cx="80" cy="340" r="6" fill="#14b19e"/>
+        <circle cx="80" cy="340" r="2.5" fill="white"/>
+
+        <!-- Dropoff pin -->
+        <g transform="translate(202, 170)">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 5.25 8 16 8 16s8-10.75 8-16c0-4.42-3.58-8-8-8zm0 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="#00735f"/>
+          <circle cx="8" cy="8" r="3" fill="white"/>
+        </g>
+
+        <!-- User location pulse -->
+        <circle cx="80" cy="340" r="18" fill="rgba(20,177,158,0.1)">
+          <animate attributeName="r" values="10;20;10" dur="2.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.4;0;0.4" dur="2.5s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Animating VTC Car -->
+        <g>
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            values="72,332; 72,252; 142,252; 142,182; 202,182"
+            keyTimes="0; 0.35; 0.55; 0.75; 1"
+            dur="5s"
+            repeatCount="indefinite"
+            calcMode="linear"
+          />
+          <!-- Stylized car body -->
+          <rect x="-10" y="-6" width="20" height="12" rx="3" fill="url(#carBodyGrad)" stroke="#00735f" stroke-width="0.75"/>
+          <rect x="-6" y="-10" width="12" height="8" rx="2" fill="url(#carBodyGrad)" opacity="0.9"/>
+          <!-- Windows -->
+          <rect x="-4" y="-8" width="8" height="4" rx="1" fill="#e2e8f0"/>
+          <!-- Wheels -->
+          <circle cx="-6" cy="6" r="3" fill="#0f172a"/>
+          <circle cx="6" cy="6" r="3" fill="#0f172a"/>
+          <!-- Headlights -->
+          <rect x="7" y="-9" width="3" height="2" rx="0.5" fill="#fef08a"/>
+        </g>
+
+        <!-- Card content (VTC values) -->
+        <g transform="translate(20, 412)">
+          <!-- Left Col: ETA -->
+          <text x="16" y="20" font-family="Inter,sans-serif" font-weight="600" font-size="10" fill="#64748b" letter-spacing="0.05em">
+            {{ t('mockup.arrival') }}
+          </text>
+          <text x="16" y="42" font-family="Sora,sans-serif" font-weight="800" font-size="20" fill="#00735f">3 min</text>
+          <text x="16" y="58" font-family="Inter,sans-serif" font-size="9" fill="#64748b">
+            {{ t('mockup.distance_vtc') }}
+          </text>
+
+          <!-- Divider -->
+          <line x1="116" y1="12" x2="116" y2="60" stroke="#e2e8f0" stroke-width="1" />
+
+          <!-- Right Col: Price -->
+          <text x="132" y="20" font-family="Inter,sans-serif" font-weight="600" font-size="10" fill="#64748b" letter-spacing="0.05em">
+            {{ t('mockup.fare') }}
+          </text>
+          <text x="132" y="42" font-family="Sora,sans-serif" font-weight="800" font-size="18" fill="#0f172a">1 200 F</text>
+          <text x="132" y="58" font-family="Inter,sans-serif" font-size="9" fill="#64748b">
+            {{ t('mockup.fare_cfa') }}
+          </text>
+        </g>
+
+        <!-- Button VTC -->
+        <g transform="translate(24, 496)">
+          <rect x="0" y="0" width="232" height="34" rx="17" fill="url(#btnGrad)"/>
+          <text x="116" y="22" font-family="Sora,sans-serif" font-weight="700" font-size="12" fill="white" text-anchor="middle">
+            {{ t('mockup.confirm_vtc') }}
+          </text>
+        </g>
       </g>
 
-      <!-- User location pulse -->
-      <circle cx="70" cy="350" r="18" fill="rgba(0,229,204,0.1)">
-        <animate attributeName="r" values="10;20;10" dur="3s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="0.4;0;0.4" dur="3s" repeatCount="indefinite"/>
-      </circle>
+      <!-- ============================================================
+           ANIMATION 2: PRO PARCEL DELIVERY (📦)
+           ============================================================ -->
+      <g v-else>
+        <!-- Route path -->
+        <path
+          d="M 80 190 L 150 190 L 150 260 L 210 260"
+          stroke="url(#delRouteGrad)"
+          stroke-width="5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"
+          stroke-dasharray="6 3"
+        />
+        <path
+          d="M 80 190 L 150 190 L 150 260 L 210 260"
+          stroke="url(#delRouteGrad)"
+          stroke-width="8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"
+          opacity="0.2"
+        />
 
-      <!-- ETA Bottom Card -->
-      <rect x="20" y="400" width="240" height="90" rx="16" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-      
-      <!-- Divider line in card -->
-      <line x1="130" y1="418" x2="130" y2="472" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-      
-      <!-- ETA info left -->
-      <text x="40" y="432" font-family="Inter,sans-serif" font-size="10" fill="rgba(248,250,252,0.5)">ARRIVÉE</text>
-      <text x="40" y="452" font-family="Sora,sans-serif" font-weight="700" font-size="22" fill="white">3 min</text>
-      <text x="40" y="470" font-family="Inter,sans-serif" font-size="11" fill="rgba(248,250,252,0.5)">2.4 km de distance</text>
-      
-      <!-- Price info right -->
-      <text x="148" y="432" font-family="Inter,sans-serif" font-size="10" fill="rgba(248,250,252,0.5)">TARIF</text>
-      <text x="148" y="452" font-family="Sora,sans-serif" font-weight="700" font-size="18" fill="url(#priceGrad)">1 200 F</text>
-      <text x="148" y="470" font-family="Inter,sans-serif" font-size="11" fill="rgba(248,250,252,0.5)">CFA estimé</text>
+        <!-- Pickup pin (orange) -->
+        <circle cx="80" cy="190" r="10" fill="#ea580c" opacity="0.2"/>
+        <circle cx="80" cy="190" r="6" fill="#ea580c"/>
+        <circle cx="80" cy="190" r="2.5" fill="white"/>
 
-      <!-- Confirm button -->
-      <rect x="24" y="500" width="232" height="36" rx="18" fill="url(#btnGrad)"/>
-      <text x="140" y="522" font-family="Sora,sans-serif" font-weight="600" font-size="13" fill="white" text-anchor="middle">Confirmer la course</text>
+        <!-- Dropoff pin (dark red) -->
+        <g transform="translate(202, 240)">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 5.25 8 16 8 16s8-10.75 8-16c0-4.42-3.58-8-8-8zm0 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="#ea580c"/>
+          <circle cx="8" cy="8" r="3" fill="white"/>
+        </g>
 
-      <!-- App header bar -->
-      <rect x="16" y="58" width="248" height="48" rx="4" fill="url(#headerGrad)"/>
-      <text x="36" y="87" font-family="Sora,sans-serif" font-weight="700" font-size="15" fill="white">Où allons-nous ?</text>
-      <rect x="160" y="70" width="80" height="26" rx="13" fill="rgba(124,58,237,0.2)" stroke="rgba(124,58,237,0.3)" stroke-width="1"/>
-      <text x="200" y="88" font-family="Inter,sans-serif" font-size="11" fill="#a855f7" text-anchor="middle">VTC ▾</text>
+        <!-- User location pulse -->
+        <circle cx="80" cy="190" r="18" fill="rgba(234,88,12,0.1)">
+          <animate attributeName="r" values="10;20;10" dur="2.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.4;0;0.4" dur="2.5s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Animating Delivery Box -->
+        <g>
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            values="72,182; 142,182; 142,252; 202,252"
+            keyTimes="0; 0.45; 0.8; 1"
+            dur="5s"
+            repeatCount="indefinite"
+            calcMode="linear"
+          />
+          <!-- 3D style Box -->
+          <rect x="-8" y="-8" width="16" height="16" rx="2" fill="url(#boxBodyGrad)" stroke="#d97706" stroke-width="0.75"/>
+          <!-- Ribbons -->
+          <line x1="0" y1="-8" x2="0" y2="8" stroke="#b45309" stroke-width="1.5"/>
+          <line x1="-8" y1="0" x2="8" y2="0" stroke="#b45309" stroke-width="1.5"/>
+        </g>
+
+        <!-- Card content (Delivery values) -->
+        <g transform="translate(20, 412)">
+          <!-- Left Col: ETA -->
+          <text x="16" y="20" font-family="Inter,sans-serif" font-weight="600" font-size="10" fill="#64748b" letter-spacing="0.05em">
+            {{ t('mockup.delivery') }}
+          </text>
+          <text x="16" y="42" font-family="Sora,sans-serif" font-weight="800" font-size="20" fill="#d97706">12 min</text>
+          <text x="16" y="58" font-family="Inter,sans-serif" font-size="9" fill="#64748b">
+            {{ t('mockup.distance_del') }}
+          </text>
+
+          <!-- Divider -->
+          <line x1="116" y1="12" x2="116" y2="60" stroke="#e2e8f0" stroke-width="1" />
+
+          <!-- Right Col: Price -->
+          <text x="132" y="20" font-family="Inter,sans-serif" font-weight="600" font-size="10" fill="#64748b" letter-spacing="0.05em">
+            {{ t('mockup.fare') }}
+          </text>
+          <text x="132" y="42" font-family="Sora,sans-serif" font-weight="800" font-size="18" fill="#0f172a">1 800 F</text>
+          <text x="132" y="58" font-family="Inter,sans-serif" font-size="9" fill="#64748b">
+            {{ t('mockup.fare_cfa') }}
+          </text>
+        </g>
+
+        <!-- Button Delivery -->
+        <g transform="translate(24, 496)">
+          <rect x="0" y="0" width="232" height="34" rx="17" fill="url(#btnDelGrad)"/>
+          <text x="116" y="22" font-family="Sora,sans-serif" font-weight="700" font-size="12" fill="white" text-anchor="middle">
+            {{ t('mockup.confirm_del') }}
+          </text>
+        </g>
+      </g>
+
+      <!-- ETA Bottom Card Shape (Common border/gradient) -->
+      <rect x="20" y="412" width="240" height="72" rx="14" stroke="#e2e8f0" stroke-width="1" fill="none" pointer-events="none" />
 
       <!-- Gradient definitions -->
       <defs>
+        <!-- Phone shell - Premium Light Titanium -->
         <linearGradient id="phoneGrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#1a1f35"/>
-          <stop offset="100%" stop-color="#0d1120"/>
+          <stop offset="0%" stop-color="#f1f5f9"/>
+          <stop offset="50%" stop-color="#cbd5e1"/>
+          <stop offset="100%" stop-color="#94a3b8"/>
         </linearGradient>
         <linearGradient id="frameGrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="rgba(124,58,237,0.5)"/>
-          <stop offset="100%" stop-color="rgba(0,229,204,0.3)"/>
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="100%" stop-color="#94a3b8"/>
         </linearGradient>
-        <radialGradient id="mapGrad" cx="50%" cy="50%">
-          <stop offset="0%" stop-color="#0f1628"/>
-          <stop offset="100%" stop-color="#080b14"/>
-        </radialGradient>
-        <linearGradient id="routeGrad" x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0%" stop-color="#00e5cc"/>
-          <stop offset="100%" stop-color="#7c3aed"/>
+
+        <!-- Route VTC -->
+        <linearGradient id="vtcRouteGrad" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%" stop-color="#14b19e"/>
+          <stop offset="100%" stop-color="#00735f"/>
         </linearGradient>
-        <linearGradient id="carGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#a855f7"/>
-          <stop offset="100%" stop-color="#7c3aed"/>
+
+        <!-- Route Delivery -->
+        <linearGradient id="delRouteGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f97316"/>
+          <stop offset="100%" stop-color="#ea580c"/>
         </linearGradient>
-        <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#141929"/>
-          <stop offset="100%" stop-color="#0d1120"/>
+
+        <!-- Vehicles -->
+        <linearGradient id="carBodyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#14b19e"/>
+          <stop offset="100%" stop-color="#00735f"/>
         </linearGradient>
-        <linearGradient id="priceGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#a855f7"/>
-          <stop offset="100%" stop-color="#00e5cc"/>
+        <linearGradient id="boxBodyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fcd34d"/>
+          <stop offset="100%" stop-color="#f59e0b"/>
         </linearGradient>
+
+        <!-- Buttons -->
         <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#7c3aed"/>
-          <stop offset="100%" stop-color="#00e5cc"/>
+          <stop offset="0%" stop-color="#00735f"/>
+          <stop offset="100%" stop-color="#14b19e"/>
         </linearGradient>
-        <linearGradient id="battGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#00e5cc"/>
-          <stop offset="100%" stop-color="#7c3aed"/>
-        </linearGradient>
-        <linearGradient id="headerGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#111828" stop-opacity="1"/>
-          <stop offset="100%" stop-color="#111828" stop-opacity="0"/>
+        <linearGradient id="btnDelGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#ea580c"/>
+          <stop offset="100%" stop-color="#f97316"/>
         </linearGradient>
       </defs>
     </svg>
   </div>
 </template>
+
+<style scoped>
+.phone-wrapper {
+  position: relative;
+  width: 280px;
+  height: 560px;
+  margin: 0 auto;
+}
+
+.phone-tabs {
+  position: absolute;
+  top: 112px;
+  left: 28px;
+  width: 224px;
+  display: flex;
+  background: #e2e8f0;
+  padding: 3px;
+  border-radius: 20px;
+  z-index: 10;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.phone-tabs button {
+  flex: 1;
+  border: none;
+  background: none;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.phone-tabs button.active {
+  background: #ffffff;
+  color: #00735f;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+</style>

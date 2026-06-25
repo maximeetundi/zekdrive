@@ -21,7 +21,12 @@ import 'package:ride_sharing_user_app/features/ride/controllers/ride_controller.
 import 'package:ride_sharing_user_app/common_widgets/app_bar_widget.dart';
 import 'package:ride_sharing_user_app/common_widgets/sliver_delegate.dart';
 import 'package:ride_sharing_user_app/common_widgets/zoom_drawer_context_widget.dart';
+import 'package:ride_sharing_user_app/features/store/widgets/merchant_dashboard_widget.dart';
+import 'package:ride_sharing_user_app/features/store/controllers/merchant_store_controller.dart';
 
+
+import 'package:ride_sharing_user_app/features/wallet/controllers/wallet_controller.dart';
+import 'package:ride_sharing_user_app/features/wallet/widgets/wallet_locked_banner_widget.dart';
 
 class HomeMenu extends GetView<ProfileController> {
   const HomeMenu({super.key});
@@ -61,6 +66,8 @@ class _HomeScreenState extends State<HomeScreen> {
     Get.find<ProfileController>().getCategoryList(1);
     Get.find<ProfileController>().getDailyLog();
     Get.find<RideController>().getOngoingParcelList();
+    // Charger le wallet pro pour afficher la bannière si verrouillé
+    Get.find<WalletController>().getWallet();
     await Get.find<RideController>().getLastTrip();
     if(Get.find<RideController>().ongoingTripDetails != null){
       for(int i =0 ;i<Get.find<RideController>().ongoingTripDetails!.length; i++){
@@ -92,66 +99,79 @@ class _HomeScreenState extends State<HomeScreen> {
     return RefreshIndicator(
       onRefresh: () async{
         Get.find<ProfileController>().getProfileInfo();
+        if (Get.find<ProfileController>().profileInfo?.userType == 'store') {
+          Get.find<MerchantStoreController>().getStoreProfile();
+        }
       },
       child: Scaffold(
-        body: Stack(children: [
-            CustomScrollView(slivers: [
-
-              SliverPersistentHeader(delegate: SliverDelegate(child: Column(children: [
-                AppBarWidget(title: 'dashboard'.tr, showBackButton: false, onTap: (){
-                  Get.find<ProfileController>().toggleDrawer();})]), height: 120), pinned: true,),
-
-
-              SliverToBoxAdapter(child: GetBuilder<ProfileController>(
-                  builder: (profileController) {
-                    return Column(crossAxisAlignment: CrossAxisAlignment.start, children:  [
-                      const SizedBox(height: 60.0),
-
-
-                      if(profileController.profileInfo?.vehicle != null && profileController.profileInfo?.vehicleStatus != 0  && profileController.profileInfo?.vehicleStatus != 1)
-                        GetBuilder<RideController>(
-                          builder: (rideController) {
-                            log("loading===>${rideController.getResult}");
-                            return  const OngoingRideCardWidget();}),
-
-
-                      if(profileController.profileInfo?.vehicle == null && profileController.profileInfo?.vehicleStatus == 0)
-                        const AddYourVehicleWidget(),
-
-                      if(profileController.profileInfo?.vehicle != null && profileController.profileInfo?.vehicleStatus == 1)
-                        VehiclePendingWidget(icon: Images.reward1,
-                            description: 'create_account_approve_description_vehicle'.tr,
-                            title: 'registration_not_approve_yet_vehicle'.tr),
-
-
-                      if(Get.find<ProfileController>().profileInfo?.vehicle != null)
-                        const MyActivityListViewWidget(),
-                      const SizedBox(height: 100,),
-                    ],
-                    );
-                  }),
-                )
-              ],
-            ),
-
-            Positioned(top: 90,left: 0,right: 0,
-              child: GetBuilder<ProfileController>(builder: (profileController) {
-                return GestureDetector( onTap: (){
-                  Get.to(()=> const ProfileScreen());
-                },
-
-                    child: ProfileStatusCardWidget(profileController: profileController,));})),
-
-          ],
-        ),
-
+        body: GetBuilder<ProfileController>(builder: (profileController) {
+          if (profileController.profileInfo?.userType == 'store') {
+            return const MerchantDashboardWidget();
+          }
+          return Stack(children: [
+              CustomScrollView(slivers: [
+  
+                SliverPersistentHeader(delegate: SliverDelegate(child: Column(children: [
+                  AppBarWidget(title: 'dashboard'.tr, showBackButton: false, onTap: (){
+                    Get.find<ProfileController>().toggleDrawer();})]), height: 120), pinned: true,),
+  
+  
+                SliverToBoxAdapter(child: GetBuilder<ProfileController>(
+                    builder: (profileController) {
+                      return Column(crossAxisAlignment: CrossAxisAlignment.start, children:  [
+                        const SizedBox(height: 60.0),
+  
+                        // Bannière wallet verrouillé (modèle Yango)
+                        const WalletLockedBannerWidget(),
+  
+  
+                        if(profileController.profileInfo?.vehicle != null && profileController.profileInfo?.vehicleStatus != 0  && profileController.profileInfo?.vehicleStatus != 1)
+                          GetBuilder<RideController>(
+                            builder: (rideController) {
+                              log("loading===>${rideController.getResult}");
+                              return  const OngoingRideCardWidget();}),
+  
+  
+                        if(profileController.profileInfo?.vehicle == null && profileController.profileInfo?.vehicleStatus == 0)
+                          const AddYourVehicleWidget(),
+  
+                        if(profileController.profileInfo?.vehicle != null && profileController.profileInfo?.vehicleStatus == 1)
+                          VehiclePendingWidget(icon: Images.reward1,
+                              description: 'create_account_approve_description_vehicle'.tr,
+                              title: 'registration_not_approve_yet_vehicle'.tr),
+  
+  
+                        if(Get.find<ProfileController>().profileInfo?.vehicle != null)
+                          const MyActivityListViewWidget(),
+                        const SizedBox(height: 100,),
+                      ],
+                      );
+                    }),
+                  )
+                ],
+              ),
+  
+              Positioned(top: 90,left: 0,right: 0,
+                child: GetBuilder<ProfileController>(builder: (profileController) {
+                  return GestureDetector( onTap: (){
+                    Get.to(()=> const ProfileScreen());
+                  },
+  
+                      child: ProfileStatusCardWidget(profileController: profileController,));})),
+  
+            ],
+          );
+        }),
         floatingActionButton: GetBuilder<RideController>(
-          builder: (rideController) {
-            int ridingCount = (rideController.ongoingTrip == null || rideController.ongoingTrip!.isEmpty)? 0 : ( rideController.ongoingTrip![0].currentStatus == 'ongoing' || rideController.ongoingTrip![0].currentStatus == 'accepted' || (rideController.ongoingTrip![0].currentStatus =='completed' && rideController.ongoingTrip![0].paymentStatus == 'unpaid') || (rideController.ongoingTrip![0].currentStatus =='cancelled' && rideController.ongoingTrip![0].paymentStatus == 'unpaid' && rideController.ongoingTrip![0].cancelledBy == 'customer') && rideController.ongoingTrip![0].type != 'parcel')? 1:0;
-            int parcelCount = rideController.parcelListModel?.totalSize??0;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 80),
-              child: CustomMenuButtonWidget(
+        builder: (rideController) {
+          if (Get.find<ProfileController>().profileInfo?.userType == 'store') {
+            return const SizedBox();
+          }
+          int ridingCount = (rideController.ongoingTrip == null || rideController.ongoingTrip!.isEmpty)? 0 : ( rideController.ongoingTrip![0].currentStatus == 'ongoing' || rideController.ongoingTrip![0].currentStatus == 'accepted' || (rideController.ongoingTrip![0].currentStatus =='completed' && rideController.ongoingTrip![0].paymentStatus == 'unpaid') || (rideController.ongoingTrip![0].currentStatus =='cancelled' && rideController.ongoingTrip![0].paymentStatus == 'unpaid' && rideController.ongoingTrip![0].cancelledBy == 'customer') && rideController.ongoingTrip![0].type != 'parcel')? 1:0;
+          int parcelCount = rideController.parcelListModel?.totalSize??0;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 80),
+            child: CustomMenuButtonWidget(
                 openForegroundColor: Colors.white,
                 closedBackgroundColor: Theme.of(context).primaryColor,
                 openBackgroundColor: Theme.of(context).primaryColorDark,
@@ -191,11 +211,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Padding(padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
                   child: Badge(label: Text('${ridingCount + parcelCount}'),child: Image.asset(Images.ongoing)),
                 )),);
-          }
-        )
+        },
       ),
-    );
-  }
+    ),
+  );
+}
 
 }
 

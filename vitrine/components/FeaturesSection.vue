@@ -1,42 +1,44 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useScrollAnimation } from '~/composables/useScrollAnimation'
+import { useLanguage } from '~/composables/useLanguage'
 
+const { t } = useLanguage()
 const { observe } = useScrollAnimation()
 const sectionRef = ref<HTMLElement | null>(null)
 
-const features = [
+const features = computed(() => [
   {
     icon: '🗺️',
-    title: 'Suivi en temps réel',
-    desc: 'Suivez votre chauffeur sur la carte en direct avec une précision GPS optimale.',
+    title: t('features.feat1_title'),
+    desc: t('features.feat1_desc'),
   },
   {
     icon: '💳',
-    title: 'Paiements sécurisés',
-    desc: 'Mobile money (Orange, MTN, Wave), carte bancaire ou espèces — vous choisissez.',
+    title: t('features.feat2_title'),
+    desc: t('features.feat2_desc'),
   },
   {
     icon: '⭐',
-    title: 'Chauffeurs notés',
-    desc: 'Chaque chauffeur est vérifié, noté et évalué par notre communauté.',
+    title: t('features.feat3_title'),
+    desc: t('features.feat3_desc'),
   },
   {
     icon: '📞',
-    title: 'Support 24/7',
-    desc: 'Notre équipe est disponible à toute heure pour vous aider.',
+    title: t('features.feat4_title'),
+    desc: t('features.feat4_desc'),
   },
   {
     icon: '🚗',
-    title: 'Multi-véhicules',
-    desc: 'VTC, moto-taxi, vélo — choisissez selon votre budget et vos besoins.',
+    title: t('features.feat5_title'),
+    desc: t('features.feat5_desc'),
   },
   {
     icon: '⚡',
-    title: 'Réservation rapide',
-    desc: 'Trouvez un chauffeur disponible en moins de 2 minutes, garanti.',
+    title: t('features.feat6_title'),
+    desc: t('features.feat6_desc'),
   },
-]
+])
 
 onMounted(() => {
   const cards = sectionRef.value?.querySelectorAll('.feature-card')
@@ -51,10 +53,10 @@ onMounted(() => {
     <div class="orb orb-teal" style="width:350px;height:350px;top:-50px;right:-100px;opacity:0.4;" />
     <div class="container" style="position:relative;z-index:1;">
       <div class="section-header fade-up">
-        <div class="section-tag">Fonctionnalités</div>
-        <h2 class="section-title">Conçu pour vous faire<br><span class="gradient-text">gagner du temps</span></h2>
+        <div class="section-tag">{{ t('features.tag') }}</div>
+        <h2 class="section-title">{{ t('features.title_1') }}<br><span class="gradient-text">{{ t('features.title_highlight') }}</span></h2>
         <p class="section-subtitle">
-          ZekDrive intègre tout ce dont vous avez besoin pour des déplacements sans stress.
+          {{ t('features.subtitle') }}
         </p>
       </div>
 

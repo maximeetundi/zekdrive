@@ -13,14 +13,16 @@ import (
 )
 
 type DriverHandler struct {
-	driverService service.DriverService
-	validate      *validator.Validate
+	driverService  service.DriverService
+	settingService domain.SettingService
+	validate       *validator.Validate
 }
 
-func NewDriverHandler(driverService service.DriverService) *DriverHandler {
+func NewDriverHandler(driverService service.DriverService, settingService domain.SettingService) *DriverHandler {
 	return &DriverHandler{
-		driverService: driverService,
-		validate:      validator.New(),
+		driverService:  driverService,
+		settingService: settingService,
+		validate:       validator.New(),
 	}
 }
 
@@ -219,6 +221,27 @@ func (h *DriverHandler) GetDriverConfig(c *fiber.Ctx) error {
 	baseURL := fmt.Sprintf("%s://%s/api/", scheme, fullHost)
 	imageBaseURLStr := fmt.Sprintf("%s://%s/uploads/", scheme, fullHost)
 
+	settings, err := h.settingService.GetSettings(c.Context())
+	dispatchTimeout := 10
+	supportEmail := "support@zekdrive.com"
+	supportPhone := "+221 33 800 0000"
+
+	if err == nil && settings != nil {
+		if appConfig, ok := settings["app_config"].(map[string]interface{}); ok {
+			if dt, ok := appConfig["dispatchTimeout"].(float64); ok {
+				dispatchTimeout = int(dt)
+			} else if dtInt, ok := appConfig["dispatchTimeout"].(int); ok {
+				dispatchTimeout = dtInt
+			}
+			if se, ok := appConfig["supportEmail"].(string); ok {
+				supportEmail = se
+			}
+			if sp, ok := appConfig["supportPhone"].(string); ok {
+				supportPhone = sp
+			}
+		}
+	}
+
 	configMap := fiber.Map{
 		"is_demo":                    true,
 		"maintenance_mode":           false,
@@ -228,12 +251,12 @@ func (h *DriverHandler) GetDriverConfig(c *fiber.Ctx) error {
 		"logo":                       "logo.png",
 		"bid_on_fare":                false,
 		"driver_completion_radius":   10.0,
-		"country_code":               "FR",
-		"business_address":           "Paris, France",
-		"business_contact_phone":     "+33100000000",
-		"business_contact_email":     "contact@zekdrive.com",
-		"business_support_phone":     "+33100000000",
-		"business_support_email":     "support@zekdrive.com",
+		"country_code":               "SN",
+		"business_address":           "Dakar, Senegal",
+		"business_contact_phone":     supportPhone,
+		"business_contact_email":     supportEmail,
+		"business_support_phone":     supportPhone,
+		"business_support_email":     supportEmail,
 		"conversion_status":          false,
 		"conversion_rate":            0.0,
 		"base_url":                   baseURL,
@@ -256,10 +279,11 @@ func (h *DriverHandler) GetDriverConfig(c *fiber.Ctx) error {
 			"parcel":                 imageBaseURLStr + "parcel/category",
 		},
 		"otp_resend_time":          60,
-		"currency_decimal_point":   "2",
-		"currency_code":            "EUR",
-		"currency_symbol":          "€",
-		"currency_symbol_position": "left",
+		"trip_request_active_time": dispatchTimeout,
+		"currency_decimal_point":   "0",
+		"currency_code":            "XOF",
+		"currency_symbol":          "FCFA",
+		"currency_symbol_position": "right",
 		"about_us": fiber.Map{
 			"image":             "",
 			"name":              "About Us",

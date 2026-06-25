@@ -44,7 +44,15 @@ class _RiseFareWidgetState extends State<RiseFareWidget> {
       return GetBuilder<RideController>(
         builder: (rideController) {
           bool inRight = Get.find<ConfigController>().config!.currencySymbolPosition == 'right';
-          String symbol = Get.find<ConfigController>().config!.currencySymbol?? '\$';
+          // Priorité : CountryController > ConfigController
+          String symbol;
+          try {
+            final dynamic cc = Get.find(tag: 'country');
+            symbol = (cc?.currencySymbol as String?) ?? '';
+            if (symbol.isEmpty) symbol = Get.find<ConfigController>().config!.currencySymbol ?? '\$';
+          } catch (_) {
+            symbol = Get.find<ConfigController>().config!.currencySymbol ?? '\$';
+          }
           return GetBuilder<ParcelController>(
             builder: (parcelController) {
               return Column(mainAxisAlignment: MainAxisAlignment.center, children: [

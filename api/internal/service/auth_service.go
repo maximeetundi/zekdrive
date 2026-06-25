@@ -128,12 +128,22 @@ func (s *authService) RefreshToken(ctx context.Context, tokenStr string) (*domai
 		return nil, errors.New("invalid refresh token")
 	}
 
-	claims, ok := token.Claims.(*authClaims)
+	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return nil, errors.New("invalid token claims")
 	}
 
-	u, err := s.userRepo.GetByID(ctx, claims.UserID)
+	userIDStr, err := claims.GetSubject()
+	if err != nil || userIDStr == "" {
+		return nil, errors.New("invalid subject in claims")
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return nil, errors.New("invalid user id in claims")
+	}
+
+	u, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil || u == nil {
 		return nil, errors.New("user not found")
 	}
@@ -161,7 +171,7 @@ func (s *authService) ValidateToken(tokenStr string, isRefresh bool) (*jwt.Token
 		secret = s.cfg.JWTRefreshSecret
 	}
 
-	return jwt.ParseWithClaims(tokenStr, &authClaims{}, func(token *jwt.Token) (interface{}, error) {
+	return jwt.ParseWithClaims(tokenStr, jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}

@@ -16,3 +16,24 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+
+subprojects {
+    def setNamespace = { prj ->
+        if (prj.hasProperty('android')) {
+            prj.android {
+                if (namespace == null) {
+                    namespace = prj.group.toString().contains('.') ? prj.group.toString() : "com.zekdrive.${prj.name.replaceAll('[^a-zA-Z0-9]', '')}"
+                }
+            }
+        }
+    }
+    if (project.state.executed) {
+        setNamespace(project)
+    } else {
+        project.afterEvaluate { prj ->
+            setNamespace(prj)
+        }
+    }
+}
+
+

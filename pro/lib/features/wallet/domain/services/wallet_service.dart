@@ -32,5 +32,22 @@ class WalletService implements WalletServiceInterface{
    return walletRepositoryInterface.withdrawBalance(typeKey, typeValue, id, balance, note);
   }
 
+  // --- Nouveau système wallet pro ---
+
+  @override
+  Future getWallet() {
+    return walletRepositoryInterface.getWallet();
+  }
+
+  @override
+  Future getWalletTransactions() {
+    return walletRepositoryInterface.getWalletTransactions();
+  }
+
+  @override
+  Future recharge(double amount, String paymentMethod, String phoneNumber, String reference) {
+    return walletRepositoryInterface.recharge(amount, paymentMethod, phoneNumber, reference);
+  }
+
 
 }

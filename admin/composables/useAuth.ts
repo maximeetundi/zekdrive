@@ -5,11 +5,8 @@ export function useAuth() {
   const authStore = useAuthStore()
 
   function isAuthenticated(): boolean {
-    if (process.client) {
-      const token = localStorage.getItem('zekdrive_token')
-      return !!token
-    }
-    return !!authStore.token
+    const token = useCookie('zekdrive_token')
+    return !!token.value
   }
 
   async function login(email: string, password: string): Promise<{ success: boolean; error?: string }> {

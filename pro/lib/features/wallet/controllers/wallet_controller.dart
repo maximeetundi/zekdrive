@@ -7,6 +7,8 @@ import 'package:ride_sharing_user_app/features/profile/controllers/profile_contr
 import 'package:ride_sharing_user_app/features/wallet/domain/models/loyalty_point_model.dart';
 import 'package:ride_sharing_user_app/features/wallet/domain/models/transaction_model.dart';
 import 'package:ride_sharing_user_app/features/wallet/domain/models/withdraw_model.dart';
+import 'package:ride_sharing_user_app/features/wallet/domain/models/driver_wallet_model.dart';
+import 'package:ride_sharing_user_app/features/wallet/domain/models/wallet_transaction_model.dart';
 
 
 class WalletController extends GetxController implements GetxService{
@@ -196,5 +198,132 @@ class WalletController extends GetxController implements GetxService{
     return response;
   }
 
+  // ============================================================
+  // Nouveau système wallet pro (modèle Yango)
+  // ============================================================
 
+  DriverWallet? _driverWallet;
+  DriverWallet? get driverWallet => _driverWallet;
+
+  double get walletBalance => _driverWallet?.balance ?? 0.0;
+  String get walletCurrency => _driverWallet?.currencyCode ?? '';
+  bool get isLocked => _driverWallet?.isLocked ?? false;
+  double get minBalance => _driverWallet?.minBalance ?? 0.0;
+
+  /// true = le chauffeur peut accepter des courses en espèces
+  bool get canAcceptRide => _driverWallet?.canAcceptCashRide ?? true;
+
+  bool _isWalletLoading = false;
+  bool get isWalletLoading => _isWalletLoading;
+
+  List<WalletTransaction> _walletTransactions = [];
+  List<WalletTransaction> get walletTransactions => _walletTransactions;
+
+  bool _isTransactionsLoading = false;
+  bool get isTransactionsLoading => _isTransactionsLoading;
+
+  bool _isRecharging = false;
+  bool get isRecharging => _isRecharging;
+
+  /// Récupère le wallet pro depuis le backend
+  Future<void> getWallet() async {
+    _isWalletLoading = true;
+    update();
+    try {
+      Response? response = await walletServiceInterface.getWallet();
+      if (response != null && response.statusCode == 200) {
+        _driverWallet = DriverWallet.fromJson(response.body);
+      } else if (response != null) {
+        ApiChecker.checkApi(response);
+      }
+    } catch (e) {
+      // Silently handle - the wallet feature may not be deployed yet
+    }
+    _isWalletLoading = false;
+    update();
+  }
+
+  /// Récupère l'historique des transactions du wallet pro
+  Future<void> getProWalletTransactions() async {
+    _isTransactionsLoading = true;
+    update();
+    try {
+      Response? response = await walletServiceInterface.getWalletTransactions();
+      if (response != null && response.statusCode == 200) {
+        final List<dynamic> data = response.body is List
+            ? response.body
+            : (response.body['data'] ?? []);
+        _walletTransactions = data
+            .map((e) => WalletTransaction.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else if (response != null) {
+        ApiChecker.checkApi(response);
+      }
+    } catch (e) {
+      _walletTransactions = [];
+    }
+    _isTransactionsLoading = false;
+    update();
+  }
+
+  /// Recharge le wallet pro
+  Future<bool> rechargeWallet({
+    required double amount,
+    required String paymentMethod,
+    required String phoneNumber,
+    required String reference,
+  }) async {
+    _isRecharging = true;
+    update();
+    bool success = false;
+    try {
+      Response? response = await walletServiceInterface.recharge(
+        amount, paymentMethod, phoneNumber, reference,
+      );
+      if (response != null && response.statusCode == 200) {
+        success = true;
+        showCustomSnackBar('recharge_successful'.tr, isError: false);
+        // Rafraîchir le wallet et les transactions
+        await getWallet();
+        await getProWalletTransactions();
+      } else if (response != null) {
+        ApiChecker.checkApi(response);
+      }
+    } catch (e) {
+      showCustomSnackBar('recharge_failed'.tr);
+    }
+    _isRecharging = false;
+    update();
+    return success;
+  }
+
+  // Contrôleurs pour le formulaire de recharge
+  final TextEditingController rechargeAmountController = TextEditingController();
+  final TextEditingController rechargePhoneController = TextEditingController();
+  final TextEditingController rechargeReferenceController = TextEditingController();
+
+  String _selectedPaymentMethod = 'mobile_money';
+  String get selectedPaymentMethod => _selectedPaymentMethod;
+
+  final List<String> paymentMethods = ['mobile_money', 'bank_transfer', 'cash'];
+
+  void setPaymentMethod(String method) {
+    _selectedPaymentMethod = method;
+    update();
+  }
+
+  void clearRechargeForm() {
+    rechargeAmountController.clear();
+    rechargePhoneController.clear();
+    rechargeReferenceController.clear();
+    _selectedPaymentMethod = 'mobile_money';
+  }
+
+  @override
+  void onClose() {
+    rechargeAmountController.dispose();
+    rechargePhoneController.dispose();
+    rechargeReferenceController.dispose();
+    super.onClose();
+  }
 }

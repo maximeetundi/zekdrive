@@ -13,6 +13,9 @@ export interface User {
   created_at: string
   trips_count?: number
   total_spent?: number
+  country?: string
+  kyc_status?: 'unsubmitted' | 'pending' | 'approved' | 'rejected'
+  kyc_document?: string
 }
 
 export interface UserFilters {
@@ -24,6 +27,8 @@ export interface UserFilters {
 const MOCK_USERS: User[] = Array.from({ length: 40 }, (_, i) => {
   const names = ['Amadou Ba', 'Fatoumata Diallo', 'Moussa Sow', 'Aissatou Camara', 'Omar Traoré', 'Mariama Kouyaté', 'Ibrahima Ndiaye', 'Kadiatou Bah', 'Cheikh Fall', 'Rokhaya Mbaye']
   const statuses: User['status'][] = ['active', 'active', 'active', 'inactive', 'banned']
+  const countries = ['SN', 'CI', 'ML']
+  const kycStatuses: User['kyc_status'][] = ['approved', 'pending', 'unsubmitted', 'rejected']
   return {
     id: `user_${i + 1}`,
     name: names[i % names.length] + (i >= names.length ? ` ${Math.floor(i / names.length) + 1}` : ''),
@@ -34,6 +39,9 @@ const MOCK_USERS: User[] = Array.from({ length: 40 }, (_, i) => {
     created_at: new Date(Date.now() - i * 86400000 * 3).toISOString(),
     trips_count: Math.floor(Math.random() * 50),
     total_spent: Math.floor(Math.random() * 200000),
+    country: countries[i % countries.length],
+    kyc_status: kycStatuses[i % kycStatuses.length],
+    kyc_document: i % 4 !== 2 ? `/uploads/kyc/cni_user_${i + 1}.jpg` : '',
   }
 })
 

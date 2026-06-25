@@ -46,8 +46,9 @@ import 'package:ride_sharing_user_app/features/ride/domain/services/ride_service
 import 'package:ride_sharing_user_app/features/ride/domain/services/ride_service_interface.dart';
 import 'package:ride_sharing_user_app/features/setting/controllers/setting_controller.dart';
 import 'package:ride_sharing_user_app/features/splash/controllers/splash_controller.dart';
-import 'package:ride_sharing_user_app/features/splash/domain/repositories/splash_repository.dart';
+import 'package:ride_sharing_user_app/features/store/controllers/merchant_store_controller.dart';
 import 'package:ride_sharing_user_app/data/api_client.dart';
+import 'package:ride_sharing_user_app/features/splash/domain/repositories/splash_repository.dart';
 import 'package:ride_sharing_user_app/features/splash/domain/repositories/splash_repository_interface.dart';
 import 'package:ride_sharing_user_app/features/splash/domain/services/splash_service.dart';
 import 'package:ride_sharing_user_app/features/splash/domain/services/splash_service_interface.dart';
@@ -187,6 +188,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => SettingController());
   Get.lazyPut(() => LocationController(locationServiceInterface: Get.find()));
   Get.lazyPut(() => OtpTimeCountController());
+  Get.lazyPut(() => MerchantStoreController(apiClient: Get.find()));
 
 
   // Retrieving localized data

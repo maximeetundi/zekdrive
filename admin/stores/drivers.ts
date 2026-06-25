@@ -19,6 +19,9 @@ export interface Driver {
   lng?: number
   created_at: string
   last_seen?: string
+  country?: string
+  kyc_status?: 'unsubmitted' | 'pending' | 'approved' | 'rejected'
+  kyc_document?: string
 }
 
 const MOCK_DRIVERS: Driver[] = Array.from({ length: 30 }, (_, i) => {
@@ -26,6 +29,8 @@ const MOCK_DRIVERS: Driver[] = Array.from({ length: 30 }, (_, i) => {
   const vehicleTypes: Driver['vehicle_type'][] = ['car', 'moto', 'car', 'bicycle', 'car', 'moto', 'truck', 'car', 'moto', 'car']
   const availabilities: Driver['availability'][] = ['available', 'busy', 'offline']
   const approvals: Driver['approval_status'][] = ['approved', 'approved', 'pending', 'approved', 'rejected']
+  const countries = ['SN', 'CI', 'ML']
+  const kycStatuses: Driver['kyc_status'][] = ['approved', 'pending', 'unsubmitted', 'rejected']
 
   return {
     id: `driver_${i + 1}`,
@@ -44,6 +49,9 @@ const MOCK_DRIVERS: Driver[] = Array.from({ length: 30 }, (_, i) => {
     lng: -17.4467 + (Math.random() - 0.5) * 0.12,
     created_at: new Date(Date.now() - i * 86400000 * 7).toISOString(),
     last_seen: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+    country: countries[i % countries.length],
+    kyc_status: kycStatuses[i % kycStatuses.length],
+    kyc_document: i % 4 !== 2 ? `/uploads/kyc/license_driver_${i + 1}.jpg` : '',
   }
 })
 

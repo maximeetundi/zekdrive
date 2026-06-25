@@ -12,10 +12,12 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final bool regularAppbar;
   const AppBarWidget({super.key, required this.title, this.showBackButton = true, this.onBackPressed, this.onTap,  this.regularAppbar = false});
 
+  double get _height => regularAppbar ? 100.0 : (GetPlatform.isAndroid ? 120.0 : 150.0);
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: regularAppbar? 100 :GetPlatform.isAndroid? 120: 150,
+      height: _height,
       color: Theme.of(context).primaryColor,
       child: AppBar(
         title: Text(title, style: textSemiBold.copyWith(
@@ -47,5 +49,5 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize =>  Size(Dimensions.webMaxWidth, GetPlatform.isAndroid? Dimensions.androidAppBarHeight : Dimensions.appBarHeight);
+  Size get preferredSize => Size(Dimensions.webMaxWidth, _height);
 }

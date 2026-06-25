@@ -32,9 +32,9 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(150.0),
+      preferredSize: preferredSize,
       child: AppBar(
-        toolbarHeight: 80,
+        toolbarHeight: preferredSize.height,
         automaticallyImplyLeading: false,
         title: InkWell(
           onTap:
@@ -100,5 +100,5 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size(Dimensions.webMaxWidth, 50);
+  Size get preferredSize => Size(Dimensions.webMaxWidth, isHome || subTitle != null ? 90.0 : 56.0);
 }

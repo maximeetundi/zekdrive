@@ -28,8 +28,7 @@ class _SignInScreenState extends State<SignInScreen> {
   TextEditingController phoneController = TextEditingController();
   FocusNode phoneNode = FocusNode();
   FocusNode passwordNode = FocusNode();
-
-
+  bool _isWhatsAppPhone = true;
 
   @override
   void initState() {
@@ -37,6 +36,9 @@ class _SignInScreenState extends State<SignInScreen> {
 
     if(Get.find<AuthController>().getUserNumber().isNotEmpty) {
       phoneController.text =  Get.find<AuthController>().getUserNumber();
+      if (phoneController.text.contains('@')) {
+        _isWhatsAppPhone = false;
+      }
     }
     passwordController.text = Get.find<AuthController>().getUserPassword();
 
@@ -46,9 +48,23 @@ class _SignInScreenState extends State<SignInScreen> {
 
     if(Get.find<AuthController>().getLoginCountryCode().isNotEmpty) {
       Get.find<AuthController>().countryDialCode = Get.find<AuthController>().getLoginCountryCode();
-    }else if(Get.find<ConfigController>().config!.countryCode != null){
-      Get.find<AuthController>().countryDialCode = CountryCode.fromCountryCode(Get.find<ConfigController>().config!.countryCode!).dialCode!;
-
+    } else {
+      String deviceCountry = WidgetsBinding.instance.platformDispatcher.locale.countryCode ?? '';
+      if (deviceCountry.isNotEmpty) {
+        try {
+          Get.find<AuthController>().countryDialCode = CountryCode.fromCountryCode(deviceCountry).dialCode ?? '+221';
+        } catch (e) {
+          if (Get.find<ConfigController>().config?.countryCode != null) {
+            Get.find<AuthController>().countryDialCode = CountryCode.fromCountryCode(Get.find<ConfigController>().config!.countryCode!).dialCode ?? '+221';
+          } else {
+            Get.find<AuthController>().countryDialCode = '+221';
+          }
+        }
+      } else if (Get.find<ConfigController>().config?.countryCode != null) {
+        Get.find<AuthController>().countryDialCode = CountryCode.fromCountryCode(Get.find<ConfigController>().config!.countryCode!).dialCode ?? '+221';
+      } else {
+        Get.find<AuthController>().countryDialCode = '+221';
+      }
     }
   }
 
@@ -90,8 +106,71 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                  CustomTextField(
-                    hintText: 'phone'.tr,
+                  // Mode selector (Segmented Control)
+                  Container(
+                    height: 45,
+                    margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeLarge),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(50),
+                      border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.15)),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                _isWhatsAppPhone = true;
+                                phoneController.clear();
+                              });
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: _isWhatsAppPhone ? Theme.of(context).primaryColor : Colors.transparent,
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              child: Text(
+                                'Téléphone WhatsApp',
+                                style: textMedium.copyWith(
+                                  color: _isWhatsAppPhone ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+                                  fontSize: Dimensions.fontSizeSmall,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                _isWhatsAppPhone = false;
+                                phoneController.clear();
+                              });
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: !_isWhatsAppPhone ? Theme.of(context).primaryColor : Colors.transparent,
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              child: Text(
+                                'Email',
+                                style: textMedium.copyWith(
+                                  color: !_isWhatsAppPhone ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+                                  fontSize: Dimensions.fontSizeSmall,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  _isWhatsAppPhone ? CustomTextField(
+                    hintText: 'Téléphone WhatsApp',
                     inputType: TextInputType.phone,
                     countryDialCode: authController.countryDialCode,
                     prefixHeight: 70,
@@ -103,6 +182,15 @@ class _SignInScreenState extends State<SignInScreen> {
                       authController.countryDialCode = countryCode.dialCode!;
                       authController.setCountryCode(countryCode.dialCode!);
                     },
+                  ) : CustomTextField(
+                    hintText: 'email'.tr,
+                    inputType: TextInputType.emailAddress,
+                    prefixIcon: Images.email,
+                    prefixHeight: 70,
+                    controller: phoneController,
+                    focusNode: phoneNode,
+                    nextFocus: passwordNode,
+                    inputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: Dimensions.paddingSizeDefault,),
                   CustomTextField(
@@ -148,17 +236,29 @@ class _SignInScreenState extends State<SignInScreen> {
                   authController.isLoading ?  Center(child: SpinKitCircle(color: Theme.of(context).primaryColor, size: 40.0,)) : ButtonWidget(
                     buttonText: 'log_in'.tr,
                     onPressed: () {
-                      String phone = phoneController.text.trim();
+                      String input = phoneController.text.trim();
                       String password = passwordController.text.trim();
 
-                      if(!GetUtils.isPhoneNumber(authController.countryDialCode + phone)) {
-                        showCustomSnackBar('phone_number_is_not_valid'.tr);
-                      }else if(password.isEmpty) {
-                        showCustomSnackBar('password_is_required'.tr);
-                      }else if(password.length < 8) {
-                        showCustomSnackBar('minimum_password_length_is_8'.tr);
-                      }else {
-                        authController.login(authController.countryDialCode, phone, password);
+                      if (_isWhatsAppPhone) {
+                        if(!GetUtils.isPhoneNumber(authController.countryDialCode + input)) {
+                          showCustomSnackBar('phone_number_is_not_valid'.tr);
+                        } else if(password.isEmpty) {
+                          showCustomSnackBar('password_is_required'.tr);
+                        } else if(password.length < 8) {
+                          showCustomSnackBar('minimum_password_length_is_8'.tr);
+                        } else {
+                          authController.login(authController.countryDialCode, input, password);
+                        }
+                      } else {
+                        if(!GetUtils.isEmail(input)) {
+                          showCustomSnackBar('email_is_not_valid'.tr);
+                        } else if(password.isEmpty) {
+                          showCustomSnackBar('password_is_required'.tr);
+                        } else if(password.length < 8) {
+                          showCustomSnackBar('minimum_password_length_is_8'.tr);
+                        } else {
+                          authController.login('', input, password);
+                        }
                       }
                     },
                     radius: 50,

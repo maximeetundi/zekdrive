@@ -162,7 +162,7 @@ class LocationController extends GetxController implements GetxService {
           onYesPressed: () async {
         Get.back();
         await Geolocator.openAppSettings();
-      }, icon: Images.driveMondLogo), barrierDismissible: false);
+      }, icon: Images.logo), barrierDismissible: false);
     }else {
       onTap();
       return true;

@@ -2,7 +2,7 @@ import 'package:ride_sharing_user_app/localization/language_model.dart';
 import 'package:ride_sharing_user_app/util/images.dart';
 
 class AppConstants {
-  static const String appName = 'Guelable Pro';
+  static const String appName = 'ZekDrive Pro';
   static const String polylineMapKey =
       'AIzaSyBLzkqJWnCO_OucXE-aoUdj9rtqfcuZo54';
   static const String baseUrl = 'https://api.driver.maximeetundi.store';

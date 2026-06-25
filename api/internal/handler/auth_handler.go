@@ -55,6 +55,10 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	if req.Email == "" && req.PhoneOrEmail == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "email or phone_or_email is required"})
+	}
+
 	resp, err := h.authService.Login(c.Context(), &req)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})

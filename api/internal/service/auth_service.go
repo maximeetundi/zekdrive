@@ -93,12 +93,25 @@ func (s *authService) Register(ctx context.Context, req *domain.RegisterRequest)
 }
 
 func (s *authService) Login(ctx context.Context, req *domain.LoginRequest) (*domain.LoginResponse, error) {
-	u, err := s.userRepo.GetByEmail(ctx, req.Email)
+	var u *domain.User
+	var err error
+
+	identifier := req.Email
+	if identifier == "" {
+		identifier = req.PhoneOrEmail
+	}
+
+	if strings.Contains(identifier, "@") {
+		u, err = s.userRepo.GetByEmail(ctx, identifier)
+	} else {
+		u, err = s.userRepo.GetByPhone(ctx, identifier)
+	}
+
 	if err != nil {
 		return nil, err
 	}
 	if u == nil {
-		return nil, errors.New("invalid email or password")
+		return nil, errors.New("invalid email/phone or password")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(req.Password)); err != nil {

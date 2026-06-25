@@ -23,7 +23,7 @@
     </queries>
 
    <application
-        android:label="Guelablé"
+        android:label="ZekDrive"
        android:requestLegacyExternalStorage="true"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"

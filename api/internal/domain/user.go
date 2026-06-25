@@ -44,8 +44,9 @@ type RegisterRequest struct {
 }
 
 type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
+	Email        string `json:"email"`
+	PhoneOrEmail string `json:"phone_or_email"`
+	Password     string `json:"password" validate:"required"`
 }
 
 type LoginResponse struct {

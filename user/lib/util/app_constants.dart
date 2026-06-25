@@ -5,7 +5,7 @@ import 'package:ride_sharing_user_app/localization/language_model.dart';
 import 'package:ride_sharing_user_app/util/images.dart';
 
 class AppConstants {
-  static const String appName = 'Guelablé';
+  static const String appName = 'ZekDrive';
   static const String baseUrl = 'https://api.driver.maximeetundi.store';
   static const Color lightPrimary = Color(0xFF14B19E);
   static const Color darkPrimary = Color(0xFF00735f);

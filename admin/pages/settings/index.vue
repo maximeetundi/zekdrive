@@ -205,7 +205,7 @@
               <input v-model.number="authConfig.smtp_port" type="number" class="form-input" placeholder="2525" />
             </div>
           </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" class="modal-form-grid">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;" class="modal-form-grid">
             <div class="form-group text-left">
               <label class="form-label">{{ lang === 'fr' ? 'Nom d\'utilisateur' : 'SMTP Auth Username' }}</label>
               <input v-model="authConfig.smtp_user" type="text" class="form-input" />
@@ -214,6 +214,20 @@
               <label class="form-label">{{ lang === 'fr' ? 'Mot de passe SMTP' : 'SMTP Auth Password' }}</label>
               <input v-model="authConfig.smtp_password" type="password" class="form-input" placeholder="••••••••••••" />
             </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;" class="modal-form-grid">
+            <div class="form-group text-left">
+              <label class="form-label">{{ lang === 'fr' ? 'E-mail d\'expédition (From Email)' : 'From Email Address' }}</label>
+              <input v-model="authConfig.smtp_from_email" type="email" class="form-input" placeholder="support@zekdrive.com" />
+            </div>
+            <div class="form-group text-left">
+              <label class="form-label">{{ lang === 'fr' ? 'Nom d\'expédition (From Name)' : 'From Name' }}</label>
+              <input v-model="authConfig.smtp_from_name" type="text" class="form-input" placeholder="ZekDrive Support" />
+            </div>
+          </div>
+          <div class="form-group text-left" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+            <input v-model="authConfig.smtp_use_tls" type="checkbox" id="smtp_use_tls" style="width: 18px; height: 18px; accent-color: var(--primary);" />
+            <label for="smtp_use_tls" class="form-label" style="margin: 0; cursor: pointer;">{{ lang === 'fr' ? 'Utiliser SSL/TLS (Sécurité requise)' : 'Use SSL/TLS Security' }}</label>
           </div>
         </div>
       </div>
@@ -315,13 +329,16 @@ const authConfig = ref({
   sms_enabled: false,
   whatsapp_enabled: true,
   email_password_enabled: true,
-  smtp_host: 'smtp.mailtrap.io',
-  smtp_port: 2525,
-  smtp_user: '',
-  smtp_password: '',
+  smtp_host: 'smtp.ionos.fr',
+  smtp_port: 465,
+  smtp_user: 'send-email@rodriguendeffo.com',
+  smtp_password: 'MdpDev55647913@#',
+  smtp_from_email: 'send-email@rodriguendeffo.com',
+  smtp_from_name: 'ZekDrive Support',
+  smtp_use_tls: true,
   whatsapp_url: 'http://openwa-api:2785',
   whatsapp_session_id: 'bdcc38d6-840f-4fce-b0b6-8365063d7fc4',
-  whatsapp_api_key: '',
+  whatsapp_api_key: 'owa_k1_eee56788a1354467c70629006b57db1e97c8f4988d4f8bab1cb415faf2067d5e',
   sms_provider: 'twilio',
   sms_api_key: '',
   sms_api_secret: '',

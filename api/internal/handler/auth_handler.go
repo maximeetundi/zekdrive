@@ -178,6 +178,15 @@ func (h *AuthHandler) VerifyWhatsAppOTP(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse request body"})
 	}
 
+	// Map role dynamically if empty
+	if req.Role == "" {
+		if strings.Contains(c.Path(), "/customer/") {
+			req.Role = "rider"
+		} else if strings.Contains(c.Path(), "/driver/") {
+			req.Role = "pro"
+		}
+	}
+
 	if err := h.validate.Struct(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}

@@ -353,6 +353,23 @@ func (s *authService) VerifyWhatsAppOTP(ctx context.Context, req *domain.VerifyW
 		if err := s.userRepo.Create(ctx, u); err != nil {
 			return nil, err
 		}
+
+		// Auto-create matching driver profile if role is driver or pro
+		if u.Role == domain.RoleDriver || u.Role == domain.RolePro {
+			d := &domain.Driver{
+				ID:            uuid.New(),
+				UserID:        u.ID,
+				LicenseNumber: u.Phone,
+				Status:        domain.DriverStatusOffline,
+				Rating:        5.00,
+				Country:       "",
+				KycStatus:     "pending",
+				KycDocument:   "",
+				CreatedAt:     now,
+				UpdatedAt:     now,
+			}
+			_ = s.driverRepo.Create(ctx, d)
+		}
 	}
 
 	accessToken, err := s.generateToken(u, false)

@@ -88,7 +88,38 @@ func (s *driverService) GetByID(ctx context.Context, id uuid.UUID) (*domain.Driv
 }
 
 func (s *driverService) GetByUserID(ctx context.Context, userID uuid.UUID) (*domain.Driver, error) {
-	return s.driverRepo.GetByUserID(ctx, userID)
+	d, err := s.driverRepo.GetByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if d == nil {
+		// Self-healing: if the user exists and has driver/pro role, create the driver record automatically!
+		u, err := s.userRepo.GetByID(ctx, userID)
+		if err == nil && u != nil && (u.Role == domain.RoleDriver || u.Role == domain.RolePro) {
+			now := time.Now()
+			licenseNum := u.Phone
+			if licenseNum == "" {
+				licenseNum = "AUTO-" + u.ID.String()[:8]
+			}
+			d = &domain.Driver{
+				ID:            uuid.New(),
+				UserID:        userID,
+				LicenseNumber: licenseNum,
+				Status:        domain.DriverStatusOffline,
+				Rating:        5.00,
+				Country:       "",
+				KycStatus:     "pending",
+				KycDocument:   "",
+				CreatedAt:     now,
+				UpdatedAt:     now,
+			}
+			err = s.driverRepo.Create(ctx, d)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return d, nil
 }
 
 func (s *driverService) UpdateLocation(ctx context.Context, driverID uuid.UUID, lat, lng float64) error {

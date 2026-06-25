@@ -118,7 +118,7 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	app.Post("/api/customer/auth/send-otp", r.authHandler.SendWhatsAppOTP)
 	app.Post("/api/customer/auth/otp-verification", r.authHandler.VerifyWhatsAppOTP)
 
-	app.Post("/api/driver/auth/registration", r.driverHandler.Register)
+	app.Post("/api/driver/auth/registration", r.authHandler.Register)
 	app.Post("/api/driver/auth/login", r.authHandler.Login)
 	app.Post("/api/driver/auth/send-otp", r.authHandler.SendWhatsAppOTP)
 	app.Post("/api/driver/auth/otp-verification", r.authHandler.VerifyWhatsAppOTP)

@@ -22,9 +22,67 @@ func NewAuthHandler(authService service.AuthService) *AuthHandler {
 }
 
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
-	var req domain.RegisterRequest
-	if err := c.BodyParser(&req); err != nil {
+	var raw map[string]interface{}
+	if err := c.BodyParser(&raw); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse request body"})
+	}
+
+	var req domain.RegisterRequest
+	_ = c.BodyParser(&req)
+
+	// Map first_name and last_name to Name if Name is empty
+	if req.Name == "" {
+		firstName, _ := raw["first_name"].(string)
+		lastName, _ := raw["last_name"].(string)
+		if firstName != "" || lastName != "" {
+			req.Name = strings.TrimSpace(firstName + " " + lastName)
+		}
+	}
+
+	// Map phone from raw body if phone is empty
+	if req.Phone == "" {
+		phone, _ := raw["phone"].(string)
+		req.Phone = phone
+	}
+
+	// Generate a fallback unique email if not provided (common for User app WhatsApp-only signup)
+	if req.Email == "" {
+		email, _ := raw["email"].(string)
+		if email != "" {
+			req.Email = email
+		} else if req.Phone != "" {
+			cleanPhone := strings.TrimPrefix(req.Phone, "+")
+			req.Email = cleanPhone + "@zekdrive.local"
+		}
+	}
+
+	// Map role based on request path if role is empty or not standard
+	if req.Role == "" {
+		role, _ := raw["role"].(string)
+		if role != "" {
+			req.Role = domain.UserRole(role)
+		} else {
+			if strings.Contains(c.Path(), "/customer/") {
+				req.Role = "rider"
+			} else if strings.Contains(c.Path(), "/driver/") {
+				req.Role = "pro"
+				req.ProProfiles = "driver"
+			}
+		}
+	}
+
+	// Ensure password is mapped
+	if req.Password == "" {
+		password, _ := raw["password"].(string)
+		req.Password = password
+	}
+
+	// Map identification type and number
+	if req.IdentificationType == "" {
+		req.IdentificationType, _ = raw["identification_type"].(string)
+	}
+	if req.IdentificationNumber == "" {
+		req.IdentificationNumber, _ = raw["identification_number"].(string)
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
@@ -37,12 +95,12 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	}
 
 	if strings.Contains(c.Path(), "/customer/") || strings.Contains(c.Path(), "/driver/") {
-		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"data": u,
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(u)
+	return c.Status(fiber.StatusOK).JSON(u)
 }
 
 func (h *AuthHandler) Login(c *fiber.Ctx) error {

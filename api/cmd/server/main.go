@@ -106,7 +106,7 @@ func main() {
 	walletRepo  := repository.NewWalletRepository(pgDB)
 
 	// 5. Initialize Services
-	authService := service.NewAuthService(cfg, userRepo, redisClient)
+	authService := service.NewAuthService(cfg, userRepo, driverRepo, redisClient)
 	userService := service.NewUserService(userRepo)
 	driverService := service.NewDriverService(driverRepo, userRepo, redisClient)
 	geoService := service.NewGeoService()

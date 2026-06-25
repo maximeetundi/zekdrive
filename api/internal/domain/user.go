@@ -35,12 +35,14 @@ type User struct {
 }
 
 type RegisterRequest struct {
-	Name        string         `json:"name" validate:"required,min=2,max=100"`
-	Email       string         `json:"email" validate:"required,email"`
-	Password    string         `json:"password" validate:"required,min=6"`
-	Phone       string         `json:"phone" validate:"required,min=8,max=20"`
-	Role        UserRole       `json:"role" validate:"required,oneof=rider driver admin store pro"`
-	ProProfiles string         `json:"pro_profiles"` // e.g. "driver" or "driver,fleet_owner" or "merchant"
+	Name                 string         `json:"name" validate:"required,min=2,max=100"`
+	Email                string         `json:"email" validate:"required,email"`
+	Password             string         `json:"password" validate:"required,min=6"`
+	Phone                string         `json:"phone" validate:"required,min=8,max=20"`
+	Role                 UserRole       `json:"role" validate:"required,oneof=rider driver admin store pro"`
+	ProProfiles          string         `json:"pro_profiles"` // e.g. "driver" or "driver,fleet_owner" or "merchant"
+	IdentificationType   string         `json:"identification_type"`
+	IdentificationNumber string         `json:"identification_number"`
 }
 
 type LoginRequest struct {

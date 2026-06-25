@@ -36,16 +36,18 @@ type authClaims struct {
 }
 
 type authService struct {
-	cfg      *config.Config
-	userRepo domain.UserRepository
-	redis    *database.RedisClient
+	cfg        *config.Config
+	userRepo   domain.UserRepository
+	driverRepo domain.DriverRepository
+	redis      *database.RedisClient
 }
 
-func NewAuthService(cfg *config.Config, userRepo domain.UserRepository, redis *database.RedisClient) AuthService {
+func NewAuthService(cfg *config.Config, userRepo domain.UserRepository, driverRepo domain.DriverRepository, redis *database.RedisClient) AuthService {
 	return &authService{
-		cfg:      cfg,
-		userRepo: userRepo,
-		redis:    redis,
+		cfg:        cfg,
+		userRepo:   userRepo,
+		driverRepo: driverRepo,
+		redis:      redis,
 	}
 }
 
@@ -87,6 +89,29 @@ func (s *authService) Register(ctx context.Context, req *domain.RegisterRequest)
 
 	if err := s.userRepo.Create(ctx, u); err != nil {
 		return nil, err
+	}
+
+	// Auto-create matching driver profile if role is driver or pro
+	if req.Role == domain.RoleDriver || req.Role == domain.RolePro {
+		licenseNum := req.IdentificationNumber
+		if licenseNum == "" {
+			licenseNum = req.Phone
+		}
+
+		d := &domain.Driver{
+			ID:            uuid.New(),
+			UserID:        u.ID,
+			LicenseNumber: licenseNum,
+			Status:        domain.DriverStatusOffline,
+			Rating:        5.00,
+			Country:       "",
+			KycStatus:     "pending",
+			KycDocument:   "",
+			CreatedAt:     now,
+			UpdatedAt:     now,
+		}
+
+		_ = s.driverRepo.Create(ctx, d)
 	}
 
 	return u, nil

@@ -245,20 +245,39 @@ func (s *authService) generateToken(u *domain.User, isRefresh bool) (string, err
 }
 
 func (s *authService) getAuthConfig(ctx context.Context) map[string]interface{} {
-	setting, err := s.settingRepo.GetByKey(ctx, "auth_config")
-	if err == nil && setting != nil {
-		if configMap, ok := setting.LiveValues.(map[string]interface{}); ok {
-			return configMap
+	cacheKey := "config:auth"
+	if cachedVal, err := s.redis.Get(ctx, cacheKey).Result(); err == nil && cachedVal != "" {
+		var cachedConfig map[string]interface{}
+		if err := json.Unmarshal([]byte(cachedVal), &cachedConfig); err == nil {
+			return cachedConfig
 		}
 	}
-	// Return defaults matching config/environment variables
-	return map[string]interface{}{
-		"whatsapp_url":        s.cfg.WhatsAppURL,
-		"whatsapp_session_id": s.cfg.WhatsAppSessionID,
-		"whatsapp_api_key":    s.cfg.WhatsAppAPIKey,
-		"sms_enabled":         false,
-		"whatsapp_enabled":    true,
+
+	var configMap map[string]interface{}
+	setting, err := s.settingRepo.GetByKey(ctx, "auth_config")
+	if err == nil && setting != nil {
+		if cm, ok := setting.LiveValues.(map[string]interface{}); ok {
+			configMap = cm
+		}
 	}
+
+	if configMap == nil {
+		// Return defaults matching config/environment variables
+		configMap = map[string]interface{}{
+			"whatsapp_url":        s.cfg.WhatsAppURL,
+			"whatsapp_session_id": s.cfg.WhatsAppSessionID,
+			"whatsapp_api_key":    s.cfg.WhatsAppAPIKey,
+			"sms_enabled":         false,
+			"whatsapp_enabled":    true,
+		}
+	}
+
+	// Cache in Redis for 1 minute to make future lookups instant
+	if configBytes, err := json.Marshal(configMap); err == nil {
+		_ = s.redis.Set(ctx, cacheKey, string(configBytes), 1*time.Minute).Err()
+	}
+
+	return configMap
 }
 
 func (s *authService) SendWhatsAppOTP(ctx context.Context, req *domain.SendWhatsAppOTPRequest) error {

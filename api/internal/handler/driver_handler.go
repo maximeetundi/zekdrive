@@ -76,8 +76,49 @@ func (h *DriverHandler) GetMe(c *fiber.Ctx) error {
 	}
 
 	if strings.Contains(c.Path(), "/customer/") || strings.Contains(c.Path(), "/driver/") {
+		firstName := d.User.Name
+		lastName := ""
+		parts := strings.SplitN(d.User.Name, " ", 2)
+		if len(parts) > 0 {
+			firstName = parts[0]
+		}
+		if len(parts) > 1 {
+			lastName = parts[1]
+		}
+
+		profileData := fiber.Map{
+			"id":                     d.ID.String(),
+			"first_name":             firstName,
+			"last_name":              lastName,
+			"phone":                  d.User.Phone,
+			"email":                  d.User.Email,
+			"identification_number":  d.LicenseNumber,
+			"identification_type":    "identity_card",
+			"profile_image":          "",
+			"user_type":              "driver",
+			"details": fiber.Map{
+				"id":        d.ID.String(),
+				"user_id":   d.UserID.String(),
+				"is_online": "0",
+			},
+			"wallet": fiber.Map{
+				"id":            d.ID.String(),
+				"driver_id":     d.ID.String(),
+				"balance":       d.WalletBalance,
+				"currency_code": d.WalletCurrency,
+			},
+			"loyalty_points": 0.0,
+			"rating":         d.Rating,
+		}
+
+		if d.Status == domain.DriverStatusOnline {
+			profileData["details"].(fiber.Map)["is_online"] = "1"
+		}
+
 		return c.JSON(fiber.Map{
-			"data": d,
+			"response_code": "200",
+			"message":       "success",
+			"data":          profileData,
 		})
 	}
 

@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing_user_app/features/auth/screens/otp_log_in_screen.dart';
 import 'package:ride_sharing_user_app/features/auth/screens/forgot_password_screen.dart';
+import 'package:ride_sharing_user_app/features/auth/screens/verification_screen.dart';
 import 'package:ride_sharing_user_app/helper/display_helper.dart';
 import 'package:ride_sharing_user_app/util/app_constants.dart';
 import 'package:ride_sharing_user_app/util/dimensions.dart';
@@ -192,62 +193,69 @@ class _SignInScreenState extends State<SignInScreen> {
                     nextFocus: passwordNode,
                     inputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: Dimensions.paddingSizeDefault,),
-                  CustomTextField(
-                    hintText: 'enter_password'.tr,
-                    inputType: TextInputType.text,
-                    prefixIcon: Images.lock,
-                    prefixHeight: 70,
-                    inputAction: TextInputAction.done,
-                    isPassword: true,
-                    controller: passwordController,
-                    focusNode: passwordNode,
-                  ),
-
-                  Row(children: [
-                    Expanded(child: ListTile(
-                      onTap: () => authController.toggleRememberMe(),
-                      title: Row(children: [
-                        SizedBox(width: 20.0, child: Checkbox(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                          value: authController.isActiveRememberMe,
-                          onChanged: (bool? isChecked) => authController.toggleRememberMe(),
-                        )),
-                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                        Text('remember'.tr, style: textRegular.copyWith(fontSize: Dimensions.fontSizeSmall)),
-                      ]),
-                      contentPadding: EdgeInsets.zero,
-                      dense: true,
-                      horizontalTitleGap: 0,
-                    )),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          Get.to(() => const ForgotPasswordScreen());
-                        },
-                        child: Text('forgot_password'.tr, style: textRegular.copyWith(
-                          fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor,
-                        )),
-                      ),
+                  if (!_isWhatsAppPhone) ...[
+                    const SizedBox(height: Dimensions.paddingSizeDefault,),
+                    CustomTextField(
+                      hintText: 'enter_password'.tr,
+                      inputType: TextInputType.text,
+                      prefixIcon: Images.lock,
+                      prefixHeight: 70,
+                      inputAction: TextInputAction.done,
+                      isPassword: true,
+                      controller: passwordController,
+                      focusNode: passwordNode,
                     ),
-                  ]),
+
+                    Row(children: [
+                      Expanded(child: ListTile(
+                        onTap: () => authController.toggleRememberMe(),
+                        title: Row(children: [
+                          SizedBox(width: 20.0, child: Checkbox(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                            value: authController.isActiveRememberMe,
+                            onChanged: (bool? isChecked) => authController.toggleRememberMe(),
+                          )),
+                          const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                          Text('remember'.tr, style: textRegular.copyWith(fontSize: Dimensions.fontSizeSmall)),
+                        ]),
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        horizontalTitleGap: 0,
+                      )),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            Get.to(() => const ForgotPasswordScreen());
+                          },
+                          child: Text('forgot_password'.tr, style: textRegular.copyWith(
+                            fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor,
+                          )),
+                        ),
+                      ),
+                    ]),
+                  ],
 
                   authController.isLoading ?  Center(child: SpinKitCircle(color: Theme.of(context).primaryColor, size: 40.0,)) : ButtonWidget(
-                    buttonText: 'log_in'.tr,
+                    buttonText: _isWhatsAppPhone ? 'Se connecter via WhatsApp' : 'log_in'.tr,
                     onPressed: () {
                       String input = phoneController.text.trim();
                       String password = passwordController.text.trim();
 
                       if (_isWhatsAppPhone) {
-                        if(!GetUtils.isPhoneNumber(authController.countryDialCode + input)) {
+                        if (input.isEmpty) {
+                          showCustomSnackBar('enter_your_phone_number'.tr);
+                        } else if(!GetUtils.isPhoneNumber(authController.countryDialCode + input)) {
                           showCustomSnackBar('phone_number_is_not_valid'.tr);
-                        } else if(password.isEmpty) {
-                          showCustomSnackBar('password_is_required'.tr);
-                        } else if(password.length < 8) {
-                          showCustomSnackBar('minimum_password_length_is_8'.tr);
                         } else {
-                          authController.login(authController.countryDialCode, input, password);
+                          authController.sendOtp(authController.countryDialCode + input).then((value) {
+                            if (value.statusCode == 200) {
+                              Get.to(() => VerificationScreen(
+                                number: authController.countryDialCode + input,
+                                fromOtpLogin: true,
+                              ));
+                            }
+                          });
                         }
                       } else {
                         if(!GetUtils.isEmail(input)) {

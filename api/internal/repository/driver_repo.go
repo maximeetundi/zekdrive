@@ -49,13 +49,48 @@ func (r *driverRepo) GetByUserID(ctx context.Context, userID uuid.UUID) (*domain
 			d.id, d.user_id, d.license_number, d.status, d.rating, d.country, d.kyc_status, d.kyc_document, d.created_at, d.updated_at,
 			ST_Y(d.location::geometry) as latitude,
 			ST_X(d.location::geometry) as longitude,
-			u.id as "user_id_fk", u.name, u.email, u.phone, u.role
+			u.id as "user_id_fk", u.name, u.email, u.phone, u.role,
+			COALESCE(w.balance, 0.00) as wallet_balance,
+			COALESCE(w.currency_code, 'XOF') as wallet_currency
 		FROM drivers d
 		JOIN users u ON d.user_id = u.id
+		LEFT JOIN driver_wallets w ON w.driver_id = d.id
 		WHERE d.user_id = $1
 	`
 	row := r.db.QueryRowContext(ctx, query, userID)
-	return scanDriver(row)
+	
+	var d domain.Driver
+	var u domain.User
+	var lat, lng sql.NullFloat64
+	var userIDFk uuid.UUID
+	var walletBal float64
+	var walletCurr string
+
+	err := row.Scan(
+		&d.ID, &d.UserID, &d.LicenseNumber, &d.Status, &d.Rating, &d.Country, &d.KycStatus, &d.KycDocument, &d.CreatedAt, &d.UpdatedAt,
+		&lat, &lng,
+		&userIDFk, &u.Name, &u.Email, &u.Phone, &u.Role,
+		&walletBal, &walletCurr,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	if lat.Valid {
+		d.Latitude = &lat.Float64
+	}
+	if lng.Valid {
+		d.Longitude = &lng.Float64
+	}
+
+	u.ID = userIDFk
+	d.User = &u
+	d.WalletBalance = walletBal
+	d.WalletCurrency = walletCurr
+	return &d, nil
 }
 
 func (r *driverRepo) Update(ctx context.Context, d *domain.Driver) error {

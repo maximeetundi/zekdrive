@@ -30,8 +30,10 @@ type Driver struct {
 	UpdatedAt     time.Time    `json:"updated_at" db:"updated_at"`
 
 	// Joined fields
-	User    *User    `json:"user,omitempty"`
-	Vehicle *Vehicle `json:"vehicle,omitempty"`
+	User           *User    `json:"user,omitempty"`
+	Vehicle        *Vehicle `json:"vehicle,omitempty"`
+	WalletBalance  float64  `json:"wallet_balance,omitempty"`
+	WalletCurrency string   `json:"wallet_currency,omitempty"`
 }
 
 type UpdateLocationRequest struct {

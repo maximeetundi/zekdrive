@@ -57,6 +57,9 @@ func (h *MapHandler) Geocode(c *fiber.Ctx) error {
 
 	var result struct {
 		DisplayName string `json:"display_name"`
+		Address     struct {
+			CountryCode string `json:"country_code"`
+		} `json:"address"`
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
@@ -68,6 +71,7 @@ func (h *MapHandler) Geocode(c *fiber.Ctx) error {
 		"response_code": "200",
 		"message":       "success",
 		"data": fiber.Map{
+			"country_code": strings.ToUpper(result.Address.CountryCode),
 			"results": []fiber.Map{
 				{
 					"formatted_address": result.DisplayName,

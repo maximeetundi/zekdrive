@@ -19,6 +19,7 @@ import 'package:ride_sharing_user_app/features/map/controllers/map_controller.da
 import 'package:ride_sharing_user_app/features/parcel/controllers/parcel_controller.dart';
 import 'package:ride_sharing_user_app/helper/display_helper.dart';
 import 'package:ride_sharing_user_app/util/images.dart';
+import 'package:ride_sharing_user_app/features/settings/controllers/country_controller.dart';
 
 enum LocationType {
   from,
@@ -337,6 +338,29 @@ class LocationController extends GetxController implements GetxService {
     return address;
   }
 
+  void _updateCountryFromGeocode(Response response) {
+    try {
+      if (response.body != null && response.body['data'] != null) {
+        String? serverCountryCode = response.body['data']['country_code'];
+        if (serverCountryCode != null && serverCountryCode.isNotEmpty) {
+          final countryController = Get.find<CountryController>();
+          if (countryController.selectedCountry?.code.toLowerCase() != serverCountryCode.toLowerCase()) {
+            final match = countryController.countries.firstWhereOrNull(
+              (c) => c.code.toLowerCase() == serverCountryCode.toLowerCase(),
+            );
+            if (match != null) {
+              countryController.selectCountry(match);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error updating country from geocode: $e");
+      }
+    }
+  }
+
   Future<String> initAddressAddressFromGeocode(LatLng latLng) async {
     Response response =
         await locationServiceInterface.getAddressFromGeocode(latLng);
@@ -348,6 +372,7 @@ class LocationController extends GetxController implements GetxService {
           latitude: latLng.latitude,
           longitude: latLng.longitude,
           address: _address);
+      _updateCountryFromGeocode(response);
     } else {
       customSnackBar(
           response.body['errors'][0]['message'] ?? response.bodyString);
@@ -362,6 +387,7 @@ class LocationController extends GetxController implements GetxService {
     if (response.statusCode == 200) {
       _address =
           response.body['data']['results'][0]['formatted_address'].toString();
+      _updateCountryFromGeocode(response);
     } else {
       customSnackBar(
           response.body['errors'][0]['message'] ?? response.bodyString);

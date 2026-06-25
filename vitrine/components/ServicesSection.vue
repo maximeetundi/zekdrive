@@ -36,6 +36,20 @@ const services = computed(() => [
     tag: t('services.delivery_tag'),
     color: '#f59e0b',
   },
+  {
+    icon: '🍔',
+    title: t('services.food_title'),
+    desc: t('services.food_desc'),
+    tag: t('services.food_tag'),
+    color: '#ef4444',
+  },
+  {
+    icon: '🛍️',
+    title: t('services.shop_title'),
+    desc: t('services.shop_desc'),
+    tag: t('services.shop_tag'),
+    color: '#ec4899',
+  },
 ])
 
 onMounted(() => {

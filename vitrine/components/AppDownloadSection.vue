@@ -53,6 +53,35 @@ onMounted(() => {
             </a>
           </div>
 
+          <div style="margin-top: 24px; margin-bottom: 32px;">
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+              {{ t('download.direct_apk_title') }}
+            </p>
+            <div class="app-buttons" style="gap: 12px; flex-wrap: wrap;">
+              <!-- APK Passager -->
+              <a href="/apks/zekdrive-user.apk" download class="app-btn app-btn-white" style="border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2c5.522 0 10 4.477 10 9.998 0 2.277-.76 4.375-2.033 6.065l1.642 2.844a.5.5 0 0 1-.866.5l-1.666-2.887A9.945 9.945 0 0 1 12 21.996a9.945 9.945 0 0 1-7.077-3.476l-1.666 2.887a.5.5 0 1 1-.866-.5l1.642-2.844A9.976 9.976 0 0 1 2 11.998C2 6.477 6.478 2 12 2zm-4.5 12a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm9 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+                </svg>
+                <div class="app-btn-label">
+                  <span>{{ t('download.apk_passenger_lbl') }}</span>
+                  <span>APK Passager</span>
+                </div>
+              </a>
+
+              <!-- APK Chauffeur -->
+              <a href="/apks/zekdrive-chauffeur.apk" download class="app-btn app-btn-white" style="border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2c5.522 0 10 4.477 10 9.998 0 2.277-.76 4.375-2.033 6.065l1.642 2.844a.5.5 0 0 1-.866.5l-1.666-2.887A9.945 9.945 0 0 1 12 21.996a9.945 9.945 0 0 1-7.077-3.476l-1.666 2.887a.5.5 0 1 1-.866-.5l1.642-2.844A9.976 9.976 0 0 1 2 11.998C2 6.477 6.478 2 12 2zm-4.5 12a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm9 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+                </svg>
+                <div class="app-btn-label">
+                  <span>{{ t('download.apk_driver_lbl') }}</span>
+                  <span>APK Chauffeur</span>
+                </div>
+              </a>
+            </div>
+          </div>
+
           <ul class="app-features-list">
             <li class="app-feature-item">
               <div class="app-feature-check">✓</div>

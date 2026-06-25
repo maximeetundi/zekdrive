@@ -110,9 +110,52 @@ func (s *settingService) GetSettings(ctx context.Context) (map[string]interface{
 		}
 	}
 
+	// 3. Fetch Auth Config
+	authConfigSetting, err := s.settingRepo.GetByKey(ctx, "auth_config")
+	if err != nil {
+		return nil, err
+	}
+
+	var authConfig interface{}
+	if authConfigSetting == nil {
+		authConfig = map[string]interface{}{
+			"sms_enabled":             false,
+			"whatsapp_enabled":        true,
+			"email_password_enabled": true,
+			"smtp_host":               "smtp.mailtrap.io",
+			"smtp_port":               2525,
+			"smtp_user":               "user_name_here",
+			"smtp_password":           "password_here",
+			"whatsapp_url":            "http://openwa-api:2785",
+			"whatsapp_session_id":     "bdcc38d6-840f-4fce-b0b6-8365063d7fc4",
+			"whatsapp_api_key":        "owa_k1_eee56788a1354467c70629006b57db1e97c8f4988d4f8bab1cb415faf2067d5e",
+			"sms_provider":            "twilio",
+			"sms_api_key":             "your_twilio_sid",
+			"sms_api_secret":          "your_twilio_token",
+			"sms_sender":              "+1234567890",
+		}
+		now := time.Now()
+		newSetting := &domain.Setting{
+			ID:           uuid.New(),
+			KeyName:      "auth_config",
+			LiveValues:   authConfig,
+			TestValues:   authConfig,
+			SettingsType: "auth_config",
+			Mode:         "test",
+			IsActive:     true,
+			CreatedAt:    now,
+			UpdatedAt:    now,
+		}
+		_ = s.settingRepo.Upsert(ctx, newSetting)
+		authConfig = newSetting.LiveValues
+	} else {
+		authConfig = authConfigSetting.LiveValues
+	}
+
 	return map[string]interface{}{
-		"app_config": appConfig,
-		"gateways":   gateways,
+		"app_config":  appConfig,
+		"gateways":    gateways,
+		"auth_config": authConfig,
 	}, nil
 }
 
@@ -186,6 +229,32 @@ func (s *settingService) SaveSettings(ctx context.Context, data map[string]inter
 					_ = s.settingRepo.Upsert(ctx, gwSetting)
 				}
 			}
+		}
+	}
+
+	// 3. Save Auth Config
+	if authConfig, ok := data["auth_config"]; ok {
+		existing, _ := s.settingRepo.GetByKey(ctx, "auth_config")
+		var id uuid.UUID
+		if existing != nil {
+			id = existing.ID
+		} else {
+			id = uuid.New()
+		}
+
+		authSetting := &domain.Setting{
+			ID:           id,
+			KeyName:      "auth_config",
+			LiveValues:   authConfig,
+			TestValues:   authConfig,
+			SettingsType: "auth_config",
+			Mode:         "live",
+			IsActive:     true,
+			CreatedAt:    now,
+			UpdatedAt:    now,
+		}
+		if err := s.settingRepo.Upsert(ctx, authSetting); err != nil {
+			return err
 		}
 	}
 

@@ -29,9 +29,10 @@ type User struct {
 	KycDocument string    `json:"kyc_document" db:"kyc_document"`
 	// ProProfiles: comma-separated active Pro sub-profiles ("driver", "fleet_owner", "merchant")
 	// Only relevant when Role == "pro" (or legacy "driver"/"store")
-	ProProfiles string    `json:"pro_profiles" db:"pro_profiles"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
+	ProProfiles     string    `json:"pro_profiles" db:"pro_profiles"`
+	IsPhoneVerified bool      `json:"is_phone_verified" db:"is_phone_verified"`
+	CreatedAt       time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at" db:"updated_at"`
 }
 
 type RegisterRequest struct {

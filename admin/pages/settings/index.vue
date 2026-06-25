@@ -30,6 +30,9 @@
       <button class="tab-item" :class="{ active: activeTab === 'gateways' }" @click="activeTab = 'gateways'">
         {{ lang === 'fr' ? 'Passerelles de paiement' : 'Payment Gateways' }}
       </button>
+      <button class="tab-item" :class="{ active: activeTab === 'auth' }" @click="activeTab = 'auth'">
+        {{ lang === 'fr' ? 'Authentification & OTP' : 'Auth & OTP Settings' }}
+      </button>
       <button class="tab-item" :class="{ active: activeTab === 'audit' }" @click="activeTab = 'audit'">
         {{ lang === 'fr' ? 'Sécurité & Audit' : 'Security & System Audit' }}
       </button>
@@ -120,6 +123,134 @@
       </div>
     </div>
 
+    <!-- Auth & OTP Settings Tab Content -->
+    <div v-else-if="activeTab === 'auth'" class="flex flex-col gap-6 animate-slide-up" style="margin-bottom: 2rem;">
+      <!-- Providers Enable Card -->
+      <div class="card">
+        <div class="card-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); text-align: left;">
+          <h3 class="text-base font-semibold">{{ lang === 'fr' ? 'Méthodes de connexion autorisées' : 'Allowed Authentication Methods' }}</h3>
+        </div>
+        <div class="card-body" style="padding: 1.5rem; text-align: left;">
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <!-- Email & Password -->
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h4 class="text-sm font-medium">{{ lang === 'fr' ? 'Email & Mot de passe' : 'Email & Password Authentication' }}</h4>
+                <p class="text-xs text-muted">{{ lang === 'fr' ? 'Permet aux utilisateurs de se connecter via Email/Password standard.' : 'Allows users to sign in using standard email and password credentials.' }}</p>
+              </div>
+              <div class="toggle-switch" :class="{ on: authConfig.email_password_enabled }" @click="authConfig.email_password_enabled = !authConfig.email_password_enabled">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <!-- WhatsApp OTP -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 1rem;">
+              <div>
+                <h4 class="text-sm font-medium">{{ lang === 'fr' ? 'WhatsApp OTP (Sans mot de passe)' : 'WhatsApp OTP (Passwordless)' }}</h4>
+                <p class="text-xs text-muted">{{ lang === 'fr' ? 'Envoie un code OTP à 6 chiffres via WhatsApp (OpenWA).' : 'Sends a 6-digit OTP code to the user\'s WhatsApp phone number.' }}</p>
+              </div>
+              <div class="toggle-switch" :class="{ on: authConfig.whatsapp_enabled }" @click="authConfig.whatsapp_enabled = !authConfig.whatsapp_enabled">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <!-- SMS OTP -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 1rem;">
+              <div>
+                <h4 class="text-sm font-medium">{{ lang === 'fr' ? 'SMS OTP (Téléphone classique)' : 'SMS OTP (Classic Mobile)' }}</h4>
+                <p class="text-xs text-muted">{{ lang === 'fr' ? 'Envoie un code OTP par SMS via Twilio ou Nexmo.' : 'Sends a classic SMS OTP code using Twilio or Nexmo API gateways.' }}</p>
+              </div>
+              <div class="toggle-switch" :class="{ on: authConfig.sms_enabled }" @click="authConfig.sms_enabled = !authConfig.sms_enabled">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WhatsApp Gateway Details -->
+      <div v-if="authConfig.whatsapp_enabled" class="card animate-slide-up">
+        <div class="card-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); text-align: left;">
+          <h3 class="text-base font-semibold">{{ lang === 'fr' ? 'Configuration OpenWA WhatsApp Gateway' : 'OpenWA WhatsApp Gateway Configuration' }}</h3>
+        </div>
+        <div class="card-body" style="padding: 1.5rem; text-align: left;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;" class="modal-form-grid">
+            <div class="form-group text-left">
+              <label class="form-label">{{ lang === 'fr' ? 'URL du serveur OpenWA' : 'OpenWA Server URL' }}</label>
+              <input v-model="authConfig.whatsapp_url" type="text" class="form-input" placeholder="http://openwa-api:2785" />
+            </div>
+            <div class="form-group text-left">
+              <label class="form-label">{{ lang === 'fr' ? 'ID de Session OpenWA' : 'OpenWA Session ID' }}</label>
+              <input v-model="authConfig.whatsapp_session_id" type="text" class="form-input" placeholder="Session-UUID-Here" />
+            </div>
+          </div>
+          <div class="form-group text-left">
+            <label class="form-label">{{ lang === 'fr' ? 'Clé API OpenWA (x-api-key)' : 'OpenWA API Key (x-api-key)' }}</label>
+            <input v-model="authConfig.whatsapp_api_key" type="password" class="form-input" placeholder="••••••••••••••••••••••••" />
+          </div>
+        </div>
+      </div>
+
+      <!-- SMTP Gateway Details -->
+      <div v-if="authConfig.email_password_enabled" class="card animate-slide-up">
+        <div class="card-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); text-align: left;">
+          <h3 class="text-base font-semibold">{{ lang === 'fr' ? 'Configuration Serveur SMTP (E-mail)' : 'SMTP Mail Server Configuration' }}</h3>
+        </div>
+        <div class="card-body" style="padding: 1.5rem; text-align: left;">
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1rem;" class="modal-form-grid">
+            <div class="form-group text-left">
+              <label class="form-label">{{ lang === 'fr' ? 'Hôte SMTP' : 'SMTP Server Hostname' }}</label>
+              <input v-model="authConfig.smtp_host" type="text" class="form-input" placeholder="smtp.mailtrap.io" />
+            </div>
+            <div class="form-group text-left">
+              <label class="form-label">{{ lang === 'fr' ? 'Port SMTP' : 'SMTP Port' }}</label>
+              <input v-model.number="authConfig.smtp_port" type="number" class="form-input" placeholder="2525" />
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" class="modal-form-grid">
+            <div class="form-group text-left">
+              <label class="form-label">{{ lang === 'fr' ? 'Nom d\'utilisateur' : 'SMTP Auth Username' }}</label>
+              <input v-model="authConfig.smtp_user" type="text" class="form-input" />
+            </div>
+            <div class="form-group text-left">
+              <label class="form-label">{{ lang === 'fr' ? 'Mot de passe SMTP' : 'SMTP Auth Password' }}</label>
+              <input v-model="authConfig.smtp_password" type="password" class="form-input" placeholder="••••••••••••" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SMS Gateway Details -->
+      <div v-if="authConfig.sms_enabled" class="card animate-slide-up">
+        <div class="card-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); text-align: left;">
+          <h3 class="text-base font-semibold">{{ lang === 'fr' ? 'Configuration Passerelle SMS' : 'SMS API Gateway Configuration' }}</h3>
+        </div>
+        <div class="card-body" style="padding: 1.5rem; text-align: left;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;" class="modal-form-grid">
+            <div class="form-group text-left">
+              <label class="form-label">{{ lang === 'fr' ? 'Fournisseur SMS' : 'SMS Provider Gateway' }}</label>
+              <select v-model="authConfig.sms_provider" class="form-select">
+                <option value="twilio">Twilio SMS API</option>
+                <option value="nexmo">Vonage / Nexmo API</option>
+              </select>
+            </div>
+            <div class="form-group text-left">
+              <label class="form-label">{{ lang === 'fr' ? 'Numéro d\'expéditeur / ID' : 'SMS Sender Phone / ID' }}</label>
+              <input v-model="authConfig.sms_sender" type="text" class="form-input" placeholder="+1234567890" />
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" class="modal-form-grid">
+            <div class="form-group text-left">
+              <label class="form-label">{{ lang === 'fr' ? 'Clé API / SID Compte' : 'SMS API Key / Account SID' }}</label>
+              <input v-model="authConfig.sms_api_key" type="text" class="form-input" />
+            </div>
+            <div class="form-group text-left">
+              <label class="form-label">{{ lang === 'fr' ? 'Secret API / Jeton d\'authentification' : 'SMS API Secret / Auth Token' }}</label>
+              <input v-model="authConfig.sms_api_secret" type="password" class="form-input" placeholder="••••••••••••••••••••••••" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 3. Security & System Audit Tab Content -->
     <div v-else class="animate-slide-up" style="margin-bottom: 2rem;">
       <div class="card">
@@ -164,7 +295,7 @@ definePageMeta({
 const { t, lang } = useI18n()
 const { get, post } = useApi()
 
-const activeTab = ref<'app' | 'gateways' | 'audit'>('app')
+const activeTab = ref<'app' | 'gateways' | 'auth' | 'audit'>('app')
 const saving = ref(false)
 const loading = ref(false)
 const saveSuccess = ref(false)
@@ -177,6 +308,24 @@ const appConfig = ref({
   supportEmail: 'support@zekdrive.com',
   supportPhone: '+221 33 800 0000',
   defaultLang: 'fr'
+})
+
+// Auth Configuration state
+const authConfig = ref({
+  sms_enabled: false,
+  whatsapp_enabled: true,
+  email_password_enabled: true,
+  smtp_host: 'smtp.mailtrap.io',
+  smtp_port: 2525,
+  smtp_user: '',
+  smtp_password: '',
+  whatsapp_url: 'http://openwa-api:2785',
+  whatsapp_session_id: 'bdcc38d6-840f-4fce-b0b6-8365063d7fc4',
+  whatsapp_api_key: '',
+  sms_provider: 'twilio',
+  sms_api_key: '',
+  sms_api_secret: '',
+  sms_sender: '+1234567890'
 })
 
 // Gateways state
@@ -225,10 +374,13 @@ const auditHeaders = computed(() => [
 
 async function loadSettings() {
   loading.value = true
-  const { data, error } = await get<{ app_config: any; gateways: any[] }>('/admin/settings')
+  const { data, error } = await get<{ app_config: any; gateways: any[]; auth_config: any }>('/admin/settings')
   if (data) {
     if (data.app_config) {
       appConfig.value = { ...appConfig.value, ...data.app_config }
+    }
+    if (data.auth_config) {
+      authConfig.value = { ...authConfig.value, ...data.auth_config }
     }
     if (data.gateways && Array.isArray(data.gateways)) {
       data.gateways.forEach((bgw: any) => {
@@ -250,7 +402,8 @@ async function saveAllSettings() {
   
   const payload = {
     app_config: appConfig.value,
-    gateways: gateways.value
+    gateways: gateways.value,
+    auth_config: authConfig.value
   }
 
   const { error } = await post('/admin/settings', payload)

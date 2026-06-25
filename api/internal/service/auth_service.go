@@ -36,18 +36,20 @@ type authClaims struct {
 }
 
 type authService struct {
-	cfg        *config.Config
-	userRepo   domain.UserRepository
-	driverRepo domain.DriverRepository
-	redis      *database.RedisClient
+	cfg         *config.Config
+	userRepo    domain.UserRepository
+	driverRepo  domain.DriverRepository
+	redis       *database.RedisClient
+	settingRepo domain.SettingRepository
 }
 
-func NewAuthService(cfg *config.Config, userRepo domain.UserRepository, driverRepo domain.DriverRepository, redis *database.RedisClient) AuthService {
+func NewAuthService(cfg *config.Config, userRepo domain.UserRepository, driverRepo domain.DriverRepository, redis *database.RedisClient, settingRepo domain.SettingRepository) AuthService {
 	return &authService{
-		cfg:        cfg,
-		userRepo:   userRepo,
-		driverRepo: driverRepo,
-		redis:      redis,
+		cfg:         cfg,
+		userRepo:    userRepo,
+		driverRepo:  driverRepo,
+		redis:       redis,
+		settingRepo: settingRepo,
 	}
 }
 
@@ -77,14 +79,15 @@ func (s *authService) Register(ctx context.Context, req *domain.RegisterRequest)
 
 	now := time.Now()
 	u := &domain.User{
-		ID:        uuid.New(),
-		Name:      req.Name,
-		Email:     req.Email,
-		Password:  string(hashedPassword),
-		Phone:     req.Phone,
-		Role:      req.Role,
-		CreatedAt: now,
-		UpdatedAt: now,
+		ID:              uuid.New(),
+		Name:            req.Name,
+		Email:           req.Email,
+		Password:        string(hashedPassword),
+		Phone:           req.Phone,
+		Role:            req.Role,
+		IsPhoneVerified: false,
+		CreatedAt:       now,
+		UpdatedAt:       now,
 	}
 
 	if err := s.userRepo.Create(ctx, u); err != nil {
@@ -241,6 +244,23 @@ func (s *authService) generateToken(u *domain.User, isRefresh bool) (string, err
 	return token.SignedString([]byte(secret))
 }
 
+func (s *authService) getAuthConfig(ctx context.Context) map[string]interface{} {
+	setting, err := s.settingRepo.GetByKey(ctx, "auth_config")
+	if err == nil && setting != nil {
+		if configMap, ok := setting.LiveValues.(map[string]interface{}); ok {
+			return configMap
+		}
+	}
+	// Return defaults matching config/environment variables
+	return map[string]interface{}{
+		"whatsapp_url":        s.cfg.WhatsAppURL,
+		"whatsapp_session_id": s.cfg.WhatsAppSessionID,
+		"whatsapp_api_key":    s.cfg.WhatsAppAPIKey,
+		"sms_enabled":         false,
+		"whatsapp_enabled":    true,
+	}
+}
+
 func (s *authService) SendWhatsAppOTP(ctx context.Context, req *domain.SendWhatsAppOTPRequest) error {
 	// Clean phone number format
 	phoneClean := req.Phone
@@ -258,13 +278,15 @@ func (s *authService) SendWhatsAppOTP(ctx context.Context, req *domain.SendWhats
 		return fmt.Errorf("failed to save OTP in redis: %w", err)
 	}
 
+	authCfg := s.getAuthConfig(ctx)
+
 	// Prepare payload for OpenWA
 	whatsappPayload := map[string]string{
 		"chatId": fmt.Sprintf("%s@c.us", phoneClean),
 		"text":   fmt.Sprintf("ZekDrive: Votre code de validation est %s. Il expire dans 5 minutes.", code),
 	}
 
-	url := fmt.Sprintf("%s/api/sessions/%s/messages/send-text", s.cfg.WhatsAppURL, s.cfg.WhatsAppSessionID)
+	url := fmt.Sprintf("%s/api/sessions/%s/messages/send-text", authCfg["whatsapp_url"], authCfg["whatsapp_session_id"])
 	payloadBytes, err := json.Marshal(whatsappPayload)
 	if err != nil {
 		return err
@@ -275,7 +297,9 @@ func (s *authService) SendWhatsAppOTP(ctx context.Context, req *domain.SendWhats
 		return err
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("x-api-key", s.cfg.WhatsAppAPIKey)
+	if apiKey, ok := authCfg["whatsapp_api_key"].(string); ok && apiKey != "" {
+		httpReq.Header.Set("x-api-key", apiKey)
+	}
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(httpReq)
@@ -340,14 +364,15 @@ func (s *authService) VerifyWhatsAppOTP(ctx context.Context, req *domain.VerifyW
 
 		now := time.Now()
 		u = &domain.User{
-			ID:        uuid.New(),
-			Name:      name,
-			Email:     email,
-			Password:  string(hashedPassword),
-			Phone:     req.Phone,
-			Role:      role,
-			CreatedAt: now,
-			UpdatedAt: now,
+			ID:              uuid.New(),
+			Name:            name,
+			Email:           email,
+			Password:        string(hashedPassword),
+			Phone:           req.Phone,
+			Role:            role,
+			IsPhoneVerified: true,
+			CreatedAt:       now,
+			UpdatedAt:       now,
 		}
 
 		if err := s.userRepo.Create(ctx, u); err != nil {
@@ -369,6 +394,12 @@ func (s *authService) VerifyWhatsAppOTP(ctx context.Context, req *domain.VerifyW
 				UpdatedAt:     now,
 			}
 			_ = s.driverRepo.Create(ctx, d)
+		}
+	} else if !u.IsPhoneVerified {
+		u.IsPhoneVerified = true
+		u.UpdatedAt = time.Now()
+		if err := s.userRepo.Update(ctx, u); err != nil {
+			return nil, err
 		}
 	}
 

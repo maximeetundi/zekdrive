@@ -123,11 +123,30 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	}
 
 	if strings.Contains(c.Path(), "/customer/") || strings.Contains(c.Path(), "/driver/") {
+		isPhoneVerified := 1
+		if !resp.User.IsPhoneVerified {
+			isPhoneVerified = 0
+			// Auto-send OTP when phone is not verified
+			otpReq := domain.SendWhatsAppOTPRequest{
+				Phone: resp.User.Phone,
+			}
+			_ = h.authService.SendWhatsAppOTP(c.Context(), &otpReq)
+
+			return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+				"data": fiber.Map{
+					"token":               resp.AccessToken,
+					"is_active":           true,
+					"is_phone_verified":   isPhoneVerified,
+					"is_profile_verified": 1,
+				},
+			})
+		}
+
 		return c.JSON(fiber.Map{
 			"data": fiber.Map{
 				"token":               resp.AccessToken,
 				"is_active":           true,
-				"is_phone_verified":   1,
+				"is_phone_verified":   isPhoneVerified,
 				"is_profile_verified": 1,
 			},
 		})

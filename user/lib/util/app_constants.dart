@@ -7,8 +7,8 @@ import 'package:ride_sharing_user_app/util/images.dart';
 class AppConstants {
   static const String appName = 'ZekDrive';
   static const String baseUrl = 'https://api.driver.maximeetundi.store';
-  static const Color lightPrimary = Color(0xFF14B19E);
-  static const Color darkPrimary = Color(0xFF00735f);
+  static const Color lightPrimary = Color(0xFFFF7A00);
+  static const Color darkPrimary = Color(0xFFE65100);
   static const String fontFamily = 'SFProText';
   static const double coverageRadiusInMeter = 50;
   static const String configUri = '/api/customer/configuration';

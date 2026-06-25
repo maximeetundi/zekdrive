@@ -4,7 +4,7 @@ import 'package:ride_sharing_user_app/util/app_constants.dart';
 ThemeData darkTheme({Color primary = AppConstants.darkPrimary}) => ThemeData(
   fontFamily: AppConstants.fontFamily,
   primaryColor: primary,
-  primaryColorDark: const Color(0xff016655),
+  primaryColorDark: const Color(0xff9e2b00),
   disabledColor: const Color(0xFFBABFC4),
   scaffoldBackgroundColor: const Color(0xFF1C1F1F),
   canvasColor: const Color(0xFF1C1F1F),
@@ -19,22 +19,22 @@ ThemeData darkTheme({Color primary = AppConstants.darkPrimary}) => ThemeData(
     titleMedium: TextStyle(color: Color(0xff1D2D2B)),
   ),
   colorScheme: const ColorScheme.dark(
-      primary: Color(0xFF02B8A2),
+      primary: Color(0xFFFF9100),
       error: Color(0xFFFF6767),
       background: Color(0xFFF3F3F3),
-      secondary: Color(0xFF008C7B),
+      secondary: Color(0xFFFF7A00),
       tertiary: Color(0xFF7CCD8B),
       tertiaryContainer: Color(0xFFC98B3E),
       secondaryContainer: Color(0xFFEE6464),
       onTertiary: Color(0xFFD9D9D9),
-      onSecondary: Color(0xFF00FEE1),
-      onSecondaryContainer: Color(0xFFA8C5C1),
+      onSecondary: Color(0xFFFFE0B2),
+      onSecondaryContainer: Color(0xFFFFCC80),
       onTertiaryContainer: Color(0xFF425956),
-      outline: Color(0xFF8CFFF1),
-      onPrimaryContainer: Color(0xFFDEFFFB),
+      outline: Color(0xFFFFCC80),
+      onPrimaryContainer: Color(0xFFFFF3E0),
       primaryContainer: Color(0xFFFFA800),
       onSurface: Color(0xFFFFE6AD),
-      onPrimary: Color(0xFF14B19E)
+      onPrimary: Color(0xFFFF7A00)
 
 
   ),

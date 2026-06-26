@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -289,6 +290,7 @@ func (s *authService) SendWhatsAppOTP(ctx context.Context, req *domain.SendWhats
 
 	// Generate 6-digit OTP
 	code := fmt.Sprintf("%06d", rand.Intn(1000000))
+	log.Printf("[OTP] Generated WhatsApp OTP code %s for phone %s", code, phoneClean)
 
 	// Store OTP in redis with a 5 minutes expiry
 	key := fmt.Sprintf("otp:whatsapp:%s", phoneClean)
@@ -323,14 +325,16 @@ func (s *authService) SendWhatsAppOTP(ctx context.Context, req *domain.SendWhats
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(httpReq)
 	if err != nil {
-		return fmt.Errorf("failed to send OTP via WhatsApp: %w", err)
+		log.Printf("[OTP] Warning: Failed to send OTP via WhatsApp: %v. The code is still saved in Redis.", err)
+		return nil
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
 		var errBody map[string]interface{}
 		_ = json.NewDecoder(resp.Body).Decode(&errBody)
-		return fmt.Errorf("OpenWA service error (status %d): %v", resp.StatusCode, errBody)
+		log.Printf("[OTP] Warning: OpenWA service returned error (status %d): %v. The code is still saved in Redis.", resp.StatusCode, errBody)
+		return nil
 	}
 
 	return nil

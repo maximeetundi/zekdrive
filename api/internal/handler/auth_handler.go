@@ -179,8 +179,12 @@ func (h *AuthHandler) SendWhatsAppOTP(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse request body"})
 	}
 
-	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	if req.Phone == "" {
+		req.Phone = req.PhoneOrEmail
+	}
+
+	if req.Phone == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "phone number is required"})
 	}
 
 	err := h.authService.SendWhatsAppOTP(c.Context(), &req)
@@ -197,6 +201,13 @@ func (h *AuthHandler) VerifyWhatsAppOTP(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse request body"})
 	}
 
+	if req.Phone == "" {
+		req.Phone = req.PhoneOrEmail
+	}
+	if req.Code == "" {
+		req.Code = req.OTP
+	}
+
 	// Map role dynamically if empty
 	if req.Role == "" {
 		if strings.Contains(c.Path(), "/customer/") {
@@ -206,8 +217,8 @@ func (h *AuthHandler) VerifyWhatsAppOTP(c *fiber.Ctx) error {
 		}
 	}
 
-	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	if req.Phone == "" || req.Code == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "phone and validation code/otp are required"})
 	}
 
 	resp, err := h.authService.VerifyWhatsAppOTP(c.Context(), &req)

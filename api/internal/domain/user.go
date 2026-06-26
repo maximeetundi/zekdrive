@@ -63,14 +63,17 @@ type RefreshTokenRequest struct {
 }
 
 type SendWhatsAppOTPRequest struct {
-	Phone string `json:"phone" validate:"required,min=8,max=20"`
+	Phone        string `json:"phone"`
+	PhoneOrEmail string `json:"phone_or_email"`
 }
 
 type VerifyWhatsAppOTPRequest struct {
-	Phone string   `json:"phone" validate:"required,min=8,max=20"`
-	Code  string   `json:"code" validate:"required,len=6"`
-	Name  string   `json:"name"`
-	Role  UserRole `json:"role"`
+	Phone        string   `json:"phone"`
+	PhoneOrEmail string   `json:"phone_or_email"`
+	Code         string   `json:"code"`
+	OTP          string   `json:"otp"`
+	Name         string   `json:"name"`
+	Role         UserRole `json:"role"`
 }
 
 type UserRepository interface {

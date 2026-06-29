@@ -211,8 +211,8 @@ onMounted(() => {
                   <rect width="100%" height="100%" fill="url(#dotGrid)" />
 
                   <!-- Stylized connection paths between hubs -->
-                  <path d="M120 110 Q220 120 310 170" stroke="rgba(0, 115, 95, 0.3)" stroke-width="2" stroke-dasharray="6 4" />
-                  <path d="M310 170 Q410 220 480 290" stroke="rgba(0, 229, 204, 0.3)" stroke-width="2" stroke-dasharray="6 4" />
+                  <path d="M120 110 Q220 120 310 170" stroke="rgba(255, 122, 0, 0.3)" stroke-width="2" stroke-dasharray="6 4" />
+                  <path d="M310 170 Q410 220 480 290" stroke="rgba(255, 122, 0, 0.3)" stroke-width="2" stroke-dasharray="6 4" />
                   <path d="M120 110 Q320 230 480 290" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" stroke-dasharray="4 4" />
 
                   <!-- Coastline abstract representation -->
@@ -220,9 +220,9 @@ onMounted(() => {
                         stroke="rgba(255, 255, 255, 0.05)" stroke-width="3" fill="none" />
 
                   <!-- Glowing animated connections (gradient overlays) -->
-                  <circle cx="120" cy="110" r="15" fill="rgba(0, 115, 95, 0.25)" class="glowing-circle" />
-                  <circle cx="310" cy="170" r="15" fill="rgba(0, 229, 204, 0.2)" class="glowing-circle" />
-                  <circle cx="480" cy="290" r="15" fill="rgba(20, 177, 158, 0.2)" class="glowing-circle" />
+                  <circle cx="120" cy="110" r="15" fill="rgba(255, 122, 0, 0.25)" class="glowing-circle" />
+                  <circle cx="310" cy="170" r="15" fill="rgba(255, 122, 0, 0.2)" class="glowing-circle" />
+                  <circle cx="480" cy="290" r="15" fill="rgba(255, 122, 0, 0.2)" class="glowing-circle" />
 
                   <!-- Dakar Hub Interactive Node -->
                   <g class="map-node" :class="{ active: selectedCityIndex === 0 }" @click="selectCity(0)">

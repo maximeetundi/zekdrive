@@ -43,7 +43,7 @@ onUnmounted(() => {
         <div class="nav-inner">
           <!-- Logo -->
           <NuxtLink to="/" class="nav-logo" @click="closeMenu">
-            <img src="/logo.png" alt="ZekDrive Logo" class="logo-img" style="width: 38px; height: 38px; object-fit: contain; border-radius: 10px; box-shadow: 0 4px 16px rgba(0, 115, 95, 0.25);" />
+            <img src="/logo.png" alt="ZekDrive Logo" class="logo-img" style="width: 38px; height: 38px; object-fit: contain; border-radius: 10px; box-shadow: 0 4px 16px rgba(255, 122, 0, 0.35);" />
             <span>ZekDrive</span>
           </NuxtLink>
 

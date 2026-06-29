@@ -13,14 +13,14 @@ const services = computed(() => [
     title: t('services.vtc_title'),
     desc: t('services.vtc_desc'),
     tag: t('services.vtc_tag'),
-    color: '#00735f',
+    color: '#CC5500',
   },
   {
     icon: '🏍️',
     title: t('services.moto_title'),
     desc: t('services.moto_desc'),
     tag: t('services.moto_tag'),
-    color: '#00e5cc',
+    color: '#FF7A00',
   },
   {
     icon: '🚲',

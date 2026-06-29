@@ -100,8 +100,8 @@ onUnmounted(() => {
         </text>
 
         <!-- Service Tag -->
-        <rect x="176" y="11" width="56" height="22" rx="11" fill="#14b19e" fill-opacity="0.1" stroke="#14b19e" stroke-width="1"/>
-        <text x="204" y="26" font-family="Inter,sans-serif" font-weight="600" font-size="10" fill="#00735f" text-anchor="middle">
+        <rect x="176" y="11" width="56" height="22" rx="11" fill="#FF7A00" fill-opacity="0.1" stroke="#FF7A00" stroke-width="1"/>
+        <text x="204" y="26" font-family="Inter,sans-serif" font-weight="600" font-size="10" fill="#CC5500" text-anchor="middle">
           {{ activeTab === 'vtc' ? 'VTC' : 'PRO' }}
         </text>
       </g>
@@ -161,13 +161,13 @@ onUnmounted(() => {
         />
 
         <!-- Pickup pin -->
-        <circle cx="80" cy="340" r="10" fill="#14b19e" opacity="0.2"/>
-        <circle cx="80" cy="340" r="6" fill="#14b19e"/>
+        <circle cx="80" cy="340" r="10" fill="#FF7A00" opacity="0.2"/>
+        <circle cx="80" cy="340" r="6" fill="#FF7A00"/>
         <circle cx="80" cy="340" r="2.5" fill="white"/>
 
         <!-- Dropoff pin -->
         <g transform="translate(202, 170)">
-          <path d="M8 0C3.58 0 0 3.58 0 8c0 5.25 8 16 8 16s8-10.75 8-16c0-4.42-3.58-8-8-8zm0 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="#00735f"/>
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 5.25 8 16 8 16s8-10.75 8-16c0-4.42-3.58-8-8-8zm0 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="#CC5500"/>
           <circle cx="8" cy="8" r="3" fill="white"/>
         </g>
 
@@ -189,7 +189,7 @@ onUnmounted(() => {
             calcMode="linear"
           />
           <!-- Stylized car body -->
-          <rect x="-10" y="-6" width="20" height="12" rx="3" fill="url(#carBodyGrad)" stroke="#00735f" stroke-width="0.75"/>
+          <rect x="-10" y="-6" width="20" height="12" rx="3" fill="url(#carBodyGrad)" stroke="#CC5500" stroke-width="0.75"/>
           <rect x="-6" y="-10" width="12" height="8" rx="2" fill="url(#carBodyGrad)" opacity="0.9"/>
           <!-- Windows -->
           <rect x="-4" y="-8" width="8" height="4" rx="1" fill="#e2e8f0"/>
@@ -206,7 +206,7 @@ onUnmounted(() => {
           <text x="16" y="20" font-family="Inter,sans-serif" font-weight="600" font-size="10" fill="#64748b" letter-spacing="0.05em">
             {{ t('mockup.arrival') }}
           </text>
-          <text x="16" y="42" font-family="Sora,sans-serif" font-weight="800" font-size="20" fill="#00735f">3 min</text>
+          <text x="16" y="42" font-family="Sora,sans-serif" font-weight="800" font-size="20" fill="#CC5500">3 min</text>
           <text x="16" y="58" font-family="Inter,sans-serif" font-size="9" fill="#64748b">
             {{ t('mockup.distance_vtc') }}
           </text>
@@ -343,8 +343,8 @@ onUnmounted(() => {
 
         <!-- Route VTC -->
         <linearGradient id="vtcRouteGrad" x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0%" stop-color="#14b19e"/>
-          <stop offset="100%" stop-color="#00735f"/>
+          <stop offset="0%" stop-color="#FF7A00"/>
+          <stop offset="100%" stop-color="#CC5500"/>
         </linearGradient>
 
         <!-- Route Delivery -->
@@ -355,8 +355,8 @@ onUnmounted(() => {
 
         <!-- Vehicles -->
         <linearGradient id="carBodyGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#14b19e"/>
-          <stop offset="100%" stop-color="#00735f"/>
+          <stop offset="0%" stop-color="#FF7A00"/>
+          <stop offset="100%" stop-color="#CC5500"/>
         </linearGradient>
         <linearGradient id="boxBodyGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#fcd34d"/>
@@ -365,8 +365,8 @@ onUnmounted(() => {
 
         <!-- Buttons -->
         <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#00735f"/>
-          <stop offset="100%" stop-color="#14b19e"/>
+          <stop offset="0%" stop-color="#CC5500"/>
+          <stop offset="100%" stop-color="#FF7A00"/>
         </linearGradient>
         <linearGradient id="btnDelGrad" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#ea580c"/>
@@ -418,7 +418,7 @@ onUnmounted(() => {
 
 .phone-tabs button.active {
   background: #ffffff;
-  color: #00735f;
+  color: #CC5500;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
 }
 </style>

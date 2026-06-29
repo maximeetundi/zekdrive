@@ -57,7 +57,7 @@ const socials = [
         <!-- Brand column -->
         <div class="footer-brand">
           <NuxtLink to="/" class="nav-logo" style="margin-bottom: 16px; display: inline-flex;">
-            <img src="/logo.png" alt="ZekDrive Logo" class="logo-img" style="width: 38px; height: 38px; object-fit: contain; border-radius: 10px; box-shadow: 0 4px 16px rgba(0, 115, 95, 0.25); margin-right: 10px;" />
+            <img src="/logo.png" alt="ZekDrive Logo" class="logo-img" style="width: 38px; height: 38px; object-fit: contain; border-radius: 10px; box-shadow: 0 4px 16px rgba(255, 122, 0, 0.25); margin-right: 10px;" />
             <span>ZekDrive</span>
           </NuxtLink>
           <p class="footer-tagline">

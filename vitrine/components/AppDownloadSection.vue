@@ -112,71 +112,71 @@ onMounted(() => {
               <!-- Top-left finder -->
               <rect x="10" y="10" width="50" height="50" rx="6" fill="#0d1120"/>
               <rect x="18" y="18" width="34" height="34" rx="4" fill="white"/>
-              <rect x="24" y="24" width="22" height="22" rx="2" fill="#00735f"/>
+              <rect x="24" y="24" width="22" height="22" rx="2" fill="#CC5500"/>
               <!-- Top-right finder -->
               <rect x="100" y="10" width="50" height="50" rx="6" fill="#0d1120"/>
               <rect x="108" y="18" width="34" height="34" rx="4" fill="white"/>
-              <rect x="114" y="24" width="22" height="22" rx="2" fill="#00735f"/>
+              <rect x="114" y="24" width="22" height="22" rx="2" fill="#CC5500"/>
               <!-- Bottom-left finder -->
               <rect x="10" y="100" width="50" height="50" rx="6" fill="#0d1120"/>
               <rect x="18" y="108" width="34" height="34" rx="4" fill="white"/>
-              <rect x="24" y="114" width="22" height="22" rx="2" fill="#00735f"/>
+              <rect x="24" y="114" width="22" height="22" rx="2" fill="#CC5500"/>
               <!-- Data modules (simulated) -->
-              <rect x="72" y="10" width="8" height="8" rx="2" fill="#00e5cc"/>
+              <rect x="72" y="10" width="8" height="8" rx="2" fill="#FF7A00"/>
               <rect x="84" y="10" width="8" height="8" rx="2" fill="#0d1120"/>
               <rect x="72" y="20" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="84" y="20" width="8" height="8" rx="2" fill="#00e5cc"/>
-              <rect x="72" y="30" width="8" height="8" rx="2" fill="#00735f"/>
+              <rect x="84" y="20" width="8" height="8" rx="2" fill="#FF7A00"/>
+              <rect x="72" y="30" width="8" height="8" rx="2" fill="#CC5500"/>
               <rect x="84" y="30" width="8" height="8" rx="2" fill="#0d1120"/>
               <rect x="10" y="72" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="20" y="72" width="8" height="8" rx="2" fill="#00e5cc"/>
-              <rect x="30" y="72" width="8" height="8" rx="2" fill="#00735f"/>
+              <rect x="20" y="72" width="8" height="8" rx="2" fill="#FF7A00"/>
+              <rect x="30" y="72" width="8" height="8" rx="2" fill="#CC5500"/>
               <rect x="40" y="72" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="50" y="72" width="8" height="8" rx="2" fill="#00e5cc"/>
+              <rect x="50" y="72" width="8" height="8" rx="2" fill="#FF7A00"/>
               <rect x="62" y="62" width="38" height="38" rx="6" fill="#0d1120"/>
               <rect x="68" y="68" width="26" height="26" rx="4" fill="white"/>
               <!-- Logo in center -->
-              <text x="80" y="84" font-family="Sora,sans-serif" font-weight="800" font-size="12" fill="#00735f" text-anchor="middle">Z</text>
+              <text x="80" y="84" font-family="Sora,sans-serif" font-weight="800" font-size="12" fill="#CC5500" text-anchor="middle">Z</text>
               <rect x="100" y="72" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="110" y="72" width="8" height="8" rx="2" fill="#00735f"/>
+              <rect x="110" y="72" width="8" height="8" rx="2" fill="#CC5500"/>
               <rect x="120" y="72" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="130" y="72" width="8" height="8" rx="2" fill="#00e5cc"/>
+              <rect x="130" y="72" width="8" height="8" rx="2" fill="#FF7A00"/>
               <rect x="140" y="72" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="100" y="82" width="8" height="8" rx="2" fill="#00735f"/>
+              <rect x="100" y="82" width="8" height="8" rx="2" fill="#CC5500"/>
               <rect x="110" y="82" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="120" y="82" width="8" height="8" rx="2" fill="#00e5cc"/>
+              <rect x="120" y="82" width="8" height="8" rx="2" fill="#FF7A00"/>
               <rect x="130" y="82" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="140" y="82" width="8" height="8" rx="2" fill="#00735f"/>
+              <rect x="140" y="82" width="8" height="8" rx="2" fill="#CC5500"/>
               <rect x="100" y="100" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="110" y="100" width="8" height="8" rx="2" fill="#00735f"/>
+              <rect x="110" y="100" width="8" height="8" rx="2" fill="#CC5500"/>
               <rect x="120" y="100" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="130" y="100" width="8" height="8" rx="2" fill="#00e5cc"/>
+              <rect x="130" y="100" width="8" height="8" rx="2" fill="#FF7A00"/>
               <rect x="140" y="100" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="100" y="110" width="8" height="8" rx="2" fill="#00e5cc"/>
+              <rect x="100" y="110" width="8" height="8" rx="2" fill="#FF7A00"/>
               <rect x="110" y="110" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="120" y="110" width="8" height="8" rx="2" fill="#00735f"/>
+              <rect x="120" y="110" width="8" height="8" rx="2" fill="#CC5500"/>
               <rect x="130" y="110" width="8" height="8" rx="2" fill="#0d1120"/>
               <rect x="140" y="110" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="10" y="82" width="8" height="8" rx="2" fill="#00e5cc"/>
+              <rect x="10" y="82" width="8" height="8" rx="2" fill="#FF7A00"/>
               <rect x="20" y="82" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="30" y="82" width="8" height="8" rx="2" fill="#00735f"/>
+              <rect x="30" y="82" width="8" height="8" rx="2" fill="#CC5500"/>
               <rect x="40" y="82" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="50" y="82" width="8" height="8" rx="2" fill="#00e5cc"/>
+              <rect x="50" y="82" width="8" height="8" rx="2" fill="#FF7A00"/>
               <rect x="100" y="120" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="110" y="120" width="8" height="8" rx="2" fill="#00735f"/>
+              <rect x="110" y="120" width="8" height="8" rx="2" fill="#CC5500"/>
               <rect x="120" y="120" width="8" height="8" rx="2" fill="#0d1120"/>
               <rect x="130" y="120" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="140" y="120" width="8" height="8" rx="2" fill="#00e5cc"/>
-              <rect x="100" y="130" width="8" height="8" rx="2" fill="#00735f"/>
+              <rect x="140" y="120" width="8" height="8" rx="2" fill="#FF7A00"/>
+              <rect x="100" y="130" width="8" height="8" rx="2" fill="#CC5500"/>
               <rect x="110" y="130" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="120" y="130" width="8" height="8" rx="2" fill="#00e5cc"/>
-              <rect x="130" y="130" width="8" height="8" rx="2" fill="#00735f"/>
+              <rect x="120" y="130" width="8" height="8" rx="2" fill="#FF7A00"/>
+              <rect x="130" y="130" width="8" height="8" rx="2" fill="#CC5500"/>
               <rect x="140" y="130" width="8" height="8" rx="2" fill="#0d1120"/>
               <rect x="100" y="140" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="110" y="140" width="8" height="8" rx="2" fill="#00e5cc"/>
+              <rect x="110" y="140" width="8" height="8" rx="2" fill="#FF7A00"/>
               <rect x="120" y="140" width="8" height="8" rx="2" fill="#0d1120"/>
               <rect x="130" y="140" width="8" height="8" rx="2" fill="#0d1120"/>
-              <rect x="140" y="140" width="8" height="8" rx="2" fill="#00735f"/>
+              <rect x="140" y="140" width="8" height="8" rx="2" fill="#CC5500"/>
             </svg>
           </div>
           <p style="font-size:0.85rem;color:var(--text-subtle);text-align:center;">

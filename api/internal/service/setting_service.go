@@ -130,7 +130,7 @@ func (s *settingService) GetSettings(ctx context.Context) (map[string]interface{
 			"smtp_from_name":          "ZekDrive Support",
 			"smtp_use_tls":            true,
 			"whatsapp_url":            "http://openwa-api:2785",
-			"whatsapp_session_id":     "bdcc38d6-840f-4fce-b0b6-8365063d7fc4",
+			"whatsapp_session_id":     "a4efd3ee-adc2-4901-bde3-1ad7f1def2c6",
 			"whatsapp_api_key":        "owa_k1_eee56788a1354467c70629006b57db1e97c8f4988d4f8bab1cb415faf2067d5e",
 			"sms_provider":            "twilio",
 			"sms_api_key":             "your_twilio_sid",

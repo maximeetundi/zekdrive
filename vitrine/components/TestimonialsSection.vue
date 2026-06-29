@@ -10,7 +10,7 @@ const testimonials = computed(() => [
     name: 'Fatou D.',
     city: 'Dakar, Sénégal',
     initials: 'FD',
-    color: '#00735f',
+    color: '#CC5500',
     stars: 5,
   },
   {
@@ -18,7 +18,7 @@ const testimonials = computed(() => [
     name: 'Kofi A.',
     city: 'Abidjan, Côte d\'Ivoire',
     initials: 'KA',
-    color: '#00e5cc',
+    color: '#FF7A00',
     stars: 5,
   },
   {

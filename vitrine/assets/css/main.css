@@ -155,12 +155,12 @@ button {
 }
 
 .section {
-  padding: 120px 0;
+  padding: 72px 0;
   position: relative;
 }
 
 .section-header {
-  margin-bottom: 64px;
+  margin-bottom: 40px;
 }
 
 .section-header.centered {
@@ -790,19 +790,21 @@ button {
 
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
 
 .service-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: var(--radius-lg);
-  padding: 40px;
+  border-radius: var(--radius-md);
+  padding: 28px;
   transition: all var(--transition);
   position: relative;
   overflow: hidden;
   cursor: default;
+  display: flex;
+  flex-direction: column;
 }
 
 .service-card::after {
@@ -832,17 +834,18 @@ button {
 }
 
 .service-icon-wrap {
-  width: 72px;
-  height: 72px;
+  width: 56px;
+  height: 56px;
   background: var(--violet-dim);
   border: 1px solid rgba(255, 122, 0, 0.2);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  margin-bottom: 24px;
+  font-size: 1.6rem;
+  margin-bottom: 14px;
   transition: all var(--transition);
+  flex-shrink: 0;
 }
 
 .service-card:hover .service-icon-wrap {
@@ -852,17 +855,18 @@ button {
 
 .service-card-title {
   font-family: 'Sora', sans-serif;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   color: var(--text);
 }
 
 .service-card-desc {
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
-  line-height: 1.6;
-  margin-bottom: 24px;
+  line-height: 1.55;
+  margin-bottom: 14px;
+  flex: 1;
 }
 
 .service-card-tag {
@@ -1959,6 +1963,7 @@ button {
   }
 
   .services-grid {
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
 
@@ -1983,7 +1988,7 @@ button {
 
 @media (max-width: 768px) {
   .section {
-    padding: 80px 0;
+    padding: 56px 0;
   }
 
   .hero-grid {
@@ -2016,7 +2021,7 @@ button {
   }
 
   .services-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
 
@@ -2110,7 +2115,7 @@ button {
 
 @media (max-width: 480px) {
   .section {
-    padding: 64px 0;
+    padding: 44px 0;
   }
 
   .container {
@@ -2133,5 +2138,14 @@ button {
     flex-wrap: wrap;
     gap: 24px;
     justify-content: center;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .service-card {
+    padding: 18px;
   }
 }

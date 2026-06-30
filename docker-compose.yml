@@ -134,6 +134,7 @@ services:
       - WEBHOOK_TIMEOUT=10000
       - WEBHOOK_MAX_RETRIES=3
       - QUEUE_ENABLED=false
+      - WWEBJS_WEB_VERSION=2.2413.51
     volumes:
       - /root/app/OpenWA/data:/app/data
     healthcheck:

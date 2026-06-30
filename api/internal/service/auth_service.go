@@ -288,8 +288,30 @@ func (s *authService) SendWhatsAppOTP(ctx context.Context, req *domain.SendWhats
 	phoneClean = strings.ReplaceAll(phoneClean, " ", "")
 	phoneClean = strings.ReplaceAll(phoneClean, "-", "")
 
-	// Generate 6-digit OTP
-	code := fmt.Sprintf("%06d", rand.Intn(1000000))
+	// Check if user exists by phone (with/without '+' prefix and clean format)
+	u, err := s.userRepo.GetByPhone(ctx, req.Phone)
+	if err != nil {
+		return err
+	}
+	if u == nil {
+		u, err = s.userRepo.GetByPhone(ctx, phoneClean)
+		if err != nil {
+			return err
+		}
+	}
+	if u == nil {
+		u, err = s.userRepo.GetByPhone(ctx, "+"+phoneClean)
+		if err != nil {
+			return err
+		}
+	}
+
+	if u == nil {
+		return errors.New("numéro de téléphone non enregistré")
+	}
+
+	// Generate 5-digit OTP
+	code := fmt.Sprintf("%05d", rand.Intn(100000))
 	log.Printf("[OTP] Generated WhatsApp OTP code %s for phone %s", code, phoneClean)
 
 	// Store OTP in redis with a 5 minutes expiry

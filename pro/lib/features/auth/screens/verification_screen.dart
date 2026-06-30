@@ -76,7 +76,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
               SizedBox(width: 240,
                   child: PinCodeTextField(
-                    length: 4,
+                    length: 5,
                     appContext: context,
                     controller: pinController,
                     keyboardType: TextInputType.number,
@@ -121,7 +121,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
 
                 const SizedBox(height: Dimensions.paddingSizeExtraLarge,),
-                !authController.isLoading? authController.verificationCode.length == 4  ?
+                !authController.isLoading? authController.verificationCode.length == 5  ?
                 Padding(padding:  const EdgeInsets.only(top: Dimensions.paddingSizeExtraLarge,),
                   child: ButtonWidget(buttonText: 'send'.tr, radius: 50,
                     onPressed: ()  => authController.otpVerification(widget.countryCode ,widget.number, authController.verificationCode, from: widget.from!).then((value){

@@ -310,8 +310,8 @@ func (s *authService) SendWhatsAppOTP(ctx context.Context, req *domain.SendWhats
 		return errors.New("numéro de téléphone non enregistré")
 	}
 
-	// Generate 4-digit OTP
-	code := fmt.Sprintf("%04d", rand.Intn(10000))
+	// Generate 6-digit OTP
+	code := fmt.Sprintf("%06d", rand.Intn(1000000))
 	log.Printf("[OTP] Generated WhatsApp OTP code %s for phone %s", code, phoneClean)
 
 	// Store OTP in redis with a 5 minutes expiry

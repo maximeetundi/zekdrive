@@ -249,6 +249,70 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	app.Post("/api/customer/config/get-routes", r.authMiddleware, r.mapHandler.GetRoutes)
 	app.Get("/api/driver/get-routes", r.authMiddleware, r.mapHandler.GetRoutes)
 
+	// Banners, Coupons, Discounts, Categories, Ongoing/Unpaid list compatibility mocks
+	app.Get("/api/customer/coupon/list", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	app.Get("/api/customer/banner/list", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	app.Get("/api/customer/discount/list", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	app.Get("/api/customer/address/all-address", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	app.Get("/api/customer/ride/unpaid-parcel-list", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	app.Get("/api/customer/ride/ongoing-parcel-list", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	app.Get("/api/customer/ride/ride-resume-status", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": nil})
+	})
+	app.Get("/api/customer/config/get-zone-id", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": fiber.Map{"zone_id": "d0000000-0000-0000-0000-000000000001"}})
+	})
+	app.Post("/api/customer/update/fcm-token", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "FCM token updated successfully"})
+	})
+	app.Get("/api/customer/vehicle/category", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"data": []fiber.Map{
+				{"id": "economy", "name": "Standard (Économie)", "type": "economy", "image": "economy.png"},
+				{"id": "premium", "name": "Confort (Premium)", "type": "premium", "image": "premium.png"},
+				{"id": "delivery", "name": "Livraison (Moto/Auto)", "type": "delivery", "image": "delivery.png"},
+			},
+		})
+	})
+	app.Get("/api/customer/parcel/category", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"data": []fiber.Map{
+				{"id": "document", "name": "Documents & Lettres", "image": "document.png"},
+				{"id": "small_parcel", "name": "Petits Colis (< 5kg)", "image": "small_parcel.png"},
+				{"id": "large_parcel", "name": "Gros Colis (> 5kg)", "image": "large_parcel.png"},
+			},
+		})
+	})
+
+	// Driver Compatibility Mocks
+	app.Get("/api/driver/vehicle/category", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"data": []fiber.Map{
+				{"id": "economy", "name": "Standard (Économie)", "type": "economy", "image": "economy.png"},
+				{"id": "premium", "name": "Confort (Premium)", "type": "premium", "image": "premium.png"},
+				{"id": "delivery", "name": "Livraison (Moto/Auto)", "type": "delivery", "image": "delivery.png"},
+			},
+		})
+	})
+	app.Get("/api/driver/ride/ride-resume-status", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": nil})
+	})
+	app.Post("/api/driver/update/fcm-token", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "FCM token updated successfully"})
+	})
+
 	app.Get("/api/customer/info", r.authMiddleware, r.userHandler.GetMe)
 	app.Put("/api/customer/update/profile", r.authMiddleware, r.userHandler.UpdateProfile)
 

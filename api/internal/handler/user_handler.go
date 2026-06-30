@@ -38,7 +38,49 @@ func (h *UserHandler) GetMe(c *fiber.Ctx) error {
 	}
 
 	if strings.Contains(c.Path(), "/customer/") || strings.Contains(c.Path(), "/driver/") {
-		return c.JSON(fiber.Map{"data": u})
+		firstName := u.Name
+		lastName := ""
+		parts := strings.SplitN(u.Name, " ", 2)
+		if len(parts) > 0 {
+			firstName = parts[0]
+		}
+		if len(parts) > 1 {
+			lastName = parts[1]
+		}
+
+		profileData := fiber.Map{
+			"id":                 u.ID.String(),
+			"first_name":         firstName,
+			"last_name":          lastName,
+			"email":              u.Email,
+			"phone":              u.Phone,
+			"is_active":          1,
+			"user_rating":        "5.0",
+			"total_ride_count":   0,
+			"completion_percent": 100.0,
+			"loyalty_points":     0,
+			"wallet": fiber.Map{
+				"id":                 u.ID.String(),
+				"payable_balance":    0.0,
+				"receivable_balance": 0.0,
+				"pending_balance":    0.0,
+				"wallet_balance":     0.0,
+				"total_withdrawn":    0.0,
+			},
+			"level": fiber.Map{
+				"id":          "level-default-id",
+				"sequence":    1,
+				"name":        "Bronze",
+				"reward_type": "none",
+				"image":       "",
+			},
+		}
+
+		return c.JSON(fiber.Map{
+			"response_code": "200",
+			"message":       "success",
+			"data":          profileData,
+		})
 	}
 
 	return c.JSON(u)

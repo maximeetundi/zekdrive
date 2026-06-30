@@ -189,6 +189,12 @@ func (h *AuthHandler) SendWhatsAppOTP(c *fiber.Ctx) error {
 
 	err := h.authService.SendWhatsAppOTP(c.Context(), &req)
 	if err != nil {
+		if err.Error() == "numéro de téléphone non enregistré" {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"message": "Numéro de téléphone incorrect ou pas encore inscrit",
+				"error":   err.Error(),
+			})
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 

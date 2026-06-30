@@ -112,16 +112,17 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 
 	app.Get("/api/driver/config/geocode-api", r.mapHandler.Geocode)
 
-	// Auth Compatibility
 	app.Post("/api/customer/auth/registration", r.authHandler.Register)
 	app.Post("/api/customer/auth/login", r.authHandler.Login)
 	app.Post("/api/customer/auth/send-otp", r.authHandler.SendWhatsAppOTP)
 	app.Post("/api/customer/auth/otp-verification", r.authHandler.VerifyWhatsAppOTP)
+	app.Post("/api/customer/auth/otp-login", r.authHandler.VerifyWhatsAppOTP)
 
 	app.Post("/api/driver/auth/registration", r.authHandler.Register)
 	app.Post("/api/driver/auth/login", r.authHandler.Login)
 	app.Post("/api/driver/auth/send-otp", r.authHandler.SendWhatsAppOTP)
 	app.Post("/api/driver/auth/otp-verification", r.authHandler.VerifyWhatsAppOTP)
+	app.Post("/api/driver/auth/otp-login", r.authHandler.VerifyWhatsAppOTP)
 
 	// Protected Routes Group
 	protected := api.Group("", r.authMiddleware)

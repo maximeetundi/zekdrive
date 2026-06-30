@@ -10,28 +10,13 @@ class ApiChecker {
       Get.find<ConfigController>().removeSharedData();
       Get.offAll(()=> const SignInScreen());
 
-    }else if(response.statusCode == 403) {
-      ErrorResponse errorResponse;
-      errorResponse = ErrorResponse.fromJson(response.body);
-      if(errorResponse.errors != null && errorResponse.errors!.isNotEmpty){
-        showCustomSnackBar(errorResponse.errors![0].message!);
-      }else{
-        showCustomSnackBar(response.body['message']);
-      }
-
-    }else if(response.statusCode == 422) {
-      ErrorResponse errorResponse;
-      errorResponse = ErrorResponse.fromJson(response.body);
-      if(errorResponse.errors != null && errorResponse.errors!.isNotEmpty){
-        showCustomSnackBar(errorResponse.errors![0].message!);
-      }else{
-        showCustomSnackBar(response.body['message']);
-      }
-
-    }else if(response.statusCode == 500){
-      showCustomSnackBar(response.statusText!);
     }else {
-      showCustomSnackBar(response.statusText!);
+      String? errorMessage;
+      if (response.body != null && response.body is Map) {
+        errorMessage = response.body['message'] ?? response.body['error'];
+      }
+      errorMessage ??= response.statusText;
+      showCustomSnackBar(errorMessage ?? 'Unknown error');
     }
   }
 }

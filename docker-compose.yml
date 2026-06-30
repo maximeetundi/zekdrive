@@ -161,6 +161,19 @@ services:
     networks:
       - zekdrive_net
 
+  openwa-autostart:
+    image: python:3.11-alpine
+    container_name: openwa_autostart
+    restart: unless-stopped
+    depends_on:
+      openwa:
+        condition: service_healthy
+    volumes:
+      - /root/app/OpenWA/autostart.sh:/autostart.sh:ro
+    entrypoint: ["python3", "/autostart.sh"]
+    networks:
+      - zekdrive_net
+
 volumes:
   postgres_data:
   redis_data:

@@ -104,6 +104,7 @@ func main() {
 	fleetRepo := repository.NewFleetRepository(pgDB)
 	countryRepo := repository.NewCountryRepository(pgDB)
 	walletRepo  := repository.NewWalletRepository(pgDB)
+	bannerRepo  := repository.NewBannerRepository(pgDB)
 
 	// 5. Initialize Services
 	authService := service.NewAuthService(cfg, userRepo, driverRepo, redisClient, settingRepo)
@@ -141,6 +142,7 @@ func main() {
 	fleetHandler := handler.NewFleetHandler(fleetService)
 	countryHandler := handler.NewCountryHandler(countryRepo)
 	walletHandler := handler.NewWalletHandler(walletRepo)
+	bannerHandler := handler.NewBannerHandler(bannerRepo)
 
 	// 8. Initialize Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(authService)
@@ -163,6 +165,7 @@ func main() {
 		fleetHandler,
 		countryHandler,
 		walletHandler,
+		bannerHandler,
 		authMiddleware,
 	)
 

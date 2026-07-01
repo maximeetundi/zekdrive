@@ -5,15 +5,15 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
+	"github.com/zekdrive/api/internal/database"
 	"github.com/zekdrive/api/internal/domain"
 )
 
 type bannerRepository struct {
-	db *sqlx.DB
+	db *database.PostgresDB
 }
 
-func NewBannerRepository(db *sqlx.DB) domain.BannerRepository {
+func NewBannerRepository(db *database.PostgresDB) domain.BannerRepository {
 	return &bannerRepository{db: db}
 }
 

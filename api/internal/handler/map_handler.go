@@ -40,7 +40,8 @@ func (h *MapHandler) Geocode(c *fiber.Ctx) error {
 	}
 
 	// Call Nominatim
-	nominatimURL := fmt.Sprintf("https://nominatim.openstreetmap.org/reverse?lat=%s&lon=%s&format=json&accept-language=fr", latStr, lngStr)
+	nominatimBase := strings.TrimSuffix(h.cfg.NominatimURL, "/")
+	nominatimURL := fmt.Sprintf("%s/reverse?lat=%s&lon=%s&format=json&accept-language=fr", nominatimBase, latStr, lngStr)
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequestWithContext(c.Context(), "GET", nominatimURL, nil)
@@ -94,7 +95,8 @@ func (h *MapHandler) SearchLocation(c *fiber.Ctx) error {
 	}
 
 	// Call Nominatim Search
-	nominatimURL := fmt.Sprintf("https://nominatim.openstreetmap.org/search?q=%s&format=json&limit=10&accept-language=fr", url.QueryEscape(searchText))
+	nominatimBase := strings.TrimSuffix(h.cfg.NominatimURL, "/")
+	nominatimURL := fmt.Sprintf("%s/search?q=%s&format=json&limit=10&accept-language=fr", nominatimBase, url.QueryEscape(searchText))
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequestWithContext(c.Context(), "GET", nominatimURL, nil)
@@ -197,7 +199,8 @@ func (h *MapHandler) DistanceAPI(c *fiber.Ctx) error {
 	}
 
 	// Query OSRM
-	osrmURL := fmt.Sprintf("https://router.project-osrm.org/route/v1/driving/%s,%s;%s,%s?overview=false", originLng, originLat, destLng, destLat)
+	osrmBase := strings.TrimSuffix(h.cfg.OSRMURL, "/")
+	osrmURL := fmt.Sprintf("%s/route/v1/driving/%s,%s;%s,%s?overview=false", osrmBase, originLng, originLat, destLng, destLat)
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Get(osrmURL)
@@ -343,7 +346,8 @@ func (h *MapHandler) GetRoutes(c *fiber.Ctx) error {
 	}
 
 	// Call OSRM with polyline output format
-	osrmURL := fmt.Sprintf("https://router.project-osrm.org/route/v1/driving/%f,%f;%f,%f?overview=full&geometries=polyline", startLng, startLat, endLng, endLat)
+	osrmBase := strings.TrimSuffix(h.cfg.OSRMURL, "/")
+	osrmURL := fmt.Sprintf("%s/route/v1/driving/%f,%f;%f,%f?overview=full&geometries=polyline", osrmBase, startLng, startLat, endLng, endLat)
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Get(osrmURL)

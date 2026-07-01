@@ -31,6 +31,9 @@ type Config struct {
 	WhatsAppURL       string `mapstructure:"WHATSAPP_URL"`
 	WhatsAppAPIKey    string `mapstructure:"WHATSAPP_API_KEY"`
 	WhatsAppSessionID string `mapstructure:"WHATSAPP_SESSION_ID"`
+
+	NominatimURL string `mapstructure:"NOMINATIM_URL"`
+	OSRMURL      string `mapstructure:"OSRM_URL"`
 }
 
 func LoadConfig() (*Config, error) {
@@ -59,6 +62,8 @@ func LoadConfig() (*Config, error) {
 	viper.SetDefault("WHATSAPP_URL", "http://openwa-api:2785")
 	viper.SetDefault("WHATSAPP_API_KEY", "owa_k1_eee56788a1354467c70629006b57db1e97c8f4988d4f8bab1cb415faf2067d5e")
 	viper.SetDefault("WHATSAPP_SESSION_ID", "bdcc38d6-840f-4fce-b0b6-8365063d7fc4")
+	viper.SetDefault("NOMINATIM_URL", "https://nominatim.openstreetmap.org")
+	viper.SetDefault("OSRM_URL", "https://router.project-osrm.org")
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Println("No .env file found. Using environment variables.")

@@ -272,7 +272,7 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 		return c.JSON(fiber.Map{"data": nil})
 	})
 	app.Get("/api/customer/config/get-zone-id", r.authMiddleware, func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"data": fiber.Map{"zone_id": "d0000000-0000-0000-0000-000000000001"}})
+		return c.JSON(fiber.Map{"data": fiber.Map{"zone_id": "a0000002-0000-0000-0000-000000000001"}})
 	})
 	app.Post("/api/customer/update/fcm-token", r.authMiddleware, func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"message": "FCM token updated successfully"})

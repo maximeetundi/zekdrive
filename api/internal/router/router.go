@@ -74,6 +74,9 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	app.Use(middleware.NewLoggerMiddleware())
 	app.Use(middleware.NewRateLimiterMiddleware())
 
+	// Static Files serving (uploads)
+	app.Static("/uploads", "./uploads")
+
 	// Health Check
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "healthy", "service": "zekdrive-api"})
@@ -254,7 +257,37 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 		return c.JSON(fiber.Map{"data": []interface{}{}})
 	})
 	app.Get("/api/customer/banner/list", r.authMiddleware, func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"data": []interface{}{}})
+		return c.JSON(fiber.Map{
+			"total_size": 2,
+			"limit":      "100",
+			"offset":     "1",
+			"data": []fiber.Map{
+				{
+					"id":               "banner_1",
+					"name":             "ZekDrive Promo",
+					"description":      "Obtenez 10% de réduction sur votre premier trajet !",
+					"time_period":      "all",
+					"display_position": "top",
+					"redirect_link":    "",
+					"banner_group":     "all",
+					"start_date":       "2026-01-01",
+					"end_date":         "2026-12-31",
+					"image":            "promo_banner_1.jpg",
+				},
+				{
+					"id":               "banner_2",
+					"name":             "Lancement Dakar",
+					"description":      "ZekDrive est disponible partout à Dakar !",
+					"time_period":      "all",
+					"display_position": "top",
+					"redirect_link":    "",
+					"banner_group":     "all",
+					"start_date":       "2026-01-01",
+					"end_date":         "2026-12-31",
+					"image":            "promo_banner_2.jpg",
+				},
+			},
+		})
 	})
 	app.Get("/api/customer/discount/list", r.authMiddleware, func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"data": []interface{}{}})

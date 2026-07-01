@@ -312,7 +312,44 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	app.Post("/api/driver/update/fcm-token", r.authMiddleware, func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"message": "FCM token updated successfully"})
 	})
+	// Chat Compatibility Mocks (Customer & Driver)
+	app.Post("/api/customer/chat/create-channel", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": fiber.Map{"id": "mock-channel-id"}})
+	})
+	app.Get("/api/customer/chat/channel-list", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	app.Get("/api/customer/chat/conversation", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	app.Post("/api/customer/chat/send-message", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "message sent"})
+	})
+	app.Get("/api/customer/chat/find-channel", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": nil})
+	})
+	app.Get("/api/customer/notification-list", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
 
+	app.Post("/api/driver/chat/create-channel", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": fiber.Map{"id": "mock-channel-id"}})
+	})
+	app.Get("/api/driver/chat/channel-list", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	app.Get("/api/driver/chat/conversation", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	app.Post("/api/driver/chat/send-message", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "message sent"})
+	})
+	app.Get("/api/driver/chat/find-channel", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": nil})
+	})
+	app.Get("/api/driver/notification-list", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
 	app.Get("/api/customer/info", r.authMiddleware, r.userHandler.GetMe)
 	app.Put("/api/customer/update/profile", r.authMiddleware, r.userHandler.UpdateProfile)
 

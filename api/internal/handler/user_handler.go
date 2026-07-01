@@ -200,6 +200,8 @@ func (h *UserHandler) GetCustomerConfig(c *fiber.Ctx) error {
 		"websocket_url":              host,
 		"websocket_port":             port,
 		"websocket_key":              "drivemond",
+		"map_api_key":                "AIzaSyBgGAnjpKxEIJU_lCdALd0QGRbQv919gbA",
+		"map_api_key_server":         "AIzaSyBgGAnjpKxEIJU_lCdALd0QGRbQv919gbA",
 		"base_url":                   baseURL,
 		"review_status":              true,
 		"level_status":               false,

@@ -76,7 +76,7 @@ class LocationController extends GetxController implements GetxService {
   GoogleMapController? mapController;
   List<PredictionModel> _predictionList = [];
   bool _updateAddAddressData = true;
-  LatLng _initialPosition = const LatLng(23.83721, 90.363715);
+  LatLng _initialPosition = const LatLng(14.6937, -17.4479);
   bool addEntrance = false;
   int currentExtraRoute = 0;
   bool extraOneRoute = false;
@@ -206,9 +206,32 @@ class LocationController extends GetxController implements GetxService {
           _locationSubscription!.cancel();
         }
 
-        Position newLocalData = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high);
-        print(newLocalData);
+        Position? newLocalData;
+        try {
+          newLocalData = await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.medium,
+              timeLimit: const Duration(seconds: 4));
+        } catch (e) {
+          print("Geolocator getCurrentPosition failed/timed out, trying last known position: $e");
+          try {
+            newLocalData = await Geolocator.getLastKnownPosition();
+          } catch (_) {}
+        }
+
+        if (newLocalData == null) {
+          print("Location is null, falling back to Dakar center");
+          newLocalData = Position(
+              latitude: 14.6937,
+              longitude: -17.4479,
+              timestamp: DateTime.now(),
+              heading: 0,
+              accuracy: 100,
+              altitude: 0,
+              speedAccuracy: 0,
+              speed: 0,
+              altitudeAccuracy: 0,
+              headingAccuracy: 0);
+        }
         _position = newLocalData;
         _initialPosition = LatLng(_position.latitude, _position.longitude);
         if (isAnimate && mapController != null) {
@@ -282,8 +305,29 @@ class LocationController extends GetxController implements GetxService {
     LatLng? latLng;
     if (isSuccess) {
       try {
-        Position newLocalData = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high);
+        Position? newLocalData;
+        try {
+          newLocalData = await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.medium,
+              timeLimit: const Duration(seconds: 4));
+        } catch (e) {
+          try {
+            newLocalData = await Geolocator.getLastKnownPosition();
+          } catch (_) {}
+        }
+        if (newLocalData == null) {
+          newLocalData = Position(
+              latitude: 14.6937,
+              longitude: -17.4479,
+              timestamp: DateTime.now(),
+              heading: 0,
+              accuracy: 100,
+              altitude: 0,
+              speedAccuracy: 0,
+              speed: 0,
+              altitudeAccuracy: 0,
+              headingAccuracy: 0);
+        }
         latLng = LatLng(newLocalData.latitude, newLocalData.longitude);
       } catch (e) {
         if (kDebugMode) {

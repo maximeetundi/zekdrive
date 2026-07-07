@@ -28,7 +28,10 @@ class DriverHeaderInfoWidget extends StatelessWidget {
           const Spacer(),
           if(Get.find<RideController>().tripDetail != null)
           InkWell(onTap: () async{
-              await launchUrl(Uri.parse('google.navigation:q=${Get.find<RideController>().tripDetail!.destinationCoordinates!.coordinates![1].toString()}, ${Get.find<RideController>().tripDetail!.destinationCoordinates!.coordinates![0].toString()}&key=${AppConstants.polylineMapKey}'));
+              await launchUrl(Uri.parse(
+                'google.navigation:q=${Get.find<RideController>().tripDetail!.destinationCoordinates!.coordinates![1].toString()},'
+                ' ${Get.find<RideController>().tripDetail!.destinationCoordinates!.coordinates![0].toString()}'
+              ));
             },
             child: Container(decoration: BoxDecoration(color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(Dimensions.paddingSizeExtraLarge),

@@ -6,6 +6,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
+import { useTheme } from '~/composables/useTheme'
+
+const { theme } = useTheme()
+let tileLayer: any = null
 
 interface Coordinates {
   lat: number
@@ -36,7 +40,7 @@ const props = defineProps({
   },
   center: {
     type: Object as () => { lat: number; lng: number },
-    default: () => ({ lat: 14.6928, lng: -17.4467 }), // Dakar default
+    default: () => ({ lat: 3.8480, lng: 11.5021 }), // Yaoundé, Cameroun (défaut)
   },
   zoom: {
     type: Number,
@@ -73,6 +77,26 @@ const markersLayer = ref<any>(null)
 const routesLayer = ref<any>(null)
 const zonesLayer = ref<any>(null)
 
+function updateTileLayer() {
+  if (!Leaflet || !map) return
+  if (tileLayer) {
+    map.removeLayer(tileLayer)
+  }
+  const tileUrl = theme.value === 'light'
+    ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+
+  tileLayer = Leaflet.tileLayer(tileUrl, {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 20,
+  }).addTo(map)
+}
+
+watch(theme, () => {
+  updateTileLayer()
+})
+
 // Initialize map on mount (client-only)
 onMounted(async () => {
   if (!process.client) return
@@ -84,12 +108,7 @@ onMounted(async () => {
 
     map = Leaflet.map(mapElement.value).setView([props.center.lat, props.center.lng], props.zoom)
 
-    // Dark-themed tiles to match the glassmorphism aesthetic
-    Leaflet.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 20,
-    }).addTo(map)
+    updateTileLayer()
 
     markersLayer.value = Leaflet.layerGroup().addTo(map)
     routesLayer.value = Leaflet.layerGroup().addTo(map)

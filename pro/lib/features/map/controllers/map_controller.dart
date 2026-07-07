@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ride_sharing_user_app/features/map/widgets/google_map_replacement.dart';
 import 'package:location/location.dart';
 import 'package:ride_sharing_user_app/features/splash/controllers/splash_controller.dart';
 import 'package:ride_sharing_user_app/util/images.dart';
@@ -90,12 +90,12 @@ class RiderMapController extends GetxController implements GetxService {
   double get distance => _distance;
   late Position _position;
   Position get position => _position;
-  LatLng _initialPosition = const LatLng(23.83721, 90.363715);
+  LatLng _initialPosition = const LatLng(3.8480, 11.5021);
   LatLng get initialPosition => _initialPosition;
 
 
   final LatLng _customerPosition = const LatLng(12,12);//Get.find<AuthController>().currentLocation;
-  late LatLng _destinationPosition = const LatLng(23.83721, 90.363715);
+  late LatLng _destinationPosition = const LatLng(3.8480, 11.5021);
   LatLng get customerInitialPosition => _customerPosition;
   LatLng get destinationPosition => _destinationPosition;
 

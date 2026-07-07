@@ -1897,7 +1897,7 @@ input[type='number'] {
 
 /* Dark theme tile filter (default) */
 .leaflet-tile {
-  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+  filter: none;
 }
 
 .leaflet-popup-content-wrapper {
@@ -2276,4 +2276,49 @@ input[type='number'] {
     gap: 0.75rem !important;
     align-items: center !important;
   }
+}
+
+/* Sidebar Dropdown Menu for E-Commerce */
+.nav-dropdown-trigger {
+  user-select: none;
+  cursor: pointer;
+}
+
+.dropdown-arrow-icon {
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+  transition: transform 0.25s ease;
+  opacity: 0.6;
+}
+
+.dropdown-arrow-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.nav-dropdown-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  padding-left: 0.25rem;
+  border-left: 1px dashed rgba(255, 255, 255, 0.1);
+  margin-left: 1.15rem;
+  margin-bottom: 0.5rem;
+}
+
+[data-theme="light"] .nav-dropdown-content {
+  border-left: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.nav-dropdown-content.open {
+  max-height: 1000px;
+  transition: max-height 0.5s ease-in;
+}
+
+.sidebar.collapsed .nav-dropdown-content {
+  display: none !important;
+}
+
+.sidebar.collapsed .dropdown-arrow-icon {
+  display: none !important;
 }

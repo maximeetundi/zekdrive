@@ -21,10 +21,13 @@ class ButtonWidget extends StatelessWidget {
   const ButtonWidget({super.key, this.onPressed, required this.buttonText, this.transparent = false, this.margin = EdgeInsets.zero,
     this.width = Dimensions.webMaxWidth, this.height = 45, this.fontSize, this.radius = 5, this.icon,this.showBorder = false,this.borderWidth=1, this.borderColor, this.textColor, this.backgroundColor, this.isLoading = false});
 
+  static DateTime? _lastClickTime;
+
   @override
   Widget build(BuildContext context) {
+    final bool isDisabled = onPressed == null || isLoading;
     final ButtonStyle flatButtonStyle = TextButton.styleFrom(
-      backgroundColor:backgroundColor ?? (onPressed == null ? Theme.of(context).disabledColor : transparent
+      backgroundColor:backgroundColor ?? (isDisabled ? Theme.of(context).disabledColor : transparent
           ? Colors.transparent : Theme.of(context).primaryColor),
       minimumSize: Size(width, height),
       padding: EdgeInsets.zero,
@@ -38,18 +41,30 @@ class ButtonWidget extends StatelessWidget {
     return Center(child: SizedBox(width: width, child: Padding(
       padding: margin,
       child: TextButton(
-        onPressed: onPressed,
+        onPressed: isDisabled ? null : () {
+          final now = DateTime.now();
+          if (_lastClickTime == null || now.difference(_lastClickTime!) > const Duration(milliseconds: 1000)) {
+            _lastClickTime = now;
+            onPressed!();
+          }
+        },
         style: flatButtonStyle,
-        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          icon != null ? Padding(
-            padding: const EdgeInsets.only(right: Dimensions.paddingSizeExtraSmall),
-            child: Icon(icon, color: transparent ? Theme.of(context).primaryColor : Colors.white),
-          ) : const SizedBox(),
-          Text(buttonText, textAlign: TextAlign.center, style: textBold.copyWith(
-            color: textColor ?? (transparent ? Theme.of(context).primaryColor : Colors.white),
-            fontSize: fontSize ?? Dimensions.fontSizeLarge,
-          )),
-        ]),
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+              )
+            : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                icon != null ? Padding(
+                  padding: const EdgeInsets.only(right: Dimensions.paddingSizeExtraSmall),
+                  child: Icon(icon, color: transparent ? Theme.of(context).primaryColor : Colors.white),
+                ) : const SizedBox(),
+                Text(buttonText, textAlign: TextAlign.center, style: textBold.copyWith(
+                  color: textColor ?? (transparent ? Theme.of(context).primaryColor : Colors.white),
+                  fontSize: fontSize ?? Dimensions.fontSizeLarge,
+                )),
+              ]),
       ),
     )));
   }

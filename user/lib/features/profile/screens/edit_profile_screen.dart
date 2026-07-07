@@ -44,11 +44,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             Get.back();
           }
         }),
-        body: Padding(padding: const EdgeInsets.all(Dimensions.paddingSizeExtraLarge),
-          child: Column(children:  [
+        body: GetBuilder<ProfileController>(builder: (profileController) {
+          if (profileController.profileModel == null || profileController.profileModel!.data == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return Padding(padding: const EdgeInsets.all(Dimensions.paddingSizeExtraLarge),
+            child: Column(children:  [
 
-            GetBuilder<ProfileController>(builder: (profileController) {
-              return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
                 InkWell(onTap:() => profileController.pickImage(false, true),
                   child: Container(decoration: BoxDecoration(shape: BoxShape.circle,
@@ -82,7 +85,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                   Padding(padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall).copyWith(
                       right: Dimensions.paddingSizeExtraSmall),
-                    child: Text(profileController.profileModel!.data!.level!.name!,
+                    child: Text(profileController.profileModel!.data!.level?.name ?? '',
                       style: textBold.copyWith(color: Theme.of(context).hintColor,fontSize: Dimensions.fontSizeSmall))),
 
                   Row(children: [
@@ -98,14 +101,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                 ])),
 
-              ]);
-            }),
-            const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+              ]),
+              const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-            Expanded(child: EditProfileAccountInfo(fromAccount: widget.fromLogin)),
+              Expanded(child: EditProfileAccountInfo(fromAccount: widget.fromLogin)),
 
-          ]),
-        ),
+            ]),
+          );
+        }),
       ),
     );
   }

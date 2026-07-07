@@ -44,11 +44,11 @@ func (h *AdminHandler) UpdateZoneSurge(c *fiber.Ctx) error {
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	if err := h.zoneRepo.UpdateSurge(c.Context(), zoneID, req.SurgeMultiplier); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(fiber.Map{"status": "surge multiplier updated"})
@@ -60,27 +60,27 @@ func (h *AdminHandler) GetSystemStats(c *fiber.Ctx) error {
 	// Simple aggregate queries
 	err := h.db.QueryRowContext(c.Context(), "SELECT COUNT(*) FROM users").Scan(&totalUsers)
 	if err != nil && err != sql.ErrNoRows {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	err = h.db.QueryRowContext(c.Context(), "SELECT COUNT(*) FROM drivers WHERE status = 'online'").Scan(&totalDrivers)
 	if err != nil && err != sql.ErrNoRows {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	err = h.db.QueryRowContext(c.Context(), "SELECT COUNT(*) FROM trips WHERE status IN ('requested', 'accepted', 'arriving', 'in_progress')").Scan(&activeTrips)
 	if err != nil && err != sql.ErrNoRows {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	err = h.db.QueryRowContext(c.Context(), "SELECT COUNT(*) FROM trips WHERE status = 'completed'").Scan(&completedTrips)
 	if err != nil && err != sql.ErrNoRows {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	err = h.db.QueryRowContext(c.Context(), "SELECT COUNT(*) FROM deliveries WHERE status IN ('requested', 'assigned', 'picked_up')").Scan(&activeDeliveries)
 	if err != nil && err != sql.ErrNoRows {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(fiber.Map{
@@ -96,7 +96,7 @@ func (h *AdminHandler) GetSystemStats(c *fiber.Ctx) error {
 
 func (h *AdminHandler) ListRoles(c *fiber.Ctx) error {
 	roles, err := h.adminRoleRepo.ListRoles(c.Context())
-	if err != nil { return c.Status(500).JSON(fiber.Map{"error": err.Error()}) }
+	if err != nil { return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)}) }
 	for i := range roles {
 		perms, _ := h.adminRoleRepo.GetRolePermissions(c.Context(), roles[i].ID)
 		roles[i].Permissions = perms
@@ -106,7 +106,7 @@ func (h *AdminHandler) ListRoles(c *fiber.Ctx) error {
 
 func (h *AdminHandler) ListPermissions(c *fiber.Ctx) error {
 	perms, err := h.adminRoleRepo.ListPermissions(c.Context())
-	if err != nil { return c.Status(500).JSON(fiber.Map{"error": err.Error()}) }
+	if err != nil { return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)}) }
 	return c.JSON(perms)
 }
 
@@ -116,7 +116,7 @@ func (h *AdminHandler) UpdateRolePermissions(c *fiber.Ctx) error {
 	var req domain.UpdateRolePermissionsRequest
 	if err := c.BodyParser(&req); err != nil { return c.Status(400).JSON(fiber.Map{"error": "invalid body"}) }
 	if err := h.adminRoleRepo.UpdateRolePermissions(c.Context(), roleID, req.PermissionIDs); err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(fiber.Map{"success": true})
 }
@@ -125,7 +125,7 @@ func (h *AdminHandler) UpdateRolePermissions(c *fiber.Ctx) error {
 
 func (h *AdminHandler) ListAdminUsers(c *fiber.Ctx) error {
 	users, err := h.adminRoleRepo.ListAdminUsers(c.Context())
-	if err != nil { return c.Status(500).JSON(fiber.Map{"error": err.Error()}) }
+	if err != nil { return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)}) }
 	return c.JSON(users)
 }
 
@@ -133,7 +133,7 @@ func (h *AdminHandler) UpsertAdminUser(c *fiber.Ctx) error {
 	var req domain.UpsertAdminUserRequest
 	if err := c.BodyParser(&req); err != nil { return c.Status(400).JSON(fiber.Map{"error": "invalid body"}) }
 	if err := h.adminRoleRepo.UpsertAdminUser(c.Context(), req.UserID, req.RoleID); err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(fiber.Map{"success": true})
 }
@@ -142,7 +142,7 @@ func (h *AdminHandler) DeactivateAdminUser(c *fiber.Ctx) error {
 	userID, err := uuid.Parse(c.Params("id"))
 	if err != nil { return c.Status(400).JSON(fiber.Map{"error": "invalid user id"}) }
 	if err := h.adminRoleRepo.DeactivateAdminUser(c.Context(), userID); err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(fiber.Map{"success": true})
 }
@@ -160,7 +160,7 @@ func (h *AdminHandler) ListKYC(c *fiber.Ctx) error {
 		FROM drivers d JOIN users u ON u.id=d.user_id
 		ORDER BY created_at DESC LIMIT 100
 	`)
-	if err != nil { return c.Status(500).JSON(fiber.Map{"error": err.Error()}) }
+	if err != nil { return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)}) }
 	defer rows.Close()
 	var result []fiber.Map
 	for rows.Next() {
@@ -182,7 +182,7 @@ func (h *AdminHandler) ApproveKYC(c *fiber.Ctx) error {
 	id := c.Params("id")
 	_, err := h.db.ExecContext(c.Context(),
 		`UPDATE users SET kyc_status='approved' WHERE id=$1`, id)
-	if err != nil { return c.Status(500).JSON(fiber.Map{"error": err.Error()}) }
+	if err != nil { return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)}) }
 	// Also update drivers table if driver
 	_, _ = h.db.ExecContext(c.Context(),
 		`UPDATE drivers SET kyc_status='approved' WHERE user_id=$1`, id)
@@ -195,7 +195,7 @@ func (h *AdminHandler) RejectKYC(c *fiber.Ctx) error {
 	_ = c.BodyParser(&body)
 	_, err := h.db.ExecContext(c.Context(),
 		`UPDATE users SET kyc_status='rejected' WHERE id=$1`, id)
-	if err != nil { return c.Status(500).JSON(fiber.Map{"error": err.Error()}) }
+	if err != nil { return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)}) }
 	_, _ = h.db.ExecContext(c.Context(),
 		`UPDATE drivers SET kyc_status='rejected' WHERE user_id=$1`, id)
 	return c.JSON(fiber.Map{"success": true, "id": id, "status": "rejected", "reason": body.Reason})

@@ -133,12 +133,12 @@ class RideController extends GetxController implements GetxService{
       }else{
         Get.to(()=> const AccessLocationScreen());
       }
-
-
     }else{
+      // 401, 404, 500 etc. = pas de course active ou erreur transitoire
+      // Ne pas rediriger — rester sur l'écran actuel
       getResult = false;
       isLoading = false;
-      Get.offNamed(RouteHelper.getHomeRoute());
+      debugPrint('[RideController] getCurrentRideStatus error ${response.statusCode}');
     }
     update();
     return response;

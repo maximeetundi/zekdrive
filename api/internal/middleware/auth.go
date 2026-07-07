@@ -15,7 +15,7 @@ func NewAuthMiddleware(authService service.AuthService) fiber.Handler {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "missing authorization token",
+				"error": "Session expirée, veuillez vous reconnecter",
 			})
 		}
 
@@ -30,7 +30,7 @@ func NewAuthMiddleware(authService service.AuthService) fiber.Handler {
 		token, err := authService.ValidateToken(tokenStr, false)
 		if err != nil || !token.Valid {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "invalid or expired access token",
+				"error": "Session expirée, veuillez vous reconnecter",
 			})
 		}
 

@@ -16,7 +16,7 @@ func NewSettingHandler(settingService domain.SettingService) *SettingHandler {
 func (h *SettingHandler) GetSettings(c *fiber.Ctx) error {
 	settings, err := h.settingService.GetSettings(c.Context())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(settings)
 }
@@ -29,7 +29,7 @@ func (h *SettingHandler) SaveSettings(c *fiber.Ctx) error {
 
 	err := h.settingService.SaveSettings(c.Context(), body)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(fiber.Map{"status": "success", "message": "settings saved successfully"})

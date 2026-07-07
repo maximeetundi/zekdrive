@@ -23,23 +23,25 @@ class OngoingRideCardWidget extends StatelessWidget {
     String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
     return GetBuilder<RideController>(
         builder: (rideController) {
-          String tripDate = '0', suffix = 'st';
+          String tripDate = '0', suffix = '';
           List<dynamic> extraRoute =[];
           int onGoingMin = 0, onGoingHr = 0, count = 1;
+          final bool isFr = (Get.locale?.languageCode ?? 'fr') == 'fr';
         if(rideController.ongoingTrip != null && rideController.ongoingTrip!.isNotEmpty){
            tripDate = DateConverter.dateTimeStringToDateOnly(rideController.ongoingTrip![0].createdAt!);
-           if(tripDate == "1"){
-             suffix = "st";
-           }else if(tripDate == "2"){
-             suffix = "nd";
-           }else if(tripDate == "3"){
-             suffix = "rd";
-           }else{
-             suffix = "th";
+
+           // Ordinals localisés : FR = "1er" puis rien / EN = st/nd/rd/th
+           if(isFr) {
+             suffix = tripDate == '1' ? 'er' : '';
+           } else {
+             if(tripDate == "1") suffix = "st";
+             else if(tripDate == "2") suffix = "nd";
+             else if(tripDate == "3") suffix = "rd";
+             else suffix = "th";
            }
 
            onGoingHr = DateTime.now().difference(DateTime.parse(rideController.ongoingTrip![0].createdAt!)).inHours;
-           onGoingMin = DateTime.now().difference(DateTime.parse(rideController.ongoingTrip![0].createdAt!)).inHours;
+           onGoingMin = DateTime.now().difference(DateTime.parse(rideController.ongoingTrip![0].createdAt!)).inMinutes;
 
            for(int i =0; i< extraRoute.length; i++){
              if(extraRoute[i] != ''){

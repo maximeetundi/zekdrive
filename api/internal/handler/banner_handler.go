@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -21,7 +22,7 @@ func NewBannerHandler(bannerRepo domain.BannerRepository) *BannerHandler {
 func (h *BannerHandler) ListPublic(c *fiber.Ctx) error {
 	banners, err := h.bannerRepo.List(c.Context())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(fiber.Map{
@@ -35,7 +36,7 @@ func (h *BannerHandler) ListPublic(c *fiber.Ctx) error {
 func (h *BannerHandler) AdminList(c *fiber.Ctx) error {
 	banners, err := h.bannerRepo.List(c.Context())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(banners)
 }
@@ -77,9 +78,13 @@ func (h *BannerHandler) Create(c *fiber.Ctx) error {
 	}
 
 	fileName := fmt.Sprintf("banner_%d%s", time.Now().UnixNano(), filepath.Ext(file.Filename))
-	uploadPath := filepath.Join("./uploads/promotion/banner", fileName)
+	dir := "./uploads/promotion/banner"
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to create upload directory: " + err.Error()})
+	}
+	uploadPath := filepath.Join(dir, fileName)
 	if err := c.SaveFile(file, uploadPath); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to save image"})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to save image: " + err.Error()})
 	}
 
 	b := &domain.Banner{
@@ -98,7 +103,7 @@ func (h *BannerHandler) Create(c *fiber.Ctx) error {
 	}
 
 	if err := h.bannerRepo.Create(c.Context(), b); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(b)
@@ -113,7 +118,7 @@ func (h *BannerHandler) Update(c *fiber.Ctx) error {
 
 	b, err := h.bannerRepo.GetByID(c.Context(), id)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	if b == nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "banner not found"})
@@ -157,9 +162,13 @@ func (h *BannerHandler) Update(c *fiber.Ctx) error {
 	file, err := c.FormFile("image")
 	if err == nil && file != nil {
 		fileName := fmt.Sprintf("banner_%d%s", time.Now().UnixNano(), filepath.Ext(file.Filename))
-		uploadPath := filepath.Join("./uploads/promotion/banner", fileName)
+		dir := "./uploads/promotion/banner"
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to create upload directory: " + err.Error()})
+		}
+		uploadPath := filepath.Join(dir, fileName)
 		if err := c.SaveFile(file, uploadPath); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to save image"})
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to save image: " + err.Error()})
 		}
 		b.Image = fileName
 	}
@@ -167,7 +176,7 @@ func (h *BannerHandler) Update(c *fiber.Ctx) error {
 	b.UpdatedAt = time.Now()
 
 	if err := h.bannerRepo.Update(c.Context(), b); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(b)
@@ -181,7 +190,7 @@ func (h *BannerHandler) Delete(c *fiber.Ctx) error {
 	}
 
 	if err := h.bannerRepo.Delete(c.Context(), id); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(fiber.Map{"message": "banner deleted successfully"})

@@ -74,7 +74,7 @@
 
     <!-- Quick Links Row -->
     <div class="quick-links animate-slide-up" style="margin-bottom: 2rem;">
-      <NuxtLink to="/fleet" class="quick-link-card">
+      <NuxtLink to="/fleet-monitor" class="quick-link-card">
         <div class="quick-link-icon" style="background: rgba(20,177,158,0.12); color: var(--accent-primary);">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:22px;height:22px">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
@@ -202,7 +202,7 @@ function formatNumber(n: number): string {
 function formatCurrency(n: number): string {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'XOF',
+    currency: 'XAF',
     maximumFractionDigits: 0
   }).format(n)
 }

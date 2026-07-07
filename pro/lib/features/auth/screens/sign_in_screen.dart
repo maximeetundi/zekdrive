@@ -46,25 +46,11 @@ class _SignInScreenState extends State<SignInScreen> {
     if(passwordController.text != ''){
       Get.find<AuthController>().setRememberMe();
     }
-    if(Get.find<AuthController>().getLoginCountryCode().isNotEmpty){
-      Get.find<AuthController>().countryDialCode = Get.find<AuthController>().getLoginCountryCode();
+    final savedCode = Get.find<AuthController>().getLoginCountryCode();
+    if (savedCode.isNotEmpty && savedCode != '+33' && savedCode != '+880') {
+      Get.find<AuthController>().countryDialCode = savedCode;
     } else {
-      String deviceCountry = WidgetsBinding.instance.platformDispatcher.locale.countryCode ?? '';
-      if (deviceCountry.isNotEmpty) {
-        try {
-          Get.find<AuthController>().countryDialCode = CountryCode.fromCountryCode(deviceCountry).dialCode ?? '+221';
-        } catch (e) {
-          if (Get.find<SplashController>().config?.countryCode != null) {
-            Get.find<AuthController>().countryDialCode = CountryCode.fromCountryCode(Get.find<SplashController>().config!.countryCode!).dialCode ?? '+221';
-          } else {
-            Get.find<AuthController>().countryDialCode = '+221';
-          }
-        }
-      } else if (Get.find<SplashController>().config?.countryCode != null) {
-        Get.find<AuthController>().countryDialCode = CountryCode.fromCountryCode(Get.find<SplashController>().config!.countryCode!).dialCode ?? '+221';
-      } else {
-        Get.find<AuthController>().countryDialCode = '+221';
-      }
+      Get.find<AuthController>().countryDialCode = '+237';
     }
     super.initState();
   }

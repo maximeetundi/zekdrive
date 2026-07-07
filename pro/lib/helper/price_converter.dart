@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing_user_app/features/splash/controllers/splash_controller.dart';
+import 'package:ride_sharing_user_app/features/profile/controllers/profile_controller.dart';
 
 class PriceConverter {
 
@@ -8,6 +9,12 @@ class PriceConverter {
     bool inRight = Get.find<SplashController>().config!.currencySymbolPosition == 'right';
     String decimal = Get.find<SplashController>().config!.currencyDecimalPoint?? '1';
     String symbol = Get.find<SplashController>().config!.currencySymbol?? '\$';
+    try {
+      final profile = Get.find<ProfileController>().profileInfo;
+      if (profile != null && profile.wallet != null && profile.wallet!.currencySymbol != null && profile.wallet!.currencySymbol!.isNotEmpty) {
+        symbol = profile.wallet!.currencySymbol!;
+      }
+    } catch (_) {}
     String finalResult;
     if(discount != null && discountType != null){
       if(discountType == 'amount') {

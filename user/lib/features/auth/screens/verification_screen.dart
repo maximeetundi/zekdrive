@@ -15,7 +15,7 @@ import 'package:ride_sharing_user_app/common_widgets/button_widget.dart';
 class VerificationScreen extends StatefulWidget {
   final String number;
   final bool fromOtpLogin;
-  const VerificationScreen({super.key,required this.number,  this.fromOtpLogin = false});
+  const VerificationScreen({super.key, required this.number, this.fromOtpLogin = false});
 
   @override
   VerificationScreenState createState() => VerificationScreenState();
@@ -35,7 +35,7 @@ class VerificationScreenState extends State<VerificationScreen> {
     _seconds = Get.find<ConfigController>().config!.otpResendTime;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _seconds = _seconds! - 1;
-      if(_seconds == 0) {
+      if (_seconds == 0) {
         timer.cancel();
         _timer?.cancel();
       }
@@ -51,103 +51,148 @@ class VerificationScreenState extends State<VerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).primaryColor;
+    final isDark = Get.isDarkMode;
+
     return Scaffold(
       body: BodyWidget(
         appBar: AppBarWidget(title: 'verification'.tr, showBackButton: true, centerTitle: true),
-        body: Center(child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal:Dimensions.paddingSizeLarge),
-          child: GetBuilder<AuthController>(builder: (authController) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+        body: Center(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
+            child: GetBuilder<AuthController>(builder: (authController) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
 
-                Image.asset(Images.verification, width: 120),
-                const SizedBox(height: Dimensions.paddingSizeExtraLarge),
-
-                Text('enter_verification_code'.tr,style: textSemiBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                (Get.find<ConfigController>().config?.isDemo ?? true) ? Padding(
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall).copyWith(
-                    bottom: Dimensions.paddingSizeOverLarge,
+                  // Illustration
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(color: primary.withOpacity(0.15), blurRadius: 32, spreadRadius: 4),
+                      ],
+                    ),
+                    child: Image.asset(Images.verification, width: 110),
                   ),
-                  child: Text('for_demo_purpose_use'.tr, style: textSemiBold.copyWith(
-                    color: Theme.of(context).disabledColor,
-                  )),
-                ) : const SizedBox(height:  Dimensions.paddingSizeExtraLarge,),
+                  const SizedBox(height: 20),
 
-                SizedBox(
-                  width: 240,
-                  child: PinCodeTextField(
+                  Text(
+                    'enter_verification_code'.tr,
+                    style: textSemiBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    widget.number,
+                    style: textMedium.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeDefault),
+                  ),
+
+                  (Get.find<ConfigController>().config?.isDemo ?? true)
+                      ? Padding(
+                          padding: const EdgeInsets.all(Dimensions.paddingSizeSmall).copyWith(bottom: Dimensions.paddingSizeOverLarge),
+                          child: Text('for_demo_purpose_use'.tr, style: textSemiBold.copyWith(color: Theme.of(context).disabledColor)),
+                        )
+                      : const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+
+                  // ── OTP SQUARES ───────────────────────────────────
+                  PinCodeTextField(
                     length: 6,
                     appContext: context,
                     keyboardType: TextInputType.number,
                     animationType: AnimationType.slide,
                     pinTheme: PinTheme(
-                      shape: PinCodeFieldShape.circle,
-                      fieldHeight: 40,
-                      fieldWidth: 40,
-                      borderWidth: 1,
-                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                      selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
-                      selectedFillColor: Get.isDarkMode?Colors.grey.withOpacity(0.6):Colors.white,
-                      inactiveFillColor: Theme.of(context).cardColor,
-                      inactiveColor: Theme.of(context).hintColor,
-                      activeColor: Theme.of(context).hintColor,
-                      activeFillColor: Theme.of(context).cardColor,
+                      shape: PinCodeFieldShape.box,
+                      fieldHeight: 52,
+                      fieldWidth: 42,
+                      borderWidth: 1.5,
+                      borderRadius: BorderRadius.circular(12),
+                      selectedColor: primary,
+                      selectedFillColor: isDark
+                          ? primary.withOpacity(0.15)
+                          : primary.withOpacity(0.06),
+                      activeColor: primary.withOpacity(0.6),
+                      activeFillColor: isDark
+                          ? primary.withOpacity(0.12)
+                          : primary.withOpacity(0.04),
+                      inactiveColor: Theme.of(context).dividerColor,
+                      inactiveFillColor: isDark
+                          ? Colors.white.withOpacity(0.05)
+                          : Colors.grey.withOpacity(0.06),
                     ),
-                    animationDuration: const Duration(milliseconds: 300),
+                    animationDuration: const Duration(milliseconds: 250),
                     backgroundColor: Colors.transparent,
                     enableActiveFill: true,
                     onChanged: authController.updateVerificationCode,
                     beforeTextPaste: (text) => true,
-                    textStyle: textSemiBold.copyWith(),
-
+                    textStyle: textSemiBold.copyWith(fontSize: 20),
                     pastedTextStyle: textRegular.copyWith(color: Theme.of(context).textTheme.bodyMedium!.color),
                   ),
-                ),
+                  // ─────────────────────────────────────────────────
 
-                _seconds! <= 0 ? Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text('did_not_receive_the_code'.tr,style: textMedium.copyWith(color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(.6)),),
-                    TextButton(
-                      onPressed: () {
-                        authController.sendOtp(widget.number).then((value){
-                          if(value.statusCode == 200) {
-                            _startTimer();
-                          }
-                        });
-                      },
-                      child: Text('resend_it'.tr,style: textBold.copyWith(color: Theme.of(context).primaryColorDark.withOpacity(.6)),
-                          textAlign: TextAlign.end),
-                    ),
-                  ],
-                ) : const SizedBox(),
+                  const SizedBox(height: 16),
 
-                _seconds! > 0 ? Text(
-                  '${'resend_it'.tr} ${'after'.tr} ${_seconds! > 0 ? '($_seconds)' : ''} ${'sec'.tr}',
-                ) : const SizedBox(),
-                const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                  // Resend timer / button
+                  _seconds! <= 0
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'did_not_receive_the_code'.tr,
+                              style: textMedium.copyWith(color: Theme.of(context).hintColor),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                authController.sendOtp(widget.number).then((value) {
+                                  if (value.statusCode == 200) _startTimer();
+                                });
+                              },
+                              child: Text(
+                                'resend_it'.tr,
+                                style: textBold.copyWith(color: primary),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.timer_outlined, size: 16, color: Theme.of(context).hintColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${'resend_it'.tr} ${'after'.tr} ${_seconds}s',
+                              style: textMedium.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
+                            ),
+                          ],
+                        ),
 
-                authController.verificationCode.length == 6 ? !authController.otpVerifying ?  Padding(
-                  padding:  const EdgeInsets.only(top: Dimensions.paddingSizeExtraLarge,),
-                  child: ButtonWidget(
-                    buttonText: 'send'.tr,
-                    radius: 50,
-                    onPressed: () {
-                      authController.otpVerification(
-                        widget.number, authController.verificationCode, accountVerification: widget.fromOtpLogin,
-                      );
-                    },
-                  ),
-                ) :  SpinKitCircle(color: Theme.of(context).primaryColor, size: 40.0,) : const SizedBox.shrink(),
-                const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                  const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-              ],
-            );
-          }),
-        )),
+                  // Verify button — shown only when 6 digits entered
+                  if (authController.verificationCode.length == 6)
+                    authController.otpVerifying
+                        ? SpinKitCircle(color: primary, size: 40.0)
+                        : Padding(
+                            padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
+                            child: ButtonWidget(
+                              buttonText: 'send'.tr,
+                              radius: 50,
+                              onPressed: () {
+                                authController.otpVerification(
+                                  widget.number,
+                                  authController.verificationCode,
+                                  accountVerification: widget.fromOtpLogin,
+                                );
+                              },
+                            ),
+                          ),
+
+                  const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                ],
+              );
+            }),
+          ),
+        ),
       ),
     );
   }

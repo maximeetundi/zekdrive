@@ -20,7 +20,8 @@ class _BannerViewState extends State<BannerView> {
 
   @override
   Widget build(BuildContext context) {
-    String baseurl = Get.find<ConfigController>().config!.imageBaseUrl!.banner!;
+    final String? baseurl = Get.find<ConfigController>().config?.imageBaseUrl?.banner;
+    if (baseurl == null) return const SizedBox();
     return GetBuilder<BannerController>(
       builder: (bannerController) {
         return bannerController.bannerList != null
@@ -47,15 +48,13 @@ class _BannerViewState extends State<BannerView> {
                           itemBuilder: (context, index, _) {
                             return InkWell(
                               onTap: () {
-                                bannerController.updateBannerClickCount(
-                                    bannerController.bannerList![index].id!);
-                                debugPrint(
-                                    "=click===> ${bannerController.bannerList![index].redirectLink!}");
-                                if (bannerController
-                                        .bannerList![index].redirectLink !=
-                                    null) {
-                                  _launchUrl(Uri.parse(bannerController
-                                      .bannerList![index].redirectLink!));
+                                if (bannerController.bannerList![index].id != null) {
+                                  bannerController.updateBannerClickCount(
+                                      bannerController.bannerList![index].id!);
+                                }
+                                final link = bannerController.bannerList![index].redirectLink;
+                                if (link != null) {
+                                  _launchUrl(Uri.parse(link));
                                 }
                               },
                               child: Padding(

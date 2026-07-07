@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,10 +10,18 @@ import (
 
 func NewRateLimiterMiddleware() fiber.Handler {
 	return limiter.New(limiter.Config{
-		Max:        100, // Maximum of 100 requests
+		Max:        300, // 300 requêtes par minute par IP (≈ 5 req/s)
 		Expiration: 1 * time.Minute,
 		KeyGenerator: func(c *fiber.Ctx) string {
+			// Clé = IP + route pour un rate-limit plus granulaire
 			return c.IP()
+		},
+		// Exclure les routes GPS temps réel (très fréquentes)
+		Next: func(c *fiber.Ctx) bool {
+			path := c.Path()
+			return strings.Contains(path, "store-live-location") ||
+				strings.Contains(path, "get-live-location") ||
+				strings.Contains(path, "/health")
 		},
 		LimitReached: func(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{

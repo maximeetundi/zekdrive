@@ -37,12 +37,12 @@ func (h *DeliveryHandler) RequestDelivery(c *fiber.Ctx) error {
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	delivery, err := h.deliveryService.RequestDelivery(c.Context(), senderID, &req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(delivery)
@@ -68,7 +68,7 @@ func (h *DeliveryHandler) AcceptDelivery(c *fiber.Ctx) error {
 
 	delivery, err := h.deliveryService.AcceptDelivery(c.Context(), deliveryID, d.ID)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(delivery)
@@ -87,12 +87,12 @@ func (h *DeliveryHandler) UpdateStatus(c *fiber.Ctx) error {
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	delivery, err := h.deliveryService.UpdateStatus(c.Context(), deliveryID, req.Status)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(delivery)
@@ -107,7 +107,7 @@ func (h *DeliveryHandler) CancelDelivery(c *fiber.Ctx) error {
 
 	delivery, err := h.deliveryService.CancelDelivery(c.Context(), deliveryID)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(delivery)
@@ -122,7 +122,7 @@ func (h *DeliveryHandler) GetByID(c *fiber.Ctx) error {
 
 	delivery, err := h.deliveryService.GetByID(c.Context(), deliveryID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	if delivery == nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "delivery order not found"})
@@ -143,7 +143,7 @@ func (h *DeliveryHandler) ListSenderHistory(c *fiber.Ctx) error {
 
 	deliveries, err := h.deliveryService.ListBySenderID(c.Context(), senderID, limit, offset)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(deliveries)
@@ -166,7 +166,7 @@ func (h *DeliveryHandler) ListDriverHistory(c *fiber.Ctx) error {
 
 	deliveries, err := h.deliveryService.ListByDriverID(c.Context(), d.ID, limit, offset)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(deliveries)

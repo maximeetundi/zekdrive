@@ -14,4 +14,5 @@ abstract class WalletRepositoryInterface implements RepositoryInterface{
   Future<Response?> getWallet();
   Future<Response?> getWalletTransactions();
   Future<Response?> recharge(double amount, String paymentMethod, String phoneNumber, String reference);
+  Future<Response?> initiateRecharge(double amount, String gateway, String phoneNumber);
 }

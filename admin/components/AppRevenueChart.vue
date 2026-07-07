@@ -104,7 +104,7 @@ const chartOptions = computed(() => {
               label += ': '
             }
             if (context.parsed.y !== null) {
-              label += new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(context.parsed.y)
+              label += new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(context.parsed.y)
             }
             return label
           },

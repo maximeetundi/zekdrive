@@ -80,33 +80,31 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void _route() async {
     bool isSuccess = await Get.find<SplashController>().getConfigData();
     if (isSuccess) {
-      if(Get.find<AuthController>().getUserToken().isNotEmpty){
+      if (Get.find<AuthController>().getUserToken().isNotEmpty) {
         PusherHelper.initilizePusher();
       }
-    if(Get.find<SplashController>().config!.maintenanceMode != null && Get.find<SplashController>().config!.maintenanceMode!){
-      Get.offAll(() => const MaintenanceScreen());
-    }else{
-      if(Get.find<AuthController>().getZoneId() == ''){
-        Get.offAll(()=> const AccessLocationScreen());
-      }else{
+      if (Get.find<SplashController>().config!.maintenanceMode != null &&
+          Get.find<SplashController>().config!.maintenanceMode!) {
+        Get.offAll(() => const MaintenanceScreen());
+      } else {
         Get.find<AuthController>().updateToken();
         Future.delayed(const Duration(milliseconds: 1000), () {
-          if(Get.find<AuthController>().isLoggedIn()){
-            Get.find<ProfileController>().getProfileInfo().then((value){
-              if(value.statusCode ==200){
-                Get.find<LocationController>().getCurrentLocation().then((value){
-                  Get.offAll(()=> const DashboardScreen());
-                });
-
-                 PusherHelper().driverTripRequestSubscribe(value.body['data']['id']);
+          if (Get.find<AuthController>().isLoggedIn()) {
+            Get.find<ProfileController>().getProfileInfo().then((value) {
+              if (value.statusCode == 200) {
+                PusherHelper().driverTripRequestSubscribe(value.body['data']['id']);
+              } else {
+                debugPrint('[SplashScreen] getProfileInfo ${value.statusCode} — going to dashboard anyway');
               }
+              // Toujours au Dashboard — même sans zone/GPS
+              Get.offAll(() => const DashboardScreen());
             });
-
-          }else{
-            Get.offAll(()=> const SignInScreen());
+          } else {
+            Get.offAll(() => const SignInScreen());
           }
         });
-      }}}
+      }
+    }
   }
 
   @override

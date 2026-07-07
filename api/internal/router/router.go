@@ -129,6 +129,8 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	app.Post("/api/driver/auth/send-otp", r.authHandler.SendWhatsAppOTP)
 	app.Post("/api/driver/auth/otp-verification", r.authHandler.VerifyWhatsAppOTP)
 	app.Post("/api/driver/auth/otp-login", r.authHandler.VerifyWhatsAppOTP)
+	app.All("/api/payments/dohone/notify", r.walletHandler.DohoneNotify)
+	app.All("/api/payments/cinetpay/notify", r.walletHandler.CinetPayNotify)
 
 	// Protected Routes Group
 	protected := api.Group("", r.authMiddleware)
@@ -233,6 +235,7 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	pro.Get("/wallet", r.walletHandler.GetMyWallet)
 	pro.Get("/wallet/transactions", r.walletHandler.ListMyTransactions)
 	pro.Post("/wallet/recharge", r.walletHandler.Recharge)
+	pro.Post("/wallet/recharge/initialize", r.walletHandler.InitializeRecharge)
 
 	// Zone view routes
 	zones := protected.Group("/zones")
@@ -281,9 +284,8 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	app.Get("/api/customer/ride/ride-resume-status", r.authMiddleware, func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"data": nil})
 	})
-	app.Get("/api/customer/config/get-zone-id", r.authMiddleware, func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"data": fiber.Map{"zone_id": "a0000002-0000-0000-0000-000000000001"}})
-	})
+	app.Get("/api/customer/config/get-zone-id", r.authMiddleware, r.zoneHandler.GetZoneID)
+	app.Get("/api/driver/config/get-zone-id", r.authMiddleware, r.zoneHandler.GetZoneID)
 	app.Post("/api/customer/update/fcm-token", r.authMiddleware, func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"message": "FCM token updated successfully"})
 	})
@@ -362,6 +364,151 @@ func (r *Router) SetupRoutes(app *fiber.App) {
 	})
 	app.Get("/api/customer/info", r.authMiddleware, r.userHandler.GetMe)
 	app.Put("/api/customer/update/profile", r.authMiddleware, r.userHandler.UpdateProfile)
+
+	// ── CUSTOMER RIDE ROUTES (Mobile Compatibility) ──────────────────────────
+	// Nearest drivers (home screen map)
+	app.Get("/api/customer/drivers-near-me", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	// Estimated fare
+	app.Get("/api/customer/ride/get-estimated-fare", r.authMiddleware, r.pricingHandler.Estimate)
+	// Create ride request
+	app.Post("/api/customer/ride/create", r.authMiddleware, r.tripHandler.RequestTrip)
+	// Ride list (history)
+	app.Get("/api/customer/ride/list", r.authMiddleware, r.tripHandler.ListRiderHistory)
+	// Ride details
+	app.Get("/api/customer/ride/details/:id", r.authMiddleware, r.tripHandler.GetByID)
+	// Bidding list
+	app.Get("/api/customer/ride/bidding-list/:id", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	// Ignore bidding
+	app.Post("/api/customer/ride/ignore-bidding", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "ok"})
+	})
+	// Trip action (accept/reject driver)
+	app.Post("/api/customer/ride/trip-action", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "ok"})
+	})
+	// Apply / remove coupon
+	app.Post("/api/customer/ride/apply-coupon", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "coupon applied"})
+	})
+	app.Post("/api/customer/ride/cancel-coupon", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "coupon removed"})
+	})
+	// Applied coupon
+	app.Get("/api/customer/applied-coupon", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": nil})
+	})
+	// Update ride status
+	app.Post("/api/customer/ride/update-status/:id", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "status updated"})
+	})
+	// Final fare
+	app.Get("/api/customer/ride/final-fare", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": fiber.Map{"total_amount": 0}})
+	})
+	// Track location (passenger sends position during trip)
+	app.Post("/api/customer/ride/track-location", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "location tracked"})
+	})
+	// Arrival time at pickup
+	app.Post("/api/customer/ride/arrival-time", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "ok"})
+	})
+	// Payment
+	app.Post("/api/customer/ride/payment", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "payment processed"})
+	})
+	app.Post("/api/customer/ride/digital-payment", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "digital payment processed"})
+	})
+	// Get driver live location — position GPS temps réel du chauffeur pour l'app User
+	app.Get("/api/user/get-live-location", r.authMiddleware, r.tripHandler.GetDriverLiveLocation)
+
+	// ── CUSTOMER ADDRESS ROUTES ───────────────────────────────────────────────
+	app.Get("/api/customer/recent-address", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	app.Post("/api/customer/address/add", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "address added"})
+	})
+	app.Put("/api/customer/address/update", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "address updated"})
+	})
+	app.Delete("/api/customer/address/delete", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "address deleted"})
+	})
+
+	// ── CUSTOMER REVIEWS ─────────────────────────────────────────────────────
+	app.Post("/api/customer/review/store", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "review submitted"})
+	})
+	app.Get("/api/customer/review/check-submission", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": fiber.Map{"is_submitted": false}})
+	})
+
+	// ── CUSTOMER TRANSACTIONS & LOYALTY POINTS ───────────────────────────────
+	app.Get("/api/customer/transaction/list", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	app.Get("/api/customer/loyalty-points/list", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"data": []interface{}{}})
+	})
+	app.Post("/api/customer/loyalty-points/convert", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "points converted"})
+	})
+
+	// ── PARCEL SUGGESTED VEHICLE CATEGORY ────────────────────────────────────
+	app.Get("/api/customer/parcel/suggested-vehicle-category", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"data": []fiber.Map{
+				{"id": "economy", "name": "Standard (Économie)", "type": "economy"},
+				{"id": "delivery", "name": "Livraison (Moto/Auto)", "type": "delivery"},
+			},
+		})
+	})
+
+	// ── CHANGE LANGUAGE ───────────────────────────────────────────────────────
+	app.Post("/api/customer/change-language", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "language updated"})
+	})
+
+	// ── CANCELLATION REASONS ─────────────────────────────────────────────────
+	app.Get("/api/customer/config/cancellation-reason-list", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"data": []fiber.Map{
+				{"id": "1", "reason": "Chauffeur trop loin"},
+				{"id": "2", "reason": "Changement de plans"},
+				{"id": "3", "reason": "Mauvaise adresse saisie"},
+				{"id": "4", "reason": "Attente trop longue"},
+			},
+		})
+	})
+
+	// ── PAYMENT METHODS ───────────────────────────────────────────────────────
+	app.Get("/api/customer/config/get-payment-methods", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"data": []fiber.Map{
+				{"id": "cash", "name": "Espèces", "type": "cash", "is_active": true},
+				{"id": "orange_money", "name": "Orange Money", "type": "mobile_money", "is_active": true},
+				{"id": "mtn_momo", "name": "MTN Mobile Money", "type": "mobile_money", "is_active": true},
+			},
+		})
+	})
+
+	// ── LOGOUT & DELETE ACCOUNT ───────────────────────────────────────────────
+	app.Post("/api/user/logout", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "logged out"})
+	})
+	app.Delete("/api/user/delete", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "account deleted"})
+	})
+	app.Post("/api/user/change-password", r.authMiddleware, func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "password changed"})
+	})
+
 
 	app.Get("/api/driver/info", r.authMiddleware, r.driverHandler.GetMe)
 	app.Put("/api/driver/update/profile", r.authMiddleware, r.userHandler.UpdateProfile)

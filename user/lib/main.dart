@@ -23,7 +23,9 @@ import 'package:ride_sharing_user_app/util/app_constants.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 Future<void> main() async {
-  if(ResponsiveHelper.isMobilePhone) {
+  // ⚠️ BUG-U002 FIX: SSL override uniquement en mode DEBUG
+  // En production, les certificats invalides sont REJETÉS (sécurité)
+  if (kDebugMode && ResponsiveHelper.isMobilePhone) {
     HttpOverrides.global = MyHttpOverrides();
   }
   WidgetsFlutterBinding.ensureInitialized();

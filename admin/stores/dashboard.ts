@@ -65,10 +65,10 @@ function generateMockRevenue(): RevenuePoint[] {
 
 function generateMockTrips(): RecentTrip[] {
   const statuses = ['completed', 'ongoing', 'cancelled', 'pending']
-  const customers = ['Amadou Ba', 'Fatoumata Diallo', 'Moussa Sow', 'Aissatou Camara', 'Omar Traoré', 'Mariama Kouyaté', 'Ibrahima Ndiaye', 'Kadiatou Bah', 'Cheikh Fall', 'Rokhaya Mbaye']
-  const drivers = ['Seydou Keita', 'Lamine Koné', 'Boubacar Diarra', 'Abdoulaye Cissé', 'Mamadou Barry']
-  const pickups = ['Almadies, Dakar', 'Plateau, Dakar', 'Parcelles Assainies', 'Grand Yoff', 'Mermoz, Dakar']
-  const dropoffs = ['Aéroport AIBD', 'UCAD, Dakar', 'Marché Sandaga', 'Point E, Dakar', 'Yoff, Dakar']
+  const customers = ['Jean-Pierre Tchoua', 'Marie-Claire Nkeng', 'Emmanuel Fondo', 'Christelle Abate', 'Patrick Mvondo', 'Cécile Bindzi', 'Roger Ndjomo', 'Josiane Ateba', 'Blaise Nguele', 'Hélène Onana']
+  const drivers = ['Rodrigue Kamga', 'Blaise Essomba', 'Thierry Donfack', 'Célestin Biyong', 'Hermann Ngono']
+  const pickups = ['Bastos, Yaoundé', 'Centre-ville, Yaoundé', 'Mvan, Yaoundé', 'Odza, Yaoundé', 'Ngousso, Yaoundé']
+  const dropoffs = ['Aéroport NSIMALEN', 'Université I, Yaoundé', 'Marché Mokolo', 'Biyem-Assi, Yaoundé', 'Mvog-Ada, Yaoundé']
 
   return Array.from({ length: 10 }, (_, i) => ({
     id: `trip_${i + 1}`,
@@ -84,15 +84,16 @@ function generateMockTrips(): RecentTrip[] {
 }
 
 function generateMockDrivers(): ActiveDriver[] {
-  const names = ['Seydou K.', 'Lamine D.', 'Boubacar C.', 'Abdoulaye B.', 'Mamadou T.', 'Ibrahima S.', 'Alpha D.', 'Modou F.']
+  const names = ['Rodrigue K.', 'Blaise E.', 'Thierry D.', 'Célestin B.', 'Hermann N.', 'Pierre T.', 'Claude M.', 'Guy R.']
   const statuses: ('available' | 'busy' | 'offline')[] = ['available', 'busy', 'available', 'offline', 'busy', 'available', 'offline', 'available']
   const vehicles = ['car', 'moto', 'car', 'car', 'moto', 'car', 'moto', 'car']
 
   return names.map((name, i) => ({
     id: `driver_${i + 1}`,
     name,
-    lat: 14.6928 + (Math.random() - 0.5) * 0.1,
-    lng: -17.4467 + (Math.random() - 0.5) * 0.1,
+    // Coordonnées GPS de Yaoundé, Cameroun
+    lat: 3.8480 + (Math.random() - 0.5) * 0.1,
+    lng: 11.5021 + (Math.random() - 0.5) * 0.1,
     status: statuses[i],
     vehicle_type: vehicles[i],
   }))

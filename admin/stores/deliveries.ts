@@ -27,10 +27,10 @@ export interface Delivery {
 const VEHICLE_TYPES: Delivery['vehicle_type'][] = ['car', 'moto', 'bicycle', 'truck']
 const STATUSES: Delivery['status'][] = ['pending', 'accepted', 'ongoing', 'completed', 'cancelled']
 const PACKAGES = ['Documents', 'Colis médium', 'Nourriture', 'Électronique', 'Vêtements', 'Pharmacie']
-const CUSTOMERS = ['Rokhaya Mbaye', 'Coumba Sarr', 'Pape Diop', 'Ndéye Fall', 'Babacar Ndiaye']
-const DRIVERS = ['Alpha D.', 'Modou F.', 'Ousmane N.', 'Samba D.', 'Abdou K.']
-const PICKUPS = ['Marché HLM', 'Liberté 6', 'Médina, Dakar', 'Fann Résidence', 'Les Almadies']
-const DROPOFFS = ['Thiès Centre', 'Rufisque', 'Bargny', 'Sébikhotane', 'Keur Massar']
+const CUSTOMERS = ['Christelle Abate', 'Josiane Ateba', 'Roger Ndjomo', 'Hélène Onana', 'Patrick Mvondo']
+const DRIVERS = ['Rodrigue K.', 'Blaise E.', 'Thierry D.', 'Célestin B.', 'Hermann N.']
+const PICKUPS = ['Marché Mokolo', 'Bastos, Yaoundé', 'Biyem-Assi, Yaoundé', 'Mvog-Ada, Yaoundé', 'Odza, Yaoundé']
+const DROPOFFS = ['Ngousso, Yaoundé', 'Centre-ville, Yaoundé', 'Mbankomo', 'Nkolmesseng', 'Ekounou']
 
 const MOCK_DELIVERIES: Delivery[] = Array.from({ length: 50 }, (_, i) => ({
   id: `del_${i + 1}`,
@@ -41,16 +41,17 @@ const MOCK_DELIVERIES: Delivery[] = Array.from({ length: 50 }, (_, i) => ({
   driver_id: `driver_${(i % 5) + 6}`,
   pickup_address: PICKUPS[i % PICKUPS.length],
   dropoff_address: DROPOFFS[i % DROPOFFS.length],
-  pickup_lat: 14.6928 + (Math.random() - 0.5) * 0.1,
-  pickup_lng: -17.4467 + (Math.random() - 0.5) * 0.1,
-  dropoff_lat: 14.8428 + (Math.random() - 0.5) * 0.1,
-  dropoff_lng: -17.5567 + (Math.random() - 0.5) * 0.1,
+  // Coordonnées GPS de Yaoundé, Cameroun
+  pickup_lat: 3.8480 + (Math.random() - 0.5) * 0.1,
+  pickup_lng: 11.5021 + (Math.random() - 0.5) * 0.1,
+  dropoff_lat: 3.8680 + (Math.random() - 0.5) * 0.1,
+  dropoff_lng: 11.5221 + (Math.random() - 0.5) * 0.1,
   status: STATUSES[i % STATUSES.length],
   fare: Math.floor(Math.random() * 5000 + 800),
   distance_km: Math.round((Math.random() * 25 + 2) * 10) / 10,
   vehicle_type: VEHICLE_TYPES[i % VEHICLE_TYPES.length],
   package_description: PACKAGES[i % PACKAGES.length],
-  payment_method: ['cash', 'orange_money', 'wave'][i % 3],
+  payment_method: ['cash', 'orange_money', 'mtn_momo'][i % 3],
   created_at: new Date(Date.now() - i * 3600000 * 3).toISOString(),
 }))
 

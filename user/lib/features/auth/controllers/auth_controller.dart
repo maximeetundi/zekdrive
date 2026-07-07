@@ -7,11 +7,12 @@ import 'package:ride_sharing_user_app/features/auth/screens/sign_in_screen.dart'
 import 'package:ride_sharing_user_app/features/dashboard/controllers/bottom_menu_controller.dart';
 import 'package:ride_sharing_user_app/features/auth/screens/reset_password_screen.dart';
 import 'package:ride_sharing_user_app/features/auth/screens/verification_screen.dart';
-import 'package:ride_sharing_user_app/features/profile/screens/edit_profile_screen.dart';
+import 'package:ride_sharing_user_app/features/splash/controllers/config_controller.dart';
 import 'package:ride_sharing_user_app/features/ride/controllers/ride_controller.dart';
 import 'package:ride_sharing_user_app/helper/display_helper.dart';
 import 'package:ride_sharing_user_app/features/profile/controllers/profile_controller.dart';
 import 'package:ride_sharing_user_app/helper/pusher_helper.dart';
+
 
 class AuthController extends GetxController implements GetxService {
   final AuthServiceInterface authServiceInterface;
@@ -21,13 +22,14 @@ class AuthController extends GetxController implements GetxService {
   String _verificationCode = '';
   bool _isActiveRememberMe = false;
   bool otpVerifying = false;
-  String countryDialCode = '+880';
+  String countryDialCode = '+237';
   bool get isLoading => _isLoading;
   String get verificationCode => _verificationCode;
   bool get isActiveRememberMe => _isActiveRememberMe;
 
-  void setCountryCode( String countryCode){
-    countryDialCode  = countryDialCode;
+  void setCountryCode(String countryCode) {
+    // BUG-U003 FIX: utilisait countryDialCode = countryDialCode (s'assignait à lui-même)
+    countryDialCode = countryCode;
     update();
   }
 
@@ -37,9 +39,9 @@ class AuthController extends GetxController implements GetxService {
     Response? response = await authServiceInterface.login(phone: countryCode+phone, password: password);
     if(response!.statusCode == 200){
       _isLoading = false;
-      setUserToken(response.body['data']['token']);
+      await setUserToken(response.body['data']['token']);
       PusherHelper.initilizePusher();
-      updateToken();
+      await updateToken();
       await Get.find<ProfileController>().getProfileInfo();
       _navigateLogin(countryCode, phone, password);
     }else if(response.statusCode == 202) {
@@ -65,6 +67,8 @@ class AuthController extends GetxController implements GetxService {
       Get.offAll(const SignInScreen());
       showCustomSnackBar('successfully_logout'.tr, isError: false);
       clearSharedData();
+      // Vider le cache config (devise, pays...) pour le prochain utilisateur
+      await Get.find<ConfigController>().clearConfigCache();
     }else{
       ApiChecker.checkApi(response);
     }
@@ -115,6 +119,34 @@ class AuthController extends GetxController implements GetxService {
   Future<Response> otpVerification(String phone, String otp, {bool accountVerification = false}) async{
     otpVerifying = true;
     update();
+
+    // Connexion WhatsApp : utilise l'endpoint otpLogin (pas verifyOtp qui est pour l'inscription)
+    if(accountVerification) {
+      Response? response = await authServiceInterface.otpLogin(phone: phone, otp: otp);
+      if(response!.statusCode == 200) {
+        otpVerifying = false;
+        _verificationCode = '';
+        updateVerificationCode('');
+        final token = response.body['data']['token'] as String?;
+        if(token != null && token.isNotEmpty) {
+          await setUserToken(token);
+          PusherHelper.initilizePusher();
+          await updateToken();
+          await Get.find<ProfileController>().getProfileInfo();
+          Get.find<BottomMenuController>().navigateToDashboard();
+        } else {
+          showCustomSnackBar('login_failed'.tr);
+        }
+      } else {
+        otpVerifying = false;
+        ApiChecker.checkApi(response);
+      }
+      otpVerifying = false;
+      update();
+      return response;
+    }
+
+    // Vérification téléphone lors d'une inscription (mot de passe oublié)
     Response? response = await authServiceInterface.verifyOtp(phone: phone, otp: otp);
     if(response!.statusCode == 200) {
       otpVerifying = false;
@@ -123,19 +155,8 @@ class AuthController extends GetxController implements GetxService {
       } else {
         _verificationCode = '';
         updateVerificationCode('');
-        if(accountVerification) {
-          setUserToken(response.body['data']['token']);
-          updateToken();
-          await Get.find<ProfileController>().getProfileInfo();
-          if(response.body['data']['is_profile_verified'] == 0) {
-            Get.offAll(() => const EditProfileScreen(fromLogin: true));
-          }else {
-            Get.find<BottomMenuController>().navigateToDashboard();
-          }
-        }else{
-          otpVerifying = false;
-          Get.to(() =>  ResetPasswordScreen(phoneNumber: phone));
-        }
+        otpVerifying = false;
+        Get.to(() =>  ResetPasswordScreen(phoneNumber: phone));
       }
     }else{
       otpVerifying = false;
@@ -151,11 +172,9 @@ class AuthController extends GetxController implements GetxService {
     update();
     Response? response = await authServiceInterface.otpLogin(phone: phone, otp: otp);
     if(response!.statusCode == 200){
-      updateToken();
-      Map map = response.body;
-      String token = '';
-      token = map['data']['token'];
-      setUserToken(token);
+      final token = response.body['data']['token'] as String;
+      await setUserToken(token);
+      await updateToken();
       _isLoading = false;
       if(fromOtpLogin) {
         Get.find<BottomMenuController>().navigateToDashboard();

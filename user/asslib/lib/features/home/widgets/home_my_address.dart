@@ -4,12 +4,11 @@ import 'package:ride_sharing_user_app/features/address/controllers/address_contr
 import 'package:ride_sharing_user_app/features/address/screens/add_new_address.dart';
 import 'package:ride_sharing_user_app/features/address/widgets/address_item_card.dart';
 import 'package:ride_sharing_user_app/features/home/widgets/address_shimmer.dart';
+import 'package:ride_sharing_user_app/features/home/widgets/home_my_address.dart' show AddressPage;
 import 'package:ride_sharing_user_app/features/wallet/widget/custom_title.dart';
 import 'package:ride_sharing_user_app/util/dimensions.dart';
 import 'package:ride_sharing_user_app/util/images.dart';
 import 'package:ride_sharing_user_app/util/styles.dart';
-
-enum AddressPage { home, sender, receiver }
 
 class HomeMyAddress extends StatefulWidget {
   final String? title;

@@ -34,40 +34,42 @@ class SettingScreen extends StatelessWidget {
                   DropdownButton<String>(
                     isDense: true,
                     style: textMedium.copyWith(color: Theme.of(context).primaryColor),
-                    value:Get.locale!.languageCode == 'en' ? 'English':'عربي',
+                    value: Get.locale!.languageCode == 'en' ? 'English' : 'Français',
                     underline: const SizedBox(),
                     icon: const Icon(Icons.keyboard_arrow_down_sharp),
 
                     elevation: 1,
                     selectedItemBuilder: (_) {
-                      return <String>['English','عربي'].map<Widget>((String item) {
+                      return <String>['Français', 'English'].map<Widget>((String item) {
                         return Center(
-                          child: Text(item,style: textRegular.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color),),
+                          child: Text(item, style: textRegular.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color)),
                         );
                       }).toList();
                     },
 
                     items: [
                       DropdownMenuItem<String>(
-                        value: 'English',
-                        child: Text('English',style: textRegular.copyWith(color:
-                        Get.locale!.languageCode == 'en' ?
-                        Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyLarge!.color),),
+                        value: 'Français',
+                        child: Text('Français', style: textRegular.copyWith(color:
+                        Get.locale!.languageCode == 'fr'
+                            ? Theme.of(context).primaryColor
+                            : Theme.of(context).textTheme.bodyLarge!.color)),
                       ),
 
                       DropdownMenuItem<String>(
-                        value: 'عربي',
-                        child: Text('عربي',style: textRegular.copyWith(color:
-                        Get.locale!.languageCode == 'ar' ?
-                        Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyLarge!.color),),
+                        value: 'English',
+                        child: Text('English', style: textRegular.copyWith(color:
+                        Get.locale!.languageCode == 'en'
+                            ? Theme.of(context).primaryColor
+                            : Theme.of(context).textTheme.bodyLarge!.color)),
                       ),
                     ],
 
                     onChanged: (String? newValue) {
-                      if(newValue == 'English'){
-                        Get.find<LocalizationController>().setLanguage(const Locale( 'en','US'));
-                      }else{
-                        Get.find<LocalizationController>().setLanguage(const Locale( 'ar', 'SA'));
+                      if (newValue == 'English') {
+                        Get.find<LocalizationController>().setLanguage(const Locale('en', 'US'));
+                      } else {
+                        Get.find<LocalizationController>().setLanguage(const Locale('fr', 'FR'));
                       }
                     },
                   )

@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="fade">
-      <div v-if="show" class="modal-overlay" @click.self="onClose">
+      <div v-if="show" class="modal-overlay" @click.self="handleOverlayClick">
         <div class="modal" :class="sizeClass">
           <div class="modal-header">
             <h3 class="modal-title">{{ title }}</h3>
@@ -43,6 +43,10 @@ const props = defineProps({
     type: String,
     default: 'md', // md, lg, xl
   },
+  closeOnOverlayClick: {
+    type: Boolean,
+    default: false, // Prevent accidental modal closure by default
+  },
 })
 
 const emit = defineEmits(['close'])
@@ -52,6 +56,12 @@ const sizeClass = computed(() => {
   if (props.size === 'xl') return 'modal-xl'
   return ''
 })
+
+function handleOverlayClick() {
+  if (props.closeOnOverlayClick) {
+    onClose()
+  }
+}
 
 function onClose() {
   emit('close')

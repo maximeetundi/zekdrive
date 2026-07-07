@@ -13,15 +13,21 @@ import 'package:ride_sharing_user_app/util/dimensions.dart';
 import 'package:ride_sharing_user_app/util/styles.dart';
 
 class MyOfferWidget extends StatefulWidget {
-   bool isCoupon;
-   MyOfferWidget({super.key, this.isCoupon = false});
+  final bool isCoupon;
+  const MyOfferWidget({super.key, this.isCoupon = false});
 
   @override
   State<MyOfferWidget> createState() => _MyOfferWidgetState();
 }
 
 class _MyOfferWidgetState extends State<MyOfferWidget> {
+  late bool isCoupon;
   final ScrollController scrollController = ScrollController();
+  @override
+  void initState() {
+    super.initState();
+    isCoupon = widget.isCoupon;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,26 +42,24 @@ class _MyOfferWidgetState extends State<MyOfferWidget> {
                     borderRadius: const  BorderRadius.all(Radius.circular(Dimensions.paddingSizeDefault))),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
                     InkWell(onTap: (){
-                      widget.isCoupon = false;
-                      setState(() {});},
+                      setState(() { isCoupon = false; });},
 
                       child: Container( decoration: BoxDecoration(
-                          color: widget.isCoupon ? null : Theme.of(context).primaryColor,
+                          color: isCoupon ? null : Theme.of(context).primaryColor,
                           borderRadius: BorderRadius.circular(50)),
                           child: Padding(padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall,horizontal: Dimensions.paddingSizeSmall),
-                            child: Text('discounts'.tr,style: textRegular.copyWith(color: widget.isCoupon ? Theme.of(context).textTheme.bodyMedium!.color?.withOpacity(0.65) : Theme.of(context).cardColor),),
+                            child: Text('discounts'.tr,style: textRegular.copyWith(color: isCoupon ? Theme.of(context).textTheme.bodyMedium!.color?.withOpacity(0.65) : Theme.of(context).cardColor),),
                           )),
                     ),
 
                     InkWell(onTap: (){
-                      widget.isCoupon = true;
-                      setState(() {});},
+                      setState(() { isCoupon = true; });},
                       child: Container( decoration: BoxDecoration(
-                          color: widget.isCoupon ? Theme.of(context).primaryColor : null,
+                          color: isCoupon ? Theme.of(context).primaryColor : null,
                           borderRadius: BorderRadius.circular(50)),
                           child: Padding(padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall,horizontal: Dimensions.paddingSizeSmall),
-                            child: Text('coupons'.tr,style: textRegular.copyWith(color: !widget.isCoupon ? Theme.of(context).textTheme.bodyMedium!.color?.withOpacity(0.65) : Theme.of(context).cardColor),),
-                          )))])),
+                            child: Text('coupons'.tr,style: textRegular.copyWith(color: !isCoupon ? Theme.of(context).textTheme.bodyMedium!.color?.withOpacity(0.65) : Theme.of(context).cardColor),),
+                          ))),])),
 
                 Expanded(child: SingleChildScrollView(controller: scrollController,
                   child: Column(children: [

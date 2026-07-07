@@ -13,6 +13,7 @@ import 'package:ride_sharing_user_app/features/auth/screens/sign_in_screen.dart'
 import 'package:ride_sharing_user_app/features/auth/widgets/approve_dialog_widget.dart';
 import 'package:ride_sharing_user_app/features/dashboard/screens/dashboard_screen.dart';
 import 'package:ride_sharing_user_app/features/auth/screens/reset_password_screen.dart';
+import 'package:ride_sharing_user_app/features/splash/controllers/splash_controller.dart';
 import 'package:ride_sharing_user_app/features/auth/screens/verification_screen.dart';
 import 'package:ride_sharing_user_app/features/location/screens/access_location_screen.dart';
 import 'package:ride_sharing_user_app/features/profile/controllers/profile_controller.dart';
@@ -36,7 +37,7 @@ class AuthController extends GetxController implements GetxService {
   XFile identityImage = XFile('');
   List<XFile> identityImages = [];
   List<MultipartBody> multipartList = [];
-  String countryDialCode = '+880';
+  String countryDialCode = '+237';
 
   void setCountryCode(String code){
     countryDialCode = code;
@@ -101,15 +102,12 @@ class AuthController extends GetxController implements GetxService {
     update();
     Response? response = await authServiceInterface.login( phone: countryCode.trim()+phone, password: password);
     if(response!.statusCode == 200){
-      Map map = response.body;
-      String token = '';
-      token = map['data']['token'];
-      setUserToken(token);
+      final token = response.body['data']['token'] as String;
+      await setUserToken(token);
       PusherHelper.initilizePusher();
-      updateToken().then((value) {
-        _navigateLogin(countryCode, phone,password);
-      });
+      await updateToken();
       _isLoading = false;
+      _navigateLogin(countryCode, phone, password);
     }else if(response.statusCode == 202){
       if(response.body['data']['is_phone_verified'] == 0){
         Get.to(()=> VerificationScreen(countryCode: countryCode, number: phone, from: 'login',));
@@ -134,9 +132,9 @@ class AuthController extends GetxController implements GetxService {
       logging = false;
       Get.back();
       Get.offAll(()=> const SignInScreen());
-
       PusherHelper().pusherDisconnectPusher();
-
+      // Vider le cache config (devise, pays...) au logout
+      await Get.find<SplashController>().clearConfigCache();
     }else{
       logging = false;
       ApiChecker.checkApi(response);
@@ -197,24 +195,23 @@ class AuthController extends GetxController implements GetxService {
   }
 
 
-  _navigateLogin(String code,String phone, String password){
+  Future<void> _navigateLogin(String code, String phone, String password) async {
     if (_isActiveRememberMe) {
-      saveUserCredential(code ,phone, password);
+      saveUserCredential(code, phone, password);
     } else {
       clearUserCredential();
     }
-    Get.find<ProfileController>().getProfileInfo().then((value){
-      if(value.statusCode == 200){
-        if(Get.find<AuthController>().getZoneId() == ''){
-          Get.offAll(()=> const AccessLocationScreen());
-        }else{
-          Get.offAll(()=> const DashboardScreen());
-        }
+    try {
+      final value = await Get.find<ProfileController>().getProfileInfo();
+      if (value.statusCode == 200) {
         PusherHelper().driverTripRequestSubscribe(value.body['data']['id']);
-
       }
-
-    });
+      // Toujours aller au Dashboard — même sans zone/GPS
+      Get.offAll(() => const DashboardScreen());
+    } catch (e) {
+      debugPrint('[Pro _navigateLogin] error: $e');
+      Get.offAll(() => const DashboardScreen());
+    }
   }
 
 
@@ -253,14 +250,11 @@ class AuthController extends GetxController implements GetxService {
               Get.offAll(()=> const SignInScreen());
             }), barrierDismissible: false);
       }else if(from == 'login'){
-        Map map = response.body;
-        String token = '';
-        token = map['data']['token'];
-        setUserToken(token);
+        final token = response.body['data']['token'] as String;
+        await setUserToken(token);
         _isLoading = false;
-        updateToken().then((value){
-          _navigateLogin(code, phone,password);
-        });
+        await updateToken();
+        _navigateLogin(code, phone, password);
       }else{
         Get.to(()=> ResetPasswordScreen(phoneNumber: phoneNumber));
       }

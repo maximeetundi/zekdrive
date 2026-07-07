@@ -54,6 +54,8 @@ type WalletRepository interface {
 	GetOrCreate(ctx interface{}, driverID uuid.UUID, currency string) (*DriverWallet, error)
 	GetBalance(ctx interface{}, driverID uuid.UUID) (*DriverWallet, error)
 	Recharge(ctx interface{}, driverID uuid.UUID, amount float64, method, ref, currency string) (*DriverWallet, error)
+	CreatePendingTransaction(ctx interface{}, driverID uuid.UUID, amount float64, method, ref, currency string) error
+	CompletePendingTransaction(ctx interface{}, ref string) (*DriverWallet, error)
 	DeductCommission(ctx interface{}, driverID, tripID uuid.UUID, amount float64, descFr, descEn, currency string) error
 	AddBonus(ctx interface{}, driverID uuid.UUID, amount float64, bonusType, currency string) error
 	ListTransactions(ctx interface{}, driverID uuid.UUID, limit int) ([]WalletTransaction, error)

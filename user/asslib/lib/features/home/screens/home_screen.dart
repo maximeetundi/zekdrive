@@ -113,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       builder: (parcelController) {
                     return BodyWidget(
                       appBar: AppBarWidget(
-                        title: 'GUELABLÉ',
+                        title: 'ZekDrive',
                         showBackButton: false,
                         isHome: true,
                         fontSize: Dimensions.fontSizeLarge,

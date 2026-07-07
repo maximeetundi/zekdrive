@@ -53,19 +53,19 @@ export const useAuthStore = defineStore('auth', () => {
       return { success: true }
     } catch (err) {
       // API unavailable — use mock login for development
-      if (email === 'admin@zekdrive.com' && password === 'admin123') {
+      if (email === 'admin@zekdrive.cm' && password === 'admin123') {
         const mockToken = 'mock_token_' + Date.now()
         const mockUser: AdminUser = {
           id: '1',
           name: 'Admin ZekDrive',
-          email: 'admin@zekdrive.com',
+          email: 'admin@zekdrive.cm',
           role: 'superadmin',
         }
         token.value = mockToken
         user.value = mockUser
         return { success: true }
       }
-      return { success: false, error: 'Connection failed. Use admin@zekdrive.com / admin123 for demo.' }
+      return { success: false, error: 'Connection failed. Use admin@zekdrive.cm / admin123 for demo.' }
     }
   }
 

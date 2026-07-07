@@ -32,7 +32,7 @@ class RiderInfo extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  tripDetails.driver != null ? Text('${tripDetails.driver!.firstName!} ${tripDetails.driver!.lastName!}',
+                  tripDetails.driver != null ? Text('${tripDetails.driver!.firstName!}',
                     style: textMedium.copyWith(fontSize: Dimensions.fontSizeLarge,color: Theme.of(context).primaryColorDark),
                     overflow: TextOverflow.ellipsis,
                   ) : const SizedBox(),

@@ -25,28 +25,28 @@ export interface Driver {
 }
 
 const MOCK_DRIVERS: Driver[] = Array.from({ length: 30 }, (_, i) => {
-  const names = ['Seydou Keita', 'Lamine Koné', 'Boubacar Diarra', 'Abdoulaye Cissé', 'Mamadou Barry', 'Ibrahima Sow', 'Alpha Diallo', 'Modou Fall', 'Ousmane Ndiaye', 'Samba Diouf']
-  const vehicleTypes: Driver['vehicle_type'][] = ['car', 'moto', 'car', 'bicycle', 'car', 'moto', 'truck', 'car', 'moto', 'car']
+  const names = ['Kamgang Jules', 'Tabe Christiane', 'Nkeng Fabrice', 'Fosso Brigitte', 'Manga Etienne', 'Tsanga Régine', 'Ngono Patrick', 'Mballa Emmanuel', 'Abena Roger', 'Flore Ngali']
+  const vehicleTypes: Driver['vehicle_type'][] = ['car', 'moto', 'car', 'car', 'moto', 'car', 'truck', 'car', 'moto', 'car']
   const availabilities: Driver['availability'][] = ['available', 'busy', 'offline']
   const approvals: Driver['approval_status'][] = ['approved', 'approved', 'pending', 'approved', 'rejected']
-  const countries = ['SN', 'CI', 'ML']
+  const countries = ['CM', 'CM', 'CI']
   const kycStatuses: Driver['kyc_status'][] = ['approved', 'pending', 'unsubmitted', 'rejected']
 
   return {
     id: `driver_${i + 1}`,
     name: names[i % names.length],
-    email: `driver${i + 1}@zekdrive.com`,
-    phone: `+221 7${String(Math.floor(Math.random() * 100000000)).padStart(8, '0')}`,
+    email: `driver${i + 1}@zekdrive.cm`,
+    phone: `+237 6${String(Math.floor(Math.random() * 100000000)).padStart(8, '0')}`,
     vehicle_type: vehicleTypes[i % vehicleTypes.length],
-    vehicle_plate: `DK ${String(1000 + i)} AA`,
-    vehicle_model: ['Toyota Corolla', 'Honda Civic', 'Bajaj Boxer', 'Hyundai i10'][i % 4],
+    vehicle_plate: `LT-${String(100 + i)}-YA`,
+    vehicle_model: ['Toyota Corolla', 'Toyota Prado', 'Yamaha Crypton', 'Honda CB125'][i % 4],
     availability: availabilities[i % availabilities.length],
     approval_status: approvals[i % approvals.length],
     rating: Math.round((3.5 + Math.random() * 1.5) * 10) / 10,
     trips_count: Math.floor(Math.random() * 500 + 20),
-    earnings_total: Math.floor(Math.random() * 2000000 + 100000),
-    lat: 14.6928 + (Math.random() - 0.5) * 0.12,
-    lng: -17.4467 + (Math.random() - 0.5) * 0.12,
+    earnings_total: Math.floor(Math.random() * 2000000 + 100000), // XAF
+    lat: 3.8480 + (Math.random() - 0.5) * 0.12,   // Yaoundé, Cameroun
+    lng: 11.5021 + (Math.random() - 0.5) * 0.12,
     created_at: new Date(Date.now() - i * 86400000 * 7).toISOString(),
     last_seen: new Date(Date.now() - Math.random() * 3600000).toISOString(),
     country: countries[i % countries.length],

@@ -26,12 +26,12 @@ func (h *PricingHandler) Estimate(c *fiber.Ctx) error {
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	estimation, err := h.pricingService.EstimatePrice(c.Context(), &req)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(estimation)

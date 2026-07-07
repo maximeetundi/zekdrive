@@ -15,4 +15,4 @@ CREATE TABLE banners (
 
 INSERT INTO banners (id, name, description, time_period, display_position, redirect_link, banner_group, start_date, end_date, image) VALUES
 ('b0000001-0000-0000-0000-000000000001', 'ZekDrive Promo', 'Obtenez 10% de réduction sur votre premier trajet !', 'all', 'top', '', 'all', '2026-01-01', '2026-12-31', 'promo_banner_1.jpg'),
-('b0000002-0000-0000-0000-000000000002', 'Lancement Dakar', 'ZekDrive est disponible partout à Dakar !', 'all', 'top', '', 'all', '2026-01-01', '2026-12-31', 'promo_banner_2.jpg');
+('b0000002-0000-0000-0000-000000000002', 'Lancement Yaoundé', 'ZekDrive est disponible partout à Yaoundé et Douala !', 'all', 'top', '', 'all', '2026-01-01', '2026-12-31', 'promo_banner_2.jpg');

@@ -10,10 +10,6 @@ import 'package:ride_sharing_user_app/util/styles.dart';
 /// List of store types to display as tabs — sync with backend StoreType enum
 const List<Map<String, String>> _storeTypeTabs = [
   {'type': '',            'label': 'all',         'emoji': '🏪'},
-  // Restauration
-  {'type': 'restaurant',  'label': 'restaurant',  'emoji': '🍽️'},
-  {'type': 'cafe',        'label': 'cafe',        'emoji': '☕'},
-  {'type': 'bakery',      'label': 'bakery',      'emoji': '🥐'},
   // Alimentation
   {'type': 'grocery',     'label': 'grocery',     'emoji': '🛒'},
   {'type': 'butcher',     'label': 'butcher',     'emoji': '🥩'},
@@ -59,14 +55,14 @@ class _StoreListScreenState extends State<StoreListScreen> with SingleTickerProv
     // Load data for initial tab
     final initialType = _storeTypeTabs[initialIndex]['type']!;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.find<StoreController>().getNearbyStores(type: initialType);
+      Get.find<StoreController>().getNearbyStores(type: initialType, excludeFood: true);
     });
 
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         final type = _storeTypeTabs[_tabController.index]['type']!;
         _searchController.clear();
-        Get.find<StoreController>().getNearbyStores(type: type);
+        Get.find<StoreController>().getNearbyStores(type: type, excludeFood: true);
       }
     });
   }
@@ -103,7 +99,7 @@ class _StoreListScreenState extends State<StoreListScreen> with SingleTickerProv
   Widget build(BuildContext context) {
     return Scaffold(
       body: BodyWidget(
-        appBar: AppBarWidget(title: 'stores'.tr),
+        appBar: AppBarWidget(title: 'commerce'.tr),
         body: Column(
           children: [
             // ── Type Tab Bar ──────────────────────────────────────────────
@@ -144,7 +140,7 @@ class _StoreListScreenState extends State<StoreListScreen> with SingleTickerProv
                           onPressed: () {
                             _searchController.clear();
                             final type = _storeTypeTabs[_tabController.index]['type']!;
-                            Get.find<StoreController>().getNearbyStores(search: '', type: type);
+                            Get.find<StoreController>().getNearbyStores(search: '', type: type, excludeFood: true);
                           },
                         )
                       : null,
@@ -162,7 +158,7 @@ class _StoreListScreenState extends State<StoreListScreen> with SingleTickerProv
                 ),
                 onChanged: (val) {
                   final type = _storeTypeTabs[_tabController.index]['type']!;
-                  Get.find<StoreController>().getNearbyStores(search: val, type: type);
+                  Get.find<StoreController>().getNearbyStores(search: val, type: type, excludeFood: true);
                 },
               ),
             ),

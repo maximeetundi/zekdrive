@@ -85,8 +85,7 @@
           <div class="form-group text-left">
             <label class="form-label">{{ lang === 'fr' ? 'Langue par défaut' : 'Supported Default Language' }}</label>
             <select v-model="appConfig.defaultLang" class="form-select">
-              <option value="fr">{{ lang === 'fr' ? 'Français (Sénégal)' : 'French (Senegal)' }}</option>
-              <option value="wo">Wolof</option>
+              <option value="fr">{{ lang === 'fr' ? 'Français (Cameroun)' : 'French (Cameroon)' }}</option>
               <option value="en">{{ lang === 'fr' ? 'Anglais' : 'English' }}</option>
             </select>
           </div>
@@ -100,7 +99,7 @@
         <div class="card-header flex justify-between items-center flex-wrap gap-4" style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); text-align: left;">
           <div>
             <h3 class="text-base font-semibold">{{ gw.name }}</h3>
-            <p class="text-xs text-muted">{{ lang === 'fr' ? (gw.id === 'gw_wave' ? 'Prend en charge les paiements locaux par QR-code Wave directement via redirection applicative.' : gw.id === 'gw_orange_money' ? 'Prend en charge les paiements push Orange Money USSD avec invite d\'authentification mobile.' : 'Prend en charge les paiements internationaux par cartes de crédit/débit visa et mastercard.') : gw.desc }}</p>
+            <p class="text-xs text-muted">{{ getGatewayDesc(gw) }}</p>
           </div>
           <!-- Custom Design System Class Switch -->
           <div class="toggle-switch" :class="{ on: gw.enabled }" @click="gw.enabled = !gw.enabled">
@@ -319,66 +318,114 @@ const appConfig = ref({
   dispatchTimeout: 30,
   searchRadius: 8,
   commissionRate: 15,
-  supportEmail: 'support@zekdrive.com',
-  supportPhone: '+221 33 800 0000',
+  supportEmail: 'support@zekdrive.cm',
+  supportPhone: '+237 690 000 000',
   defaultLang: 'fr'
 })
 
 // Auth Configuration state
+// ⚠️ SÉCURITÉ : Les valeurs sensibles sont chargées depuis l'API au montage.
+//               Ne jamais hardcoder des credentials ici.
 const authConfig = ref({
   sms_enabled: false,
   whatsapp_enabled: true,
   email_password_enabled: true,
-  smtp_host: 'smtp.ionos.fr',
+  smtp_host: '',
   smtp_port: 465,
-  smtp_user: 'send-email@rodriguendeffo.com',
-  smtp_password: 'MdpDev55647913@#',
-  smtp_from_email: 'send-email@rodriguendeffo.com',
+  smtp_user: '',
+  smtp_password: '',
+  smtp_from_email: 'support@zekdrive.cm',
   smtp_from_name: 'ZekDrive Support',
   smtp_use_tls: true,
   whatsapp_url: 'http://openwa-api:2785',
-  whatsapp_session_id: 'a4efd3ee-adc2-4901-bde3-1ad7f1def2c6',
-  whatsapp_api_key: 'owa_k1_eee56788a1354467c70629006b57db1e97c8f4988d4f8bab1cb415faf2067d5e',
+  whatsapp_session_id: '',
+  whatsapp_api_key: '',
   sms_provider: 'twilio',
   sms_api_key: '',
   sms_api_secret: '',
-  sms_sender: '+1234567890'
+  sms_sender: ''
 })
 
-// Gateways state
+// Gateways — Cameroun (MTN MoMo + Orange Money prioritaires)
 const gateways = ref([
   {
-    id: 'gw_wave',
-    name: 'Wave Senegal Gateway',
-    desc: 'Support local Wave QR-code payments directly from mobile app redirects.',
+    id: 'gw_mtn_momo',
+    name: 'MTN Mobile Money Cameroon',
+    desc: 'Support MTN MoMo USSD push payments — principal opérateur Cameroun.',
     enabled: true,
-    publicKey: 'pk_live_wave_51m92Fkd208mD2l',
-    secretToken: 'sk_live_wave_secret_token_100x'
+    publicKey: '',
+    secretToken: ''
   },
   {
     id: 'gw_orange_money',
     name: 'Orange Money WebPay API',
     desc: 'Support Orange Money USSD push payments with mobile auth prompts.',
     enabled: true,
-    publicKey: 'pk_live_orange_448kd901msda',
-    secretToken: 'sk_live_orange_secret_token_99y'
+    publicKey: '',
+    secretToken: ''
+  },
+  {
+    id: 'gw_dohone',
+    name: 'Dohone Mobile Money',
+    desc: 'Support local Mobile Money payments in Cameroon (Orange, MTN, Express Union) via Dohone aggregator.',
+    enabled: false,
+    publicKey: '',
+    secretToken: ''
+  },
+  {
+    id: 'gw_cinetpay',
+    name: 'CinetPay Aggregator',
+    desc: 'Support multi-country Mobile Money and cards payments in Francophone Africa via CinetPay.',
+    enabled: false,
+    publicKey: '',
+    secretToken: ''
   },
   {
     id: 'gw_stripe',
     name: 'Stripe International Gateway',
     desc: 'Support credit/debit visa and mastercard payouts and client fares.',
     enabled: false,
-    publicKey: 'pk_live_stripe_823190salkdm',
-    secretToken: 'sk_live_stripe_secret_token_33z'
+    publicKey: '',
+    secretToken: ''
+  },
+  {
+    id: 'gw_paypal',
+    name: 'PayPal Global Gateway',
+    desc: 'Support global credit cards and account funding via PayPal.',
+    enabled: false,
+    publicKey: '',
+    secretToken: ''
   }
 ])
 
+function getGatewayDesc(gw: any) {
+  if (lang.value === 'fr') {
+    switch (gw.id) {
+      case 'gw_mtn_momo':
+        return 'Prend en charge les paiements MTN Mobile Money (push USSD) — principal opérateur au Cameroun.'
+      case 'gw_orange_money':
+        return 'Prend en charge les paiements push Orange Money USSD avec invite d\'authentification mobile.'
+      case 'gw_stripe':
+        return 'Prend en charge les paiements internationaux par cartes de crédit/débit (Visa, Mastercard, etc.) via Stripe.'
+      case 'gw_paypal':
+        return 'Prend en charge les paiements internationaux et recharges via PayPal.'
+      case 'gw_dohone':
+        return 'Prend en charge les paiements locaux Mobile Money (Orange, MTN, Express Union, etc.) au Cameroun via Dohone.'
+      case 'gw_cinetpay':
+        return 'Prend en charge les paiements Mobile Money et cartes bancaires en Afrique de l\'Ouest et Centrale via CinetPay.'
+      default:
+        return gw.desc || 'Prend en charge les transactions de cette passerelle.'
+    }
+  }
+  return gw.desc
+}
+
 // Audit System Logs
 const auditLogs = ref([
-  { id: '1', action: 'Admin Login Successful', user: 'admin@zekdrive.com', ip: '197.34.82.11', severity: 'low', timestamp: new Date(Date.now() - 3600000).toISOString() },
-  { id: '2', action: 'Zone Boundary Almadies Updated', user: 'admin@zekdrive.com', ip: '197.34.82.11', severity: 'medium', timestamp: new Date(Date.now() - 7200000).toISOString() },
-  { id: '3', action: 'Pricing Rule Commission Altered', user: 'admin@zekdrive.com', ip: '197.34.82.11', severity: 'high', timestamp: new Date(Date.now() - 14400000).toISOString() },
-  { id: '4', action: 'Driver Seymour Approved', user: 'support@zekdrive.com', ip: '196.223.10.4', severity: 'low', timestamp: new Date(Date.now() - 86400000).toISOString() }
+  { id: '1', action: 'Connexion Admin réussie', user: 'admin@zekdrive.cm', ip: '197.155.72.11', severity: 'low', timestamp: new Date(Date.now() - 3600000).toISOString() },
+  { id: '2', action: 'Zone Yaoundé-Centre mise à jour', user: 'admin@zekdrive.cm', ip: '197.155.72.11', severity: 'medium', timestamp: new Date(Date.now() - 7200000).toISOString() },
+  { id: '3', action: 'Commission modifiée : 15% → 20%', user: 'admin@zekdrive.cm', ip: '197.155.72.11', severity: 'high', timestamp: new Date(Date.now() - 14400000).toISOString() },
+  { id: '4', action: 'Chauffeur Kamgang Jules approuvé', user: 'support@zekdrive.cm', ip: '196.223.10.4', severity: 'low', timestamp: new Date(Date.now() - 86400000).toISOString() }
 ])
 
 const auditHeaders = computed(() => [

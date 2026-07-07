@@ -32,7 +32,7 @@ func (h *FleetHandler) GetProProfileSummary(c *fiber.Ctx) error {
 
 	summary, err := h.fleetService.GetProProfileSummary(c.Context(), userID)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(summary)
 }
@@ -51,11 +51,11 @@ func (h *FleetHandler) ActivateProProfile(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse request"})
 	}
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	if err := h.fleetService.ActivateProProfile(c.Context(), userID, req.Profile); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	// Return updated summary
@@ -77,12 +77,12 @@ func (h *FleetHandler) CreateFleet(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse request"})
 	}
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	fleet, err := h.fleetService.CreateFleet(c.Context(), userID, &req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.Status(fiber.StatusCreated).JSON(fleet)
 }
@@ -93,7 +93,7 @@ func (h *FleetHandler) ListMyFleets(c *fiber.Ctx) error {
 
 	fleets, err := h.fleetService.ListOwnerFleets(c.Context(), userID)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(fleets)
 }
@@ -107,7 +107,7 @@ func (h *FleetHandler) GetFleet(c *fiber.Ctx) error {
 
 	fleet, err := h.fleetService.GetFleet(c.Context(), fleetID)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(fleet)
 }
@@ -127,7 +127,7 @@ func (h *FleetHandler) UpdateFleet(c *fiber.Ctx) error {
 
 	fleet, err := h.fleetService.UpdateFleet(c.Context(), userID, fleetID, &req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(fleet)
 }
@@ -141,7 +141,7 @@ func (h *FleetHandler) DeleteFleet(c *fiber.Ctx) error {
 	}
 
 	if err := h.fleetService.DeleteFleet(c.Context(), userID, fleetID); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.SendStatus(fiber.StatusNoContent)
 }
@@ -158,12 +158,12 @@ func (h *FleetHandler) AddVehicleToFleet(c *fiber.Ctx) error {
 	}
 	req.FleetID = c.Params("id")
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	vehicle, err := h.fleetService.AddVehicleToFleet(c.Context(), userID, &req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.Status(fiber.StatusCreated).JSON(vehicle)
 }
@@ -178,7 +178,7 @@ func (h *FleetHandler) ListFleetVehicles(c *fiber.Ctx) error {
 
 	vehicles, err := h.fleetService.ListFleetVehicles(c.Context(), userID, fleetID)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(vehicles)
 }
@@ -190,7 +190,7 @@ func (h *FleetHandler) ListAllMyVehicles(c *fiber.Ctx) error {
 
 	vehicles, err := h.fleetService.ListAllOwnerVehicles(c.Context(), userID)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(vehicles)
 }
@@ -207,12 +207,12 @@ func (h *FleetHandler) AssignDriver(c *fiber.Ctx) error {
 	}
 	req.VehicleID = c.Params("id")
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	assignment, err := h.fleetService.AssignDriverToVehicle(c.Context(), userID, &req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.Status(fiber.StatusCreated).JSON(assignment)
 }
@@ -226,7 +226,7 @@ func (h *FleetHandler) UnassignDriver(c *fiber.Ctx) error {
 	}
 
 	if err := h.fleetService.UnassignDriverFromVehicle(c.Context(), userID, vehicleID); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.SendStatus(fiber.StatusNoContent)
 }
@@ -241,7 +241,7 @@ func (h *FleetHandler) ListFleetAssignments(c *fiber.Ctx) error {
 
 	assignments, err := h.fleetService.ListFleetAssignments(c.Context(), userID, fleetID)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(assignments)
 }

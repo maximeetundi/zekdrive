@@ -7,7 +7,6 @@ import 'package:ride_sharing_user_app/features/auth/controllers/auth_controller.
 import 'package:ride_sharing_user_app/features/auth/screens/sign_in_screen.dart';
 import 'package:ride_sharing_user_app/features/dashboard/screens/dashboard_screen.dart';
 import 'package:ride_sharing_user_app/features/location/controllers/location_controller.dart';
-import 'package:ride_sharing_user_app/features/location/view/access_location_screen.dart';
 import 'package:ride_sharing_user_app/features/maintainance_mode/maintainance_screen.dart';
 import 'package:ride_sharing_user_app/features/onboard/screens/onboarding_screen.dart';
 import 'package:ride_sharing_user_app/features/profile/controllers/profile_controller.dart';
@@ -108,15 +107,23 @@ class _SplashScreenState extends State<SplashScreen>
                     if (value.body['data']['is_profile_verified'] == 1) {
                       Get.find<AuthController>().remainingFindingRideTime();
                       Get.offAll(() => const DashboardScreen());
-                      // Get.find<RideController>().getCurrentRideStatus();
                     } else {
                       Get.offAll(
                           () => const EditProfileScreen(fromLogin: true));
                     }
+                  } else {
+                    // Profil pas encore dispo (timing) — aller au dashboard quand même
+                    debugPrint('[SplashScreen] getProfileInfo returned ${value.statusCode}, navigating to dashboard anyway');
+                    Get.find<AuthController>().updateToken();
+                    Get.offAll(() => const DashboardScreen());
                   }
                 });
               } else {
-                Get.offAll(() => const AccessLocationScreen());
+                // Pas d'adresse GPS sauvegardée — aller au Dashboard quand même
+                Get.find<ProfileController>().getProfileInfo().then((value) {
+                  Get.find<AuthController>().updateToken();
+                  Get.offAll(() => const DashboardScreen());
+                });
               }
             } else {
               if (Get.find<ConfigController>().showIntro()) {

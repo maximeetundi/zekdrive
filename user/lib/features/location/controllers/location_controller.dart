@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ride_sharing_user_app/features/map/widgets/google_map_replacement.dart';
 import 'package:ride_sharing_user_app/common_widgets/confirmation_dialog_widget.dart';
 import 'package:ride_sharing_user_app/common_widgets/custom_snackbar.dart';
 import 'package:ride_sharing_user_app/features/address/domain/models/address_model.dart';
@@ -76,7 +76,7 @@ class LocationController extends GetxController implements GetxService {
   GoogleMapController? mapController;
   List<PredictionModel> _predictionList = [];
   bool _updateAddAddressData = true;
-  LatLng _initialPosition = const LatLng(14.6937, -17.4479);
+  LatLng _initialPosition = const LatLng(3.8480, 11.5021);
   bool addEntrance = false;
   int currentExtraRoute = 0;
   bool extraOneRoute = false;
@@ -219,10 +219,10 @@ class LocationController extends GetxController implements GetxService {
         }
 
         if (newLocalData == null) {
-          print("Location is null, falling back to Dakar center");
+          print("Location is null, falling back to Yaoundé center");
           newLocalData = Position(
-              latitude: 14.6937,
-              longitude: -17.4479,
+              latitude: 3.8480,
+              longitude: 11.5021,
               timestamp: DateTime.now(),
               heading: 0,
               accuracy: 100,
@@ -317,8 +317,8 @@ class LocationController extends GetxController implements GetxService {
         }
         if (newLocalData == null) {
           newLocalData = Position(
-              latitude: 14.6937,
-              longitude: -17.4479,
+              latitude: 3.8480,
+              longitude: 11.5021,
               timestamp: DateTime.now(),
               heading: 0,
               accuracy: 100,
@@ -418,8 +418,15 @@ class LocationController extends GetxController implements GetxService {
           address: _address);
       _updateCountryFromGeocode(response);
     } else {
-      customSnackBar(
-          response.body['errors'][0]['message'] ?? response.bodyString);
+      String? errorMsg;
+      if (response.body != null) {
+        if (response.body['errors'] != null && response.body['errors'].isNotEmpty) {
+          errorMsg = response.body['errors'][0]['message'];
+        } else if (response.body['error'] != null) {
+          errorMsg = response.body['error'].toString();
+        }
+      }
+      customSnackBar(errorMsg ?? response.bodyString ?? 'Error');
     }
     update();
     return _address;
@@ -433,8 +440,15 @@ class LocationController extends GetxController implements GetxService {
           response.body['data']['results'][0]['formatted_address'].toString();
       _updateCountryFromGeocode(response);
     } else {
-      customSnackBar(
-          response.body['errors'][0]['message'] ?? response.bodyString);
+      String? errorMsg;
+      if (response.body != null) {
+        if (response.body['errors'] != null && response.body['errors'].isNotEmpty) {
+          errorMsg = response.body['errors'][0]['message'];
+        } else if (response.body['error'] != null) {
+          errorMsg = response.body['error'].toString();
+        }
+      }
+      customSnackBar(errorMsg ?? response.bodyString ?? 'Error');
     }
     update();
     return _address;

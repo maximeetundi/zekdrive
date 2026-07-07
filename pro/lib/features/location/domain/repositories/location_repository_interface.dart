@@ -1,5 +1,5 @@
 import 'package:get/get_connect/http/src/response/response.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ride_sharing_user_app/features/map/widgets/google_map_replacement.dart';
 import 'package:ride_sharing_user_app/interface/repository_interface.dart';
 
 abstract class LocationRepositoryInterface implements RepositoryInterface{

@@ -6,7 +6,6 @@ import 'package:ride_sharing_user_app/common_widgets/swipable_button_widget/slid
 import 'package:ride_sharing_user_app/features/dashboard/controllers/bottom_menu_controller.dart';
 import 'package:ride_sharing_user_app/features/map/controllers/map_controller.dart';
 import 'package:ride_sharing_user_app/features/parcel/controllers/parcel_controller.dart';
-import 'package:ride_sharing_user_app/features/parcel/widgets/otp_widget.dart';
 import 'package:ride_sharing_user_app/features/parcel/widgets/route_widget.dart';
 import 'package:ride_sharing_user_app/features/parcel/widgets/tolltip_widget.dart';
 import 'package:ride_sharing_user_app/features/ride/controllers/ride_controller.dart';

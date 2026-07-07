@@ -311,7 +311,7 @@ function seedRoles() {
 
 function seedAdmins() {
   return [
-    { user_id:'u1', name:'Super Admin ZekDrive', email:'admin@zekdrive.com', phone:'+221770000000', role_name:'super_admin', role_label:'Super Administrateur', role_color:'#ef4444', is_active:true, last_login: new Date().toISOString() },
+    { user_id:'u1', name:'Super Admin ZekDrive', email:'admin@zekdrive.cm', phone:'+237690000000', role_name:'super_admin', role_label:'Super Administrateur', role_color:'#ef4444', is_active:true, last_login: new Date().toISOString() },
   ]
 }
 </script>

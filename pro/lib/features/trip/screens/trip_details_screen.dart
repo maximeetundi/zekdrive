@@ -68,7 +68,10 @@ class _TripDetailsState extends State<TripDetails> {
               Padding(padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge),
                 child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
                   if(rideController.tripDetail!.actualTime != null)
-                  SummeryItem(title: '${tripDuration!.inHours}:${tripDuration.inMinutes % 60} hr',subTitle: 'time'.tr,),
+                  SummeryItem(
+                    title: '${tripDuration!.inHours}:${(tripDuration.inMinutes % 60).toString().padLeft(2,'0')} ${'time_unit'.tr}',
+                    subTitle: 'time'.tr,
+                  ),
                   SummeryItem(title: '${rideController.tripDetail!.actualDistance} km',subTitle: 'distance'.tr,),
 
                 ],),

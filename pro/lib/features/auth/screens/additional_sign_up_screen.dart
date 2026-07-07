@@ -169,9 +169,8 @@ class AdditionalSignUpScreen extends StatelessWidget {
 
 
 
-                authController.isLoading?
-                Center(child: SpinKitCircle(color: Theme.of(context).primaryColor, size: 40.0,)):
                 ButtonWidget(buttonText: 'send'.tr,
+                  isLoading: authController.isLoading,
                   onPressed: (){
                     String email = authController.emailController.text;
                     String address = authController.addressController.text;

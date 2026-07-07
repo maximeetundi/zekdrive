@@ -1,31 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ride_sharing_user_app/common_widgets/app_bar_widget.dart';
-import 'package:ride_sharing_user_app/common_widgets/body_widget.dart';
 import 'package:ride_sharing_user_app/features/address/controllers/address_controller.dart';
 import 'package:ride_sharing_user_app/features/coupon/controllers/coupon_controller.dart';
 import 'package:ride_sharing_user_app/features/home/controllers/banner_controller.dart';
 import 'package:ride_sharing_user_app/features/home/controllers/category_controller.dart';
 import 'package:ride_sharing_user_app/features/home/widgets/banner_view.dart';
-import 'package:ride_sharing_user_app/features/home/widgets/best_offers_widget.dart';
-import 'package:ride_sharing_user_app/features/home/widgets/category_view.dart';
-import 'package:ride_sharing_user_app/features/home/widgets/coupon_home_widget.dart';
 import 'package:ride_sharing_user_app/features/home/widgets/home_my_address.dart';
-import 'package:ride_sharing_user_app/features/home/widgets/home_search_widget.dart';
 import 'package:ride_sharing_user_app/features/home/widgets/main_drawer.dart';
-import 'package:ride_sharing_user_app/features/home/widgets/user_location.dart';
 import 'package:ride_sharing_user_app/features/location/controllers/location_controller.dart';
 import 'package:ride_sharing_user_app/features/my_offer/controller/offer_controller.dart';
 import 'package:ride_sharing_user_app/features/parcel/controllers/parcel_controller.dart';
 import 'package:ride_sharing_user_app/features/parcel/screens/ongoing_parcel_list_view.dart';
-import 'package:ride_sharing_user_app/features/profile/controllers/profile_controller.dart';
 import 'package:ride_sharing_user_app/features/ride/controllers/ride_controller.dart';
 import 'package:ride_sharing_user_app/features/ride/widgets/rider_details_widget.dart';
 import 'package:ride_sharing_user_app/helper/display_helper.dart';
 import 'package:ride_sharing_user_app/helper/pusher_helper.dart';
 import 'package:ride_sharing_user_app/util/dimensions.dart';
-import 'package:ride_sharing_user_app/util/images.dart';
 import 'package:ride_sharing_user_app/util/styles.dart';
+
+import 'package:ride_sharing_user_app/features/map/widgets/google_map_replacement.dart';
+import 'package:ride_sharing_user_app/theme/theme_controller.dart';
+import 'package:ride_sharing_user_app/features/map/controllers/map_controller.dart';
+import 'package:ride_sharing_user_app/features/parcel/screens/parcel_screen.dart';
+import 'package:ride_sharing_user_app/features/store/screens/store_list_screen.dart';
+import 'package:ride_sharing_user_app/features/store/screens/restaurant_list_screen.dart';
+import 'package:ride_sharing_user_app/features/set_destination/screens/set_destination_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -56,37 +55,90 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool clickedMenu = false;
   Future<void> loadData() async {
-    Get.find<ParcelController>().getUnpaidParcelList();
-    Get.find<BannerController>().getBannerList();
-    Get.find<CategoryController>().getCategoryList();
-    Get.find<AddressController>().getAddressList(1);
-    Get.find<CouponController>().getCouponList(1, isUpdate: false);
-    Get.find<OfferController>().getOfferList(1);
-    await Get.find<RideController>().getCurrentRide();
-    if (Get.find<RideController>().currentTripDetails != null) {
-      PusherHelper().pusherDriverStatus(
-          Get.find<RideController>().currentTripDetails!.id!);
-      if (Get.find<RideController>().currentTripDetails!.currentStatus ==
-              'accepted' ||
-          Get.find<RideController>().currentTripDetails!.currentStatus ==
-              'ongoing') {
-        Get.find<RideController>().startLocationRecord();
+    try {
+      Get.find<ParcelController>().getUnpaidParcelList();
+      Get.find<BannerController>().getBannerList();
+      Get.find<CategoryController>().getCategoryList();
+      Get.find<AddressController>().getAddressList(1);
+      Get.find<CouponController>().getCouponList(1, isUpdate: false);
+      Get.find<OfferController>().getOfferList(1);
+      await Get.find<RideController>().getCurrentRide();
+      if (Get.find<RideController>().currentTripDetails != null) {
+        PusherHelper().pusherDriverStatus(
+            Get.find<RideController>().currentTripDetails!.id!);
+        if (Get.find<RideController>().currentTripDetails!.currentStatus ==
+                'accepted' ||
+            Get.find<RideController>().currentTripDetails!.currentStatus ==
+                'ongoing') {
+          Get.find<RideController>().startLocationRecord();
+        }
       }
-    }
-    await Get.find<ParcelController>().getOngoingParcelList();
-    if (Get.find<ParcelController>().parcelListModel!.data!.isNotEmpty) {
-      for (var element in Get.find<ParcelController>().parcelListModel!.data!) {
-        PusherHelper().pusherDriverStatus(element.id!);
+      await Get.find<ParcelController>().getOngoingParcelList();
+      if (Get.find<ParcelController>().parcelListModel?.data?.isNotEmpty == true) {
+        for (var element in Get.find<ParcelController>().parcelListModel!.data!) {
+          PusherHelper().pusherDriverStatus(element.id!);
+        }
       }
+      // Guard: only call getNearestDriverList if lat/lng are available
+      final userAddress = Get.find<LocationController>().getUserAddress();
+      final lat = userAddress?.latitude;
+      final lng = userAddress?.longitude;
+      if (lat != null && lng != null) {
+        Get.find<RideController>().getNearestDriverList(
+            lat.toString(), lng.toString());
+      }
+    } catch (e) {
+      debugPrint('[HomeScreen.loadData] error: $e');
     }
-    Get.find<RideController>().getNearestDriverList(
-        Get.find<LocationController>().getUserAddress()!.latitude!.toString(),
-        Get.find<LocationController>().getUserAddress()!.longitude!.toString());
+  }
+
+  Widget _buildServiceItem(BuildContext context, {required IconData icon, required String label, required Color color}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 6,
+            spreadRadius: 1,
+          )
+        ],
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.05)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: textBold.copyWith(
+              fontSize: 11,
+              color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.9),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: MainDrawer(),
       body: GetBuilder<RideController>(builder: (rideController) {
         return GetBuilder<ParcelController>(builder: (parcelController) {
           int parcelCount = parcelController.parcelListModel?.totalSize ?? 0;
@@ -97,132 +149,239 @@ class _HomeScreenState extends State<HomeScreen> {
                       rideController.tripDetails!.currentStatus == 'ongoing' ||
                       (rideController.tripDetails!.currentStatus ==
                               'completed' &&
-                          rideController.tripDetails!.paymentStatus! ==
+                          (rideController.tripDetails!.paymentStatus ?? '') ==
                               'unpaid') ||
                       (rideController.tripDetails!.currentStatus ==
                               'cancelled' &&
-                          rideController.tripDetails!.paymentStatus! ==
+                          (rideController.tripDetails!.paymentStatus ?? '') ==
                               'unpaid')))
               ? 1
               : 0;
           return Stack(
             children: [
-              GetBuilder<ProfileController>(builder: (profileController) {
-                return GetBuilder<RideController>(builder: (rideController) {
-                  return GetBuilder<ParcelController>(
-                      builder: (parcelController) {
-                    return BodyWidget(
-                      appBar: AppBarWidget(
-                        title: 'GUELABLÉ',
-                        showBackButton: false,
-                        isHome: true,
-                        fontSize: Dimensions.fontSizeLarge,
+              // Map layer
+              Positioned.fill(
+                child: GetBuilder<MapController>(builder: (mapController) {
+                  return GoogleMap(
+                    markers: mapController.nearestDeliveryManMarkers?.toSet() ?? {},
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(
+                        Get.find<LocationController>().getUserAddress()?.latitude ?? 3.8480,
+                        Get.find<LocationController>().getUserAddress()?.longitude ?? 11.5021,
                       ),
-                      drawer: MainDrawer(),
-                      body: RefreshIndicator(
-                        onRefresh: () async {
-                          await loadData();
-                        },
-                        child: CustomScrollView(slivers: [
-                          SliverToBoxAdapter(
-                              child: Column(children: [
-                            Padding(
-                                padding: const EdgeInsets.only(
-                                    top: Dimensions.paddingSize,
-                                    left: Dimensions.paddingSize,
-                                    right: Dimensions.paddingSize),
-                                child: Stack(children: [
-                                  Column(children: [
-                                    const UserLocation(),
-                                    const Padding(
-                                        padding: EdgeInsets.only(
-                                            top: Dimensions.paddingSize,
-                                            bottom: Dimensions.paddingSize),
-                                        child: CategoryView()),
-                                    rideController.tripDetails != null
-                                        ? const SizedBox()
-                                        : const HomeSearchWidget(),
-                                    const HomeMyAddress(
-                                        addressPage: AddressPage.home),
-                                    const Divider(
-                                      height:
-                                          20, // Espace avant et après le diviseur
-                                      thickness: 2, // Épaisseur de la ligne
-                                      indent: 20, // Indentation à gauche
-                                      endIndent: 20, // Indentation à droite
-                                      color: Colors
-                                          .transparent, // Couleur de la ligne
-                                    ),
-                                    const BannerView(),
-                                    //const HomeMapView(
-                                    //   title: 'rider_around_you'),
-                                  ])
-                                ])),
-                            const BestOfferWidget(),
-                            const HomeCouponWidget(),
-                            const SizedBox(
-                              height: 100,
-                            )
-                          ])),
-                        ]),
+                      zoom: 15,
+                    ),
+                    onMapCreated: (gController) {
+                      gController.setMapStyle(
+                        Get.isDarkMode
+                            ? Get.find<ThemeController>().darkMap
+                            : Get.find<ThemeController>().lightMap,
+                      );
+                      mapController.setMapController(gController);
+                    },
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: false,
+                    zoomControlsEnabled: false,
+                    zoomGesturesEnabled: true,
+                  );
+                }),
+              ),
+
+              // Floating drawer menu trigger
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 10,
+                left: Dimensions.paddingSizeDefault,
+                child: Builder(builder: (context) {
+                  return GestureDetector(
+                    onTap: () => Scaffold.of(context).openDrawer(),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.12),
+                            blurRadius: 8,
+                            spreadRadius: 1,
+                          )
+                        ],
                       ),
-                    );
-                  });
-                });
-              }),
+                      padding: const EdgeInsets.all(12),
+                      child: Icon(
+                        Icons.menu,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                        size: 24,
+                      ),
+                    ),
+                  );
+                }),
+              ),
+
+              // Banners floating carousel (Sits above the bottom sheet)
+              Positioned(
+                bottom: 275,
+                left: 0,
+                right: 0,
+                child: const BannerView(),
+              ),
+
+              // Floating bottom sheet/card
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.12),
+                        blurRadius: 16,
+                        spreadRadius: 1,
+                      )
+                    ],
+                  ),
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          margin: const EdgeInsets.only(bottom: 16),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Get.to(() => const SetDestinationScreen()),
+                        child: Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).hoverColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            children: [
+                              Icon(Icons.search, color: Theme.of(context).primaryColor, size: 24),
+                              const SizedBox(width: 12),
+                              Text(
+                                'where_to_go'.tr,
+                                style: textBold.copyWith(
+                                  fontSize: 16,
+                                  color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                Get.find<RideController>().setRideCategoryIndex(0);
+                                Get.to(() => const SetDestinationScreen());
+                              },
+                              child: _buildServiceItem(
+                                context,
+                                icon: Icons.local_taxi,
+                                label: 'ride'.tr,
+                                color: const Color(0xFF14B19E),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => Get.to(() => const ParcelScreen()),
+                              child: _buildServiceItem(
+                                context,
+                                icon: Icons.local_shipping,
+                                label: 'parcel_delivery'.tr,
+                                color: const Color(0xFF2196F3),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => Get.to(() => const RestaurantListScreen(initialType: 'restaurant')),
+                              child: _buildServiceItem(
+                                context,
+                                icon: Icons.restaurant,
+                                label: 'restaurant'.tr,
+                                color: const Color(0xFFFF5722),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => Get.to(() => const StoreListScreen(initialType: '')),
+                              child: _buildServiceItem(
+                                context,
+                                icon: Icons.store,
+                                label: 'commerce'.tr,
+                                color: const Color(0xFFFF9800),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      const HomeMyAddress(addressPage: AddressPage.home),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Bidding lists / Ongoing overlay widgets
               (rideCount + parcelCount) != 0
                   ? Positioned(
-                      child: Align(
-                          alignment: Alignment.centerRight,
-                          child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  clickedMenu = true;
-                                });
-                              },
-                              onHorizontalDragEnd: (DragEndDetails details) {
-                                _onHorizontalDrag(details);
-                              },
-                              child: Stack(
-                                children: [
-                                  SizedBox(
-                                      width: 70,
-                                      child: Image.asset(Images.homeMapIcon,
-                                          color:
-                                              Theme.of(context).primaryColor)),
-                                  Positioned(
-                                      top: 0,
-                                      bottom: 15,
-                                      left: 35,
-                                      right: 0,
-                                      child: SizedBox(
-                                          height: 10,
-                                          child: Image.asset(
-                                            Images.ongoing,
-                                            scale: 2.7,
-                                          ))),
-                                  Positioned(
-                                      bottom: 85,
-                                      right: 5,
-                                      child: Container(
-                                          width: 20,
-                                          height: 20,
-                                          padding: const EdgeInsets.all(3),
-                                          decoration: BoxDecoration(
-                                              color: Colors.red,
-                                              borderRadius:
-                                                  BorderRadius.circular(50)),
-                                          child: Center(
-                                              child: Text(
-                                            '${rideCount + parcelCount}',
-                                            style: textRegular.copyWith(
-                                                color: Colors.white,
-                                                fontSize: Dimensions
-                                                    .fontSizeExtraSmall),
-                                          ))))
-                                ],
-                              ))))
+                      top: MediaQuery.of(context).padding.top + 10,
+                      right: Dimensions.paddingSizeDefault,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            clickedMenu = true;
+                          });
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 6,
+                              )
+                            ],
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.airport_shuttle, color: Colors.white, size: 20),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${rideCount + parcelCount}',
+                                style: textBold.copyWith(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
                   : const SizedBox(),
+
               if (clickedMenu)
                 Positioned(
                     child: Align(
@@ -430,7 +589,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           bidding:
                                               rideController.biddingList[index],
                                           tripId:
-                                              rideController.tripDetails!.id!,
+                                              rideController.tripDetails?.id ?? '',
                                         ));
                                   }),
                             ),
@@ -442,18 +601,4 @@ class _HomeScreenState extends State<HomeScreen> {
       }),
     );
   }
-
-  void _onHorizontalDrag(DragEndDetails details) {
-    if (details.primaryVelocity == 0) return;
-
-    if (details.primaryVelocity!.compareTo(0) == -1) {
-      debugPrint('dragged from left');
-    } else {
-      debugPrint('dragged from right');
-    }
-  }
 }
-
-
-
-// Utilisez AnimatedListTile à la place de ListTile dans votre Drawer

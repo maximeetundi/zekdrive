@@ -132,10 +132,9 @@ func (s *storeService) GetStoreDetails(ctx context.Context, storeID uuid.UUID) (
 	return store, nil
 }
 
-func (s *storeService) ListNearbyStores(ctx context.Context, lat, lng float64, search string, storeType string) ([]domain.Store, error) {
-	// Radius default 50km
-	radius := 50000.0
-	stores, err := s.storeRepo.ListNearbyStores(ctx, lat, lng, radius, search, storeType)
+func (s *storeService) ListNearbyStores(ctx context.Context, lat, lng float64, search string, storeType string, excludeFood bool) ([]domain.Store, error) {
+	radius := 50000.0 // 50km
+	stores, err := s.storeRepo.ListNearbyStores(ctx, lat, lng, radius, search, storeType, excludeFood)
 	if err != nil {
 		return nil, err
 	}
@@ -287,6 +286,14 @@ func (s *storeService) ListProductsForStoreOwner(ctx context.Context, userID uui
 }
 
 func (s *storeService) ListProductsForCustomer(ctx context.Context, storeID uuid.UUID) ([]domain.Product, error) {
+	// Vérifier que le store existe avant de lister ses produits
+	store, err := s.storeRepo.GetStoreByID(ctx, storeID)
+	if err != nil {
+		return nil, err
+	}
+	if store == nil {
+		return nil, errors.New("store not found")
+	}
 	return s.storeRepo.ListProducts(ctx, storeID, true)
 }
 

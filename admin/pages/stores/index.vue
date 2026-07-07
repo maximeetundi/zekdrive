@@ -222,7 +222,7 @@
       <form @submit.prevent="saveStore">
         <div class="form-group text-left" style="margin-bottom: 1.25rem;">
           <label class="form-label">{{ t('store_name') }}</label>
-          <input v-model="storeForm.name" type="text" class="form-input" required placeholder="La Fourchette Dakar" />
+          <input v-model="storeForm.name" type="text" class="form-input" required placeholder="La Fourchette Yaoundé" />
         </div>
 
         <div class="form-group text-left" style="margin-bottom: 1.25rem;">
@@ -249,7 +249,7 @@
 
         <div class="form-group text-left" style="margin-bottom: 1.25rem;">
           <label class="form-label">{{ lang === 'fr' ? 'Adresse' : 'Address' }}</label>
-          <input v-model="storeForm.address" type="text" class="form-input" required placeholder="Avenue Hassan II, Dakar" />
+          <input v-model="storeForm.address" type="text" class="form-input" required placeholder="Avenue Kennedy, Yaoundé" />
         </div>
 
         <div class="grid grid-cols-2 gap-4 modal-form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1.25rem;">
@@ -365,10 +365,10 @@ watch(currentType, () => loadStores())
 
 // Stores Database (mock fallback - replaced by backend data on load)
 const stores = ref([
-  { id: 'st_1', name: 'Le Ryad Resto', type: 'restaurant', rating: 4.8, is_active: true, description: 'Cuisine marocaine et orientale', address: 'Route de la Corniche Ouest, Dakar', latitude: 14.6811, longitude: -17.4623, category: 'Gastronomie' },
-  { id: 'st_2', name: 'Alimentation Générale Diallo', type: 'grocery', rating: 4.2, is_active: true, description: 'Superette de quartier, fruits et boissons', address: 'Avenue Bourguiba, Dakar', latitude: 14.7088, longitude: -17.4512, category: 'Épicerie' },
-  { id: 'st_3', name: 'Boulangerie La Parisienne', type: 'restaurant', rating: 4.6, is_active: true, description: 'Croissants chauds, pains artisanaux et pâtisseries', address: 'Rue Aimé Césaire, Dakar', latitude: 14.6934, longitude: -17.4705, category: 'Boulangerie' },
-  { id: 'st_4', name: 'Zara Dakar Boutique', type: 'boutique', rating: 4.5, is_active: true, description: 'Mode vêtements, chaussures et accessoires', address: 'Sea Plaza, Corniche Ouest', latitude: 14.6854, longitude: -17.4721, category: 'Mode' },
+  { id: 'st_1', name: 'Chez Ngando Resto', type: 'restaurant', rating: 4.8, is_active: true, description: 'Cuisine camerounaise traditionnelle et grillades', address: 'Bastos, Yaoundé', latitude: 3.8568, longitude: 11.5165, category: 'Gastronomie' },
+  { id: 'st_2', name: 'Alimentation Générale Manga', type: 'grocery', rating: 4.2, is_active: true, description: 'Supérette de quartier, fruits et boissons', address: 'Avenue Kennedy, Yaoundé', latitude: 3.8712, longitude: 11.5234, category: 'Épicerie' },
+  { id: 'st_3', name: 'Boulangerie La Trésorerie', type: 'restaurant', rating: 4.6, is_active: true, description: 'Croissants chauds, pains artisanaux et pâtisseries', address: 'Nlongkak, Yaoundé', latitude: 3.8634, longitude: 11.5089, category: 'Boulangerie' },
+  { id: 'st_4', name: 'Fashion Marché Central Yaoundé', type: 'boutique', rating: 4.5, is_active: true, description: 'Mode vêtements, chaussures et accessoires', address: 'Marché Central, Yaoundé', latitude: 3.8678, longitude: 11.5156, category: 'Mode' },
 ])
 
 // Selected Store for catalog tab
@@ -426,7 +426,7 @@ const orders = ref([
     customer_id: 'c_1',
     customer_name: 'Amadou Ba',
     store_id: 'st_1',
-    store_name: 'Le Ryad Resto',
+    store_name: 'Chez Ngando Resto',
     status: 'preparing',
     delivery_type: 'delivery',
     total_fare: 10800,
@@ -442,7 +442,7 @@ const orders = ref([
     customer_id: 'c_2',
     customer_name: 'Aissatou Camara',
     store_id: 'st_3',
-    store_name: 'Boulangerie La Parisienne',
+    store_name: 'Boulangerie La Trésorerie',
     status: 'ready_for_pickup',
     delivery_type: 'pickup',
     total_fare: 1950,
@@ -459,7 +459,7 @@ const orders = ref([
     customer_id: 'c_3',
     customer_name: 'Mariama Kouyaté',
     store_id: 'st_4',
-    store_name: 'Zara Dakar Boutique',
+    store_name: 'Fashion Marché Central Yaoundé',
     status: 'delivered',
     delivery_type: 'delivery',
     total_fare: 19500,
@@ -512,8 +512,8 @@ const storeForm = ref({
   description: '',
   type: 'restaurant' as string,
   category: '',
-  latitude: 14.6928,
-  longitude: -17.4467,
+  latitude: 3.8480,
+  longitude: 11.5021,
   address: '',
   is_active: true
 })
@@ -536,8 +536,8 @@ function openAddModal() {
       name: '',
       description: '',
       type: currentType.value === 'restaurant' ? 'restaurant' : 'boutique',
-      latitude: 14.6928,
-      longitude: -17.4467,
+      latitude: 3.8480,
+      longitude: 11.5021,
       address: '',
       is_active: true
     }
@@ -619,7 +619,7 @@ function deleteOrder(id: string) {
 }
 
 function formatCurrency(val: number): string {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(val)
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(val)
 }
 </script>
 

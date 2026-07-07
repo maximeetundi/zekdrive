@@ -32,10 +32,10 @@ export interface Trip {
 }
 
 const STATUSES: Trip['status'][] = ['pending', 'accepted', 'ongoing', 'completed', 'cancelled']
-const PICKUPS = ['Almadies, Dakar', 'Plateau, Dakar', 'Parcelles Assainies', 'Grand Yoff', 'Mermoz, Dakar']
-const DROPOFFS = ['Aéroport AIBD', 'UCAD, Dakar', 'Marché Sandaga', 'Point E, Dakar', 'Yoff, Dakar']
-const CUSTOMERS = ['Amadou Ba', 'Fatoumata D.', 'Moussa Sow', 'Aissatou C.', 'Omar T.']
-const DRIVERS = ['Seydou K.', 'Lamine K.', 'Boubacar D.', 'Abdoulaye C.', 'Mamadou B.']
+const PICKUPS = ['Bastos, Yaoundé', 'Centre-ville, Yaoundé', 'Mvan, Yaoundé', 'Odza, Yaoundé', 'Ngousso, Yaoundé']
+const DROPOFFS = ['Aéroport NSIMALEN', 'Université I, Yaoundé', 'Marché Mokolo', 'Biyem-Assi, Yaoundé', 'Mvog-Ada, Yaoundé']
+const CUSTOMERS = ['Jean-Pierre T.', 'Marie-Claire N.', 'Emmanuel F.', 'Christelle A.', 'Patrick M.']
+const DRIVERS = ['Rodrigue K.', 'Blaise E.', 'Thierry D.', 'Célestin B.', 'Hermann N.']
 
 const MOCK_TRIPS: Trip[] = Array.from({ length: 60 }, (_, i) => ({
   id: `trip_${i + 1}`,
@@ -46,16 +46,17 @@ const MOCK_TRIPS: Trip[] = Array.from({ length: 60 }, (_, i) => ({
   driver_id: `driver_${(i % 5) + 1}`,
   pickup_address: PICKUPS[i % PICKUPS.length],
   dropoff_address: DROPOFFS[i % DROPOFFS.length],
-  pickup_lat: 14.6928 + (Math.random() - 0.5) * 0.08,
-  pickup_lng: -17.4467 + (Math.random() - 0.5) * 0.08,
-  dropoff_lat: 14.7428 + (Math.random() - 0.5) * 0.08,
-  dropoff_lng: -17.4867 + (Math.random() - 0.5) * 0.08,
+  // Coordonnées GPS de Yaoundé, Cameroun
+  pickup_lat: 3.8480 + (Math.random() - 0.5) * 0.08,
+  pickup_lng: 11.5021 + (Math.random() - 0.5) * 0.08,
+  dropoff_lat: 3.8680 + (Math.random() - 0.5) * 0.08,
+  dropoff_lng: 11.5221 + (Math.random() - 0.5) * 0.08,
   status: STATUSES[i % STATUSES.length],
   fare: Math.floor(Math.random() * 8000 + 1500),
   distance_km: Math.round((Math.random() * 15 + 1) * 10) / 10,
   duration_min: Math.floor(Math.random() * 40 + 5),
-  payment_method: ['cash', 'orange_money', 'wave', 'card'][i % 4],
-  zone: ['Dakar Centre', 'Dakar Ouest', 'Banlieue', 'Pikine'][i % 4],
+  payment_method: ['cash', 'orange_money', 'mtn_momo', 'card'][i % 4],
+  zone: ['Yaoundé Centre', 'Yaoundé Nord', 'Yaoundé Sud', 'Douala'][i % 4],
   created_at: new Date(Date.now() - i * 3600000 * 2).toISOString(),
   status_history: [
     { status: 'pending', timestamp: new Date(Date.now() - i * 3600000 * 2).toISOString() },

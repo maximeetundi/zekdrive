@@ -24,7 +24,7 @@
     </div>
 
     <!-- Stats -->
-    <div class="stats-grid animate-fade-in" style="grid-template-columns:repeat(5,1fr);margin-bottom:2rem;">
+    <div class="stats-grid animate-fade-in" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;">
       <AppStatsCard :title="lang==='fr'?'Total dossiers':'Total Dossiers'" :value="items.length.toString()" icon="📋" color="blue"/>
       <AppStatsCard :title="lang==='fr'?'En attente':'Pending'" :value="countByStatus('pending').toString()" icon="⏳" color="orange"/>
       <AppStatsCard :title="lang==='fr'?'Approuvés':'Approved'" :value="countByStatus('approved').toString()" icon="✅" color="green"/>
@@ -34,8 +34,8 @@
 
     <!-- KYC Table -->
     <div class="card animate-slide-up">
-      <div class="card-body" style="padding:0;">
-        <table class="kyc-table">
+      <div class="card-body" style="padding:0;overflow-x:auto;">
+        <table class="kyc-table" style="min-width:850px;width:100%;">
           <thead>
             <tr>
               <th>{{ lang==='fr'?'Entité':'Entity' }}</th>
@@ -84,6 +84,9 @@
               <!-- Actions -->
               <td style="text-align:right;">
                 <div class="flex gap-2 justify-end">
+                  <NuxtLink v-if="item.kyc_status === 'approved'" :to="entityRoute(item.entity_type)" class="btn btn-secondary btn-sm flex items-center gap-1">
+                    🔗 {{ lang === 'fr' ? 'Fiche' : 'Profile' }}
+                  </NuxtLink>
                   <button class="btn btn-secondary btn-sm" @click="openDetail(item)">
                     {{ lang==='fr'?'Voir':'View' }}
                   </button>
@@ -116,6 +119,11 @@
             <div class="font-semibold text-primary" style="font-size:1.1rem;">{{ selected.name }}</div>
             <div class="text-sm text-muted">{{ selected.email }}</div>
             <div class="text-xs text-muted">{{ selected.phone }}</div>
+            <div style="margin-top:0.375rem;">
+              <NuxtLink :to="entityRoute(selected.entity_type)" class="text-xs font-semibold text-accent flex items-center gap-1" style="text-decoration:underline; display: inline-flex;">
+                🔗 {{ lang === 'fr' ? 'Accéder à la gestion' : 'Go to management' }}
+              </NuxtLink>
+            </div>
           </div>
           <div style="margin-left:auto;">
             <AppStatusBadge :status="selected.kyc_status" />
@@ -223,15 +231,16 @@ interface KycItem {
 }
 
 const items = ref<KycItem[]>([
-  { id:'k1', name:'Ibrahima Diallo', email:'ibra@mail.sn', phone:'+221771234567', entity_type:'user', doc_type_fr:"Carte Nationale d'Identité", doc_type_en:'National ID Card', doc_number:'SN-7821-4432', country:'SN', submitted_at: new Date(Date.now()-86400000).toISOString(), kyc_status:'pending' },
-  { id:'k2', name:'Cheikh Fall', email:'cheikh.fall@mail.sn', phone:'+221785556677', entity_type:'driver', doc_type_fr:'Permis de conduire', doc_type_en:"Driver's License", doc_number:'DL-221-9983', country:'SN', submitted_at: new Date(Date.now()-172800000).toISOString(), kyc_status:'approved' },
-  { id:'k3', name:'Véhicule DK-4521-A (Cheikh Fall)', email:'cheikh.fall@mail.sn', phone:'+221785556677', entity_type:'vehicle', doc_type_fr:'Carte Grise', doc_type_en:'Vehicle Registration', doc_number:'DK-4521-A', country:'SN', submitted_at: new Date(Date.now()-172800000).toISOString(), kyc_status:'approved', vehicle_info:'Toyota Corolla 2020 Blanc', expiry_date:'2027-06-30' },
-  { id:'k4', name:'Moussa Kouyaté', email:'moussa.k@mail.ci', phone:'+2250787654321', entity_type:'driver', doc_type_fr:'Permis de conduire', doc_type_en:"Driver's License", doc_number:'CI-DRV-44521', country:'CI', submitted_at: new Date(Date.now()-3600000).toISOString(), kyc_status:'pending' },
-  { id:'k5', name:'Fatou Camara', email:'fatou.c@mail.ml', phone:'+22376111222', entity_type:'user', doc_type_fr:'Passeport', doc_type_en:'Passport', doc_number:'ML-8899-12', country:'ML', submitted_at: new Date(Date.now()-604800000).toISOString(), kyc_status:'rejected', reject_reason:'Document expiré — la date de validité est dépassée.' },
-  { id:'k6', name:'Abdoulaye Seck', email:'a.seck@mail.sn', phone:'+221706543210', entity_type:'driver', doc_type_fr:'Permis de conduire', doc_type_en:"Driver's License", doc_number:'DL-221-7721', country:'SN', submitted_at: new Date(Date.now()-43200000).toISOString(), kyc_status:'pending' },
-  { id:'k7', name:'Véhicule DK-9877-B (Abdoulaye Seck)', email:'a.seck@mail.sn', phone:'+221706543210', entity_type:'vehicle', doc_type_fr:"Certificat d'assurance", doc_type_en:'Insurance Certificate', doc_number:'INS-DK-2026-B', country:'SN', submitted_at: new Date(Date.now()-43200000).toISOString(), kyc_status:'pending', vehicle_info:'Renault Logan 2019 Gris', expiry_date:'2026-12-31' },
-  { id:'k8', name:'Mariama Ba', email:'mari.ba@mail.sn', phone:'+221779988776', entity_type:'user', doc_type_fr:"Carte Nationale d'Identité", doc_type_en:'National ID Card', doc_number:'SN-5534-8812', country:'SN', submitted_at: new Date(Date.now()-1209600000).toISOString(), kyc_status:'unsubmitted' },
+  { id:'k1', name:'Kamgang Jules', email:'kamgang.jules@mail.cm', phone:'+237681234567', entity_type:'driver', doc_type_fr:'Permis de conduire', doc_type_en:"Driver's License", doc_number:'CM-DRV-78456', country:'CM', submitted_at: new Date(Date.now()-86400000).toISOString(), kyc_status:'pending' },
+  { id:'k2', name:'Nkeng Fabrice', email:'nkeng.fabrice@mail.cm', phone:'+237674567890', entity_type:'user', doc_type_fr:"Carte Nationale d'Identité", doc_type_en:'National ID Card', doc_number:'CM-7821-4432', country:'CM', submitted_at: new Date(Date.now()-172800000).toISOString(), kyc_status:'approved' },
+  { id:'k3', name:'Véhicule LT-123-YA (Kamgang Jules)', email:'kamgang.jules@mail.cm', phone:'+237681234567', entity_type:'vehicle', doc_type_fr:'Carte Grise', doc_type_en:'Vehicle Registration', doc_number:'LT-123-YA', country:'CM', submitted_at: new Date(Date.now()-172800000).toISOString(), kyc_status:'approved', vehicle_info:'Toyota Corolla 2018 Jaune', expiry_date:'2027-06-30' },
+  { id:'k4', name:'Tsanga Régine', email:'tsanga.regine@mail.cm', phone:'+237677890123', entity_type:'user', doc_type_fr:'Passeport Camerounais', doc_type_en:'Cameroonian Passport', doc_number:'CM-PP-54321', country:'CM', submitted_at: new Date(Date.now()-3600000).toISOString(), kyc_status:'pending' },
+  { id:'k5', name:'Mballa Emmanuel', email:'mballa.em@mail.cm', phone:'+237676789012', entity_type:'driver', doc_type_fr:'Permis de conduire', doc_type_en:"Driver's License", doc_number:'CM-DRV-11234', country:'CM', submitted_at: new Date(Date.now()-604800000).toISOString(), kyc_status:'rejected', reject_reason:'Document expiré — la date de validité est dépassée.' },
+  { id:'k6', name:'Tabe Christiane', email:'tabe.ch@mail.cm', phone:'+237685678901', entity_type:'driver', doc_type_fr:'Permis de conduire', doc_type_en:"Driver's License", doc_number:'CM-DRV-78567', country:'CM', submitted_at: new Date(Date.now()-43200000).toISOString(), kyc_status:'pending' },
+  { id:'k7', name:'Véhicule CE-456-OU (Tabe Christiane)', email:'tabe.ch@mail.cm', phone:'+237685678901', entity_type:'vehicle', doc_type_fr:"Certificat d'assurance", doc_type_en:'Insurance Certificate', doc_number:'INS-CM-2026-B', country:'CM', submitted_at: new Date(Date.now()-43200000).toISOString(), kyc_status:'pending', vehicle_info:'Toyota Prado 2020 Noir', expiry_date:'2026-12-31' },
+  { id:'k8', name:'Fosso Brigitte', email:'fosso.br@mail.cm', phone:'+237675678901', entity_type:'user', doc_type_fr:"Carte Nationale d'Identité", doc_type_en:'National ID Card', doc_number:'CM-5534-8812', country:'CM', submitted_at: new Date(Date.now()-1209600000).toISOString(), kyc_status:'unsubmitted' },
 ])
+
 
 onMounted(async () => {
   const res = await get<KycItem[]>('/api/admin/kyc')
@@ -240,11 +249,23 @@ onMounted(async () => {
 
 const filteredItems = computed(() => items.value.filter(i => {
   if (entityFilter.value && i.entity_type !== entityFilter.value) return false
-  if (statusFilter.value && i.kyc_status !== statusFilter.value) return false
+  if (statusFilter.value) {
+    if (i.kyc_status !== statusFilter.value) return false
+  } else {
+    // Hide approved KYC requests by default to free screen space
+    if (i.kyc_status === 'approved') return false
+  }
   return true
 }))
 
 const countByStatus = (s: string) => items.value.filter(i => i.kyc_status === s).length
+
+function entityRoute(type: string) {
+  if (type === 'user') return '/users'
+  if (type === 'driver') return '/drivers'
+  if (type === 'vehicle') return '/vehicles'
+  return '/'
+}
 
 function entityLabel(type: string) {
   const m: Record<string, string[]> = {
@@ -256,13 +277,13 @@ function entityLabel(type: string) {
 }
 
 function countryFlag(code: string) {
-  const flags: Record<string,string> = { SN:'🇸🇳', CI:'🇨🇮', ML:'🇲🇱', GN:'🇬🇳', BF:'🇧🇫', TG:'🇹🇬', BJ:'🇧🇯', NE:'🇳🇪', MR:'🇲🇷', GW:'🇬🇼' }
+  const flags: Record<string,string> = { CM:'🇨🇲', SN:'🇸🇳', CI:'🇨🇮', ML:'🇲🇱', GN:'🇬🇳', BF:'🇧🇫', TG:'🇹🇬', BJ:'🇧🇯', NE:'🇳🇪', MR:'🇲🇷', GW:'🇬🇼' }
   return flags[code] ?? '🌍'
 }
 
 function countryName(code: string) {
   const names: Record<string,string[]> = {
-    SN:['Sénégal','Senegal'], CI:["Côte d'Ivoire","Ivory Coast"], ML:['Mali','Mali'],
+    CM:['Cameroun','Cameroon'], SN:['Sénégal','Senegal'], CI:["Côte d'Ivoire","Ivory Coast"], ML:['Mali','Mali'],
     GN:['Guinée','Guinea'], BF:['Burkina Faso','Burkina Faso'], TG:['Togo','Togo'],
     BJ:['Bénin','Benin'], NE:['Niger','Niger'], MR:['Mauritanie','Mauritania']
   }

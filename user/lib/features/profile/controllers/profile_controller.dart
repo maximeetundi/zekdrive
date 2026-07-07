@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ride_sharing_user_app/data/api_checker.dart';
@@ -62,7 +63,7 @@ class ProfileController extends GetxController implements GetxService {
 
   String customerName() {
     if(profileModel != null) {
-      return '${profileModel!.data!.firstName ?? ''} ${profileModel!.data!.lastName ?? ''}';
+      return profileModel!.data!.firstName ?? '';
     }else {
       return 'Guest';
     }
@@ -80,8 +81,12 @@ class ProfileController extends GetxController implements GetxService {
     Response? response = await profileServiceInterface.getProfileInfo();
     if(response!.statusCode == 200) {
       profileModel = ProfileModel.fromJson(response.body);
-    }else{
-      ApiChecker.checkApi(response);
+    } else {
+      // Ne pas déconnecter sur 401/404 — peut être un timing juste après login
+      debugPrint('[ProfileController] getProfileInfo error ${response.statusCode}: ${response.body}');
+      if (response.statusCode != 401 && response.statusCode != 404) {
+        ApiChecker.checkApi(response);
+      }
     }
     isLoading = false;
     update();

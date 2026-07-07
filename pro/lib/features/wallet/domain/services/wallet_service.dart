@@ -49,5 +49,10 @@ class WalletService implements WalletServiceInterface{
     return walletRepositoryInterface.recharge(amount, paymentMethod, phoneNumber, reference);
   }
 
+  @override
+  Future initiateRecharge(double amount, String gateway, String phoneNumber) {
+    return walletRepositoryInterface.initiateRecharge(amount, gateway, phoneNumber);
+  }
+
 
 }

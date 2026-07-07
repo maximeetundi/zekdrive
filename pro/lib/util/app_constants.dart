@@ -3,9 +3,13 @@ import 'package:ride_sharing_user_app/util/images.dart';
 
 class AppConstants {
   static const String appName = 'ZekDrive Pro';
-  static const String polylineMapKey =
-      'AIzaSyBLzkqJWnCO_OucXE-aoUdj9rtqfcuZo54';
-  static const String baseUrl = 'https://api.driver.maximeetundi.store';
+
+  // URL de l'API ZekDrive — HTTPS, redirige vers le port local de l'API
+  // Prod / dev : api.driver.maximeetundi.store → serveur local
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://api.driver.maximeetundi.store',
+  );
   static const String configUri = '/api/driver/configuration';
   static const String registration = '/api/driver/auth/registration';
   static const String loginUri = '/api/driver/auth/login';
@@ -91,6 +95,7 @@ class AppConstants {
   static const String proWalletUri = '/api/pro/wallet';
   static const String proWalletTransactionsUri = '/api/pro/wallet/transactions';
   static const String proWalletRechargeUri = '/api/pro/wallet/recharge';
+  static const String proWalletRechargeInitUri = '/api/pro/wallet/recharge/initialize';
 
   ///Pusher web socket
   static const String appKey = 'drivemond';

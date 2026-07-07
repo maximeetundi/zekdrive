@@ -25,20 +25,20 @@ export interface UserFilters {
 }
 
 const MOCK_USERS: User[] = Array.from({ length: 40 }, (_, i) => {
-  const names = ['Amadou Ba', 'Fatoumata Diallo', 'Moussa Sow', 'Aissatou Camara', 'Omar Traoré', 'Mariama Kouyaté', 'Ibrahima Ndiaye', 'Kadiatou Bah', 'Cheikh Fall', 'Rokhaya Mbaye']
+  const names = ['Amadou Diallo', 'Mariama Sow', 'Cheikh Bamba', 'Nkeng Fabrice', 'Fosso Brigitte', 'Mballa Emmanuel', 'Tsanga Régine', 'Ngono Patrick', 'Guy Minlo', 'Flore Ngali']
   const statuses: User['status'][] = ['active', 'active', 'active', 'inactive', 'banned']
-  const countries = ['SN', 'CI', 'ML']
+  const countries = ['CM', 'CM', 'CI']
   const kycStatuses: User['kyc_status'][] = ['approved', 'pending', 'unsubmitted', 'rejected']
   return {
     id: `user_${i + 1}`,
     name: names[i % names.length] + (i >= names.length ? ` ${Math.floor(i / names.length) + 1}` : ''),
-    email: `user${i + 1}@example.com`,
-    phone: `+221 7${String(Math.floor(Math.random() * 100000000)).padStart(8, '0')}`,
-    role: i < 3 ? 'admin' : 'customer',
+    email: `user${i + 1}@zekdrive.cm`,
+    phone: `+237 6${String(Math.floor(Math.random() * 100000000)).padStart(8, '0')}`,
+    role: 'customer', // Tous clients, les admins sont dans le panel admins
     status: statuses[i % statuses.length],
     created_at: new Date(Date.now() - i * 86400000 * 3).toISOString(),
     trips_count: Math.floor(Math.random() * 50),
-    total_spent: Math.floor(Math.random() * 200000),
+    total_spent: Math.floor(Math.random() * 200000), // XAF
     country: countries[i % countries.length],
     kyc_status: kycStatuses[i % kycStatuses.length],
     kyc_document: i % 4 !== 2 ? `/uploads/kyc/cni_user_${i + 1}.jpg` : '',

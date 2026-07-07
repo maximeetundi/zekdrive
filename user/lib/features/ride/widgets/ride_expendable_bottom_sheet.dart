@@ -72,56 +72,65 @@ class _RideExpendableBottomSheetState extends State<RideExpendableBottomSheet> {
                     return Padding(padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
                       child: Column(mainAxisSize: MainAxisSize.min, children:  [
 
+                        // État initial : sélection du véhicule et du tarif
                         (rideController.currentRideState == RideState.initial) ?
                          InitialWidget(expandableKey: widget.expandableKey,) :
 
+                        // Mode enchère (inDrive) : proposition de prix
                         (rideController.currentRideState == RideState.riseFare) ?
                         RaiseFareBottomSheet(expandableKey: widget.expandableKey):
 
+                        // Recherche de conducteur
                         (rideController.currentRideState == RideState.findingRider) ?
                         FindingRiderWidget(expandableKey: widget.expandableKey, fromPage: FindingRide.ride) :
 
-                        (rideController.currentRideState == RideState.acceptingRider || rideController.currentRideState == RideState.ongoingRide) ?
+                        // Conducteur accepté ET en route / trajet en cours
+                        (rideController.currentRideState == RideState.acceptingRider ||
+                         rideController.currentRideState == RideState.ongoingRide) ?
                         AcceptingAndOngoingBottomSheet(firstRoute: firstRoute, secondRoute: secondRoute, expandableKey: widget.expandableKey,):
 
+                        // OTP affiché au conducteur avant démarrage
                         (rideController.currentRideState == RideState.otpSent) ?
-                        OtpSentBottomSheet(firstRoute: firstRoute, secondRoute: secondRoute,expandableKey: widget.expandableKey,):
+                        OtpSentBottomSheet(firstRoute: firstRoute, secondRoute: secondRoute, expandableKey: widget.expandableKey,):
 
-                        (rideController.currentRideState == RideState.ongoingRide) ?
+                        // Trajet terminé → redirection automatique vers paiement
+                        (rideController.currentRideState == RideState.completeRide) ?
                         GestureDetector(
                           onTap: () {
                             showDialog(context: context, builder: (_) {
-                              return ConfirmationDialogWidget(icon: Images.endTrip,
-                                description: 'end_this_trip_at_your_destination'.tr, onYesPressed: () async {
+                              return ConfirmationDialogWidget(
+                                icon: Images.endTrip,
+                                description: 'end_this_trip_at_your_destination'.tr,
+                                onYesPressed: () async {
                                   Get.back();
                                   Get.dialog(const ConfirmationTripDialog(isStartedTrip: false,), barrierDismissible: false);
-                                  await Future.delayed( const Duration(seconds: 5));
+                                  await Future.delayed(const Duration(seconds: 5));
                                   Get.find<RideController>().stopLocationRecord();
                                   rideController.updateRideCurrentState(RideState.completeRide);
                                   Get.find<MapController>().notifyMapController();
-                                  Get.off(()=>const PaymentScreen());
-                                },);
+                                  Get.off(() => const PaymentScreen());
+                                },
+                              );
                             });
                           },
                           child: Column(children: [
                             TollTipWidget(title: 'trip_is_ongoing'.tr),
-                            const SizedBox(height: Dimensions.paddingSizeDefault,),
-                            Padding(padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeDefault),
+                            const SizedBox(height: Dimensions.paddingSizeDefault),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeDefault),
                               child: Text.rich(TextSpan(
-                                style: textRegular.copyWith(fontSize: Dimensions.fontSizeLarge,
-                                    color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.8)
-                                ),
-                                children:  [
-                                  TextSpan(text: "the_car_just_arrived_at".tr,style: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault)),
-                                  TextSpan(text: " ".tr),
-                                  TextSpan(text: "your_destination".tr,style: textMedium.copyWith(fontSize: Dimensions.fontSizeDefault,color: Theme.of(context).primaryColor)),
+                                children: [
+                                  TextSpan(text: 'the_car_just_arrived_at'.tr,
+                                    style: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                                  const TextSpan(text: ' '),
+                                  TextSpan(text: 'your_destination'.tr,
+                                    style: textMedium.copyWith(fontSize: Dimensions.fontSizeDefault,
+                                      color: Theme.of(context).primaryColor)),
                                 ],
-                              ),
-                              ),
+                              )),
                             ),
-
                             const ActivityScreenRiderDetails(),
-                            const SizedBox(height: Dimensions.paddingSizeDefault,),
+                            const SizedBox(height: Dimensions.paddingSizeDefault),
                           ]),
                         ) : const SizedBox(),
 

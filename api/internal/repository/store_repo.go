@@ -92,7 +92,7 @@ func (r *storeRepo) UpdateStore(ctx context.Context, s *domain.Store) error {
 	return err
 }
 
-func (r *storeRepo) ListNearbyStores(ctx context.Context, lat, lng float64, radius float64, search string, storeType string) ([]domain.Store, error) {
+func (r *storeRepo) ListNearbyStores(ctx context.Context, lat, lng float64, radius float64, search string, storeType string, excludeFood bool) ([]domain.Store, error) {
 	query := `
 		SELECT 
 			id, user_id, name, description, image_url, address, rating, is_active, type, category, created_at, updated_at,
@@ -103,10 +103,11 @@ func (r *storeRepo) ListNearbyStores(ctx context.Context, lat, lng float64, radi
 		WHERE is_active = true
 		  AND ($3 = '' OR name ILIKE '%' || $3 || '%' OR description ILIKE '%' || $3 || '%')
 		  AND ($5 = '' OR type = $5)
+		  AND ($6 = false OR type NOT IN ('restaurant', 'cafe', 'bakery'))
 		  AND ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, $4)
 		ORDER BY distance ASC
 	`
-	rows, err := r.db.QueryContext(ctx, query, lng, lat, search, radius, storeType)
+	rows, err := r.db.QueryContext(ctx, query, lng, lat, search, radius, storeType, excludeFood)
 	if err != nil {
 		return nil, err
 	}

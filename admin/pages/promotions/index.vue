@@ -200,7 +200,7 @@
       <form @submit.prevent="saveBanner">
         <div class="form-group text-left" style="margin-bottom: 1rem;">
           <label class="form-label">{{ lang === 'fr' ? 'Titre de la campagne' : 'Campaign Title' }}</label>
-          <input v-model="bannerForm.name" type="text" class="form-input" required placeholder="Lancement ZekDrive Dakar" />
+          <input v-model="bannerForm.name" type="text" class="form-input" required placeholder="Lancement ZekDrive Yaoundé" />
         </div>
 
         <div class="form-group text-left" style="margin-bottom: 1rem;">
@@ -218,7 +218,7 @@
           </div>
           <div class="form-group text-left">
             <label class="form-label">{{ lang === 'fr' ? 'Lien de redirection (Optionnel)' : 'Redirect Link (Optional)' }}</label>
-            <input v-model="bannerForm.redirect_link" type="text" class="form-input" placeholder="https://zekdrive.com/promo" />
+            <input v-model="bannerForm.redirect_link" type="text" class="form-input" placeholder="https://zekdrive.cm/promo" />
           </div>
         </div>
 
@@ -233,10 +233,21 @@
           </div>
         </div>
 
+        <!-- Image Preview Box -->
+        <div v-if="bannerPreviewUrl" class="form-group text-left" style="margin-bottom: 1.25rem;">
+          <label class="form-label">{{ lang === 'fr' ? 'Aperçu de la bannière' : 'Banner Preview' }}</label>
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); position: relative; aspect-ratio: 16/9; max-height: 180px;">
+            <img :src="bannerPreviewUrl" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+            <button type="button" @click="clearBannerImage" style="position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(239, 68, 68, 0.9); color: white; border: none; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: background 0.2s;">
+              ✕
+            </button>
+          </div>
+        </div>
+
         <!-- Banner Image File Upload -->
         <div class="form-group text-left" style="margin-bottom: 1.5rem;">
           <label class="form-label">{{ lang === 'fr' ? 'Image de la bannière (Recommandé 16:9)' : 'Banner Image (16:9 aspect ratio)' }}</label>
-          <input type="file" class="form-input" accept="image/*" @change="handleBannerImageChange" :required="!isBannerEditMode" />
+          <input type="file" id="banner-file-input" class="form-input" accept="image/*" @change="handleBannerImageChange" :required="!isBannerEditMode && !bannerPreviewUrl" />
           <p v-if="isBannerEditMode" class="text-xs text-muted" style="margin-top: 0.25rem;">
             {{ lang === 'fr' ? 'Laissez vide pour conserver l\'image actuelle.' : 'Leave empty to keep current image.' }}
           </p>
@@ -255,7 +266,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from '~/composables/useI18n'
 import { useApi } from '~/composables/useApi'
 
@@ -266,8 +278,15 @@ definePageMeta({
 const { t, lang } = useI18n()
 const { get, del } = useApi()
 const config = useRuntimeConfig()
+const route = useRoute()
 
-const activeTab = ref('coupons')
+const activeTab = ref(route.query.tab === 'banners' ? 'banners' : 'coupons')
+
+watch(() => route.query.tab, (newTab) => {
+  if (newTab === 'banners' || newTab === 'coupons') {
+    activeTab.value = newTab
+  }
+})
 const loadingCoupons = ref(false)
 const loadingBanners = ref(false)
 const savingBanner = ref(false)
@@ -423,6 +442,7 @@ const showBannerModal = ref(false)
 const isBannerEditMode = ref(false)
 const editingBannerId = ref<string | null>(null)
 const bannerImageFile = ref<File | null>(null)
+const bannerPreviewUrl = ref('')
 
 const bannerForm = ref({
   name: '',
@@ -439,7 +459,8 @@ function getBannerImageUrl(imageName: string): string {
   // If it's already a full URL, return it
   if (imageName.startsWith('http://') || imageName.startsWith('https://')) return imageName
   // Otherwise, construct backend uploads URL
-  const baseUploads = config.public.apiUrl.replace('/api/', '/uploads/promotion/banner/')
+  const baseApi = config.public.apiUrl.endsWith('/') ? config.public.apiUrl.slice(0, -1) : config.public.apiUrl
+  const baseUploads = baseApi.replace(/\/api$/, '/uploads/promotion/banner/')
   return `${baseUploads}${imageName}`
 }
 
@@ -458,10 +479,11 @@ function openAddBannerModal() {
   isBannerEditMode.value = false
   editingBannerId.value = null
   bannerImageFile.value = null
+  bannerPreviewUrl.value = ''
   
   const start = new Date()
   const end = new Date()
-  end.setDate(end.getDate() + 30) // Default 30 days campaign
+  const endate = new Date(end.setDate(end.getDate() + 30)) // Default 30 days campaign
 
   bannerForm.value = {
     name: '',
@@ -470,7 +492,7 @@ function openAddBannerModal() {
     redirect_link: '',
     banner_group: 'all',
     start_date: start.toISOString().split('T')[0],
-    end_date: end.toISOString().split('T')[0],
+    end_date: endate.toISOString().split('T')[0],
   }
   showBannerModal.value = true
 }
@@ -479,6 +501,7 @@ function openEditBannerModal(b: DBBanner) {
   isBannerEditMode.value = true
   editingBannerId.value = b.id
   bannerImageFile.value = null
+  bannerPreviewUrl.value = getBannerImageUrl(b.image)
 
   bannerForm.value = {
     name: b.name,
@@ -495,7 +518,24 @@ function openEditBannerModal(b: DBBanner) {
 function handleBannerImageChange(e: Event) {
   const target = e.target as HTMLInputElement
   if (target.files && target.files.length > 0) {
+    if (bannerPreviewUrl.value && bannerPreviewUrl.value.startsWith('blob:')) {
+      URL.revokeObjectURL(bannerPreviewUrl.value)
+    }
     bannerImageFile.value = target.files[0]
+    bannerPreviewUrl.value = URL.createObjectURL(bannerImageFile.value)
+  }
+}
+
+function clearBannerImage() {
+  if (bannerPreviewUrl.value && bannerPreviewUrl.value.startsWith('blob:')) {
+    URL.revokeObjectURL(bannerPreviewUrl.value)
+  }
+  bannerImageFile.value = null
+  bannerPreviewUrl.value = ''
+  
+  const fileInput = document.getElementById('banner-file-input') as HTMLInputElement
+  if (fileInput) {
+    fileInput.value = ''
   }
 }
 
@@ -581,7 +621,7 @@ function formatDate(dateStr: string): string {
 }
 
 function formatCurrency(val: number): string {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(val)
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(val)
 }
 </script>
 

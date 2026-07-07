@@ -180,7 +180,7 @@
       <form @submit.prevent="saveFleet">
         <div class="form-group text-left" style="margin-bottom: 1.25rem;">
           <label class="form-label">{{ t('fleet_name') }}</label>
-          <input v-model="fleetForm.name" type="text" class="form-input" required :placeholder="lang === 'fr' ? 'Ex: Parc Auto Dakar' : 'e.g. Dakar Fleet'" />
+          <input v-model="fleetForm.name" type="text" class="form-input" required :placeholder="lang === 'fr' ? 'Ex: Parc Auto Yaoundé' : 'e.g. Yaoundé Fleet'" />
         </div>
         <div class="form-group text-left" style="margin-bottom: 1.5rem;">
           <label class="form-label">{{ t('description') }}</label>
@@ -217,44 +217,44 @@ const fleets = ref([
   {
     id: 'fl_1',
     owner_id: 'u_1',
-    owner_name: 'Mamadou Sy',
-    owner_phone: '+221 77 123 45 67',
-    name: 'Parc Auto Dakar Centre',
-    description: '12 véhicules économiques et premium',
+    owner_name: 'Kamgang Jules',
+    owner_phone: '+237 681 234 567',
+    name: 'Parc Auto Yaoundé Centre',
+    description: '5 véhicules économiques et premium',
     is_active: true,
     vehicles: [{ id: 'v_1' }, { id: 'v_2' }, { id: 'v_3' }]
   },
   {
     id: 'fl_2',
     owner_id: 'u_2',
-    owner_name: 'Fatou Diallo',
-    owner_phone: '+221 78 456 78 90',
-    name: 'Fleet Plateau & Almadies',
-    description: '5 VTC premium + 2 véhicules de livraison',
+    owner_name: 'Manga Etienne',
+    owner_phone: '+237 686 789 012',
+    name: 'Fleet Bastos & Golf',
+    description: '3 VTC premium + 1 véhicule de livraison',
     is_active: true,
     vehicles: [{ id: 'v_4' }, { id: 'v_5' }]
   }
 ])
 
 const allVehicles = ref([
-  { id: 'v_1', make: 'Toyota', model: 'Corolla', year: 2021, plate_number: 'DK-2345-A', color: 'Blanc', type: 'economy', owner_name: 'Mamadou Sy', driver_name: 'Cheikh Fall', kyc_status: 'approved' },
-  { id: 'v_2', make: 'Mercedes', model: 'E-Class', year: 2022, plate_number: 'DK-8821-B', color: 'Noir', type: 'premium', owner_name: 'Mamadou Sy', driver_name: null, kyc_status: 'pending' },
-  { id: 'v_3', make: 'Renault', model: 'Kangoo', year: 2020, plate_number: 'DK-4412-C', color: 'Gris', type: 'delivery', owner_name: 'Mamadou Sy', driver_name: 'Ibrahima Diop', kyc_status: 'approved' },
-  { id: 'v_4', make: 'BMW', model: 'X5', year: 2023, plate_number: 'DK-1100-D', color: 'Noir', type: 'premium', owner_name: 'Fatou Diallo', driver_name: 'Moussa Kane', kyc_status: 'approved' },
-  { id: 'v_5', make: 'Peugeot', model: '508', year: 2021, plate_number: 'DK-3310-E', color: 'Bleu', type: 'economy', owner_name: 'Fatou Diallo', driver_name: null, kyc_status: 'unsubmitted' },
+  { id: 'v_1', make: 'Toyota', model: 'Corolla', year: 2018, plate_number: 'LT-123-YA', color: 'Jaune', type: 'economy', owner_name: 'Kamgang Jules', driver_name: 'Nkeng Fabrice', kyc_status: 'approved' },
+  { id: 'v_2', make: 'Toyota', model: 'Prado', year: 2020, plate_number: 'CE-456-OU', color: 'Noir', type: 'premium', owner_name: 'Kamgang Jules', driver_name: null, kyc_status: 'pending' },
+  { id: 'v_3', make: 'Yamaha', model: 'Crypton', year: 2021, plate_number: 'LT-789-CM', color: 'Rouge', type: 'delivery', owner_name: 'Kamgang Jules', driver_name: 'Tsanga Régine', kyc_status: 'approved' },
+  { id: 'v_4', make: 'Mercedes', model: 'Classe E', year: 2021, plate_number: 'DL-001-OU', color: 'Noir', type: 'premium', owner_name: 'Manga Etienne', driver_name: 'Fosso Brigitte', kyc_status: 'approved' },
+  { id: 'v_5', make: 'Toyota', model: 'Camry', year: 2019, plate_number: 'DL-003-OU', color: 'Argent', type: 'economy', owner_name: 'Manga Etienne', driver_name: null, kyc_status: 'unsubmitted' },
 ])
 
 const assignments = ref([
-  { id: 'a_1', fleet_id: 'fl_1', vehicle_id: 'v_1', vehicle_make: 'Toyota', vehicle_model: 'Corolla', plate_number: 'DK-2345-A', driver_name: 'Cheikh Fall', driver_phone: '+221 77 900 00 01', is_active: true, assigned_at: new Date(Date.now() - 7 * 86400000).toISOString() },
-  { id: 'a_2', fleet_id: 'fl_1', vehicle_id: 'v_3', vehicle_make: 'Renault', vehicle_model: 'Kangoo', plate_number: 'DK-4412-C', driver_name: 'Ibrahima Diop', driver_phone: '+221 77 900 00 02', is_active: true, assigned_at: new Date(Date.now() - 2 * 86400000).toISOString() },
-  { id: 'a_3', fleet_id: 'fl_2', vehicle_id: 'v_4', vehicle_make: 'BMW', vehicle_model: 'X5', plate_number: 'DK-1100-D', driver_name: 'Moussa Kane', driver_phone: '+221 77 900 00 03', is_active: true, assigned_at: new Date(Date.now() - 86400000).toISOString() },
+  { id: 'a_1', fleet_id: 'fl_1', vehicle_id: 'v_1', vehicle_make: 'Toyota', vehicle_model: 'Corolla', plate_number: 'LT-123-YA', driver_name: 'Nkeng Fabrice', driver_phone: '+237 674 567 890', is_active: true, assigned_at: new Date(Date.now() - 7 * 86400000).toISOString() },
+  { id: 'a_2', fleet_id: 'fl_1', vehicle_id: 'v_3', vehicle_make: 'Yamaha', vehicle_model: 'Crypton', plate_number: 'LT-789-CM', driver_name: 'Tsanga Régine', driver_phone: '+237 677 890 123', is_active: true, assigned_at: new Date(Date.now() - 2 * 86400000).toISOString() },
+  { id: 'a_3', fleet_id: 'fl_2', vehicle_id: 'v_4', vehicle_make: 'Mercedes', vehicle_model: 'Classe E', plate_number: 'DL-001-OU', driver_name: 'Fosso Brigitte', driver_phone: '+237 675 678 901', is_active: true, assigned_at: new Date(Date.now() - 86400000).toISOString() },
 ])
 
 const proUsers = ref([
-  { id: 'u_1', name: 'Mamadou Sy', email: 'mamadou@example.com', phone: '+221 77 123 45 67', pro_profiles: ['driver', 'fleet_owner'], kyc_status: 'approved' },
-  { id: 'u_2', name: 'Fatou Diallo', email: 'fatou@example.com', phone: '+221 78 456 78 90', pro_profiles: ['fleet_owner'], kyc_status: 'approved' },
-  { id: 'u_3', name: 'Omar Ndiaye', email: 'omar@example.com', phone: '+221 70 111 22 33', pro_profiles: ['driver', 'merchant'], kyc_status: 'pending' },
-  { id: 'u_4', name: 'Aissatou Ba', email: 'aissatou@example.com', phone: '+221 76 444 55 66', pro_profiles: ['merchant'], kyc_status: 'approved' },
+  { id: 'u_1', name: 'Kamgang Jules', email: 'kamgang@jules.cm', phone: '+237 681 234 567', pro_profiles: ['driver', 'fleet_owner'], kyc_status: 'approved' },
+  { id: 'u_2', name: 'Manga Etienne', email: 'manga@etienne.cm', phone: '+237 686 789 012', pro_profiles: ['fleet_owner'], kyc_status: 'approved' },
+  { id: 'u_3', name: 'Ngono Patrick', email: 'ngono@patrick.cm', phone: '+237 678 901 234', pro_profiles: ['driver', 'merchant'], kyc_status: 'pending' },
+  { id: 'u_4', name: 'Tabe Christiane', email: 'tabe@christiane.cm', phone: '+237 685 678 901', pro_profiles: ['merchant'], kyc_status: 'approved' },
 ])
 
 const fleetOwners = computed(() => proUsers.value.filter(u => u.pro_profiles.includes('fleet_owner')))

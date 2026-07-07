@@ -1,4 +1,4 @@
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ride_sharing_user_app/features/map/widgets/google_map_replacement.dart';
 
 abstract class LocationServiceInterface {
   Future<dynamic> getZone(String lat, String lng);

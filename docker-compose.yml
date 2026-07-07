@@ -53,6 +53,7 @@ services:
       - '8088:8080'
     volumes:
       - ./api:/app
+      - api_uploads:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -63,7 +64,8 @@ services:
       test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1:8080/health']
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 40s
     networks:
       - zekdrive_net
 
@@ -92,6 +94,8 @@ services:
     restart: unless-stopped
     ports:
       - '3000:3000'
+    volumes:
+      - ./vitrine/public/apks:/usr/share/nginx/html/apks
     networks:
       - zekdrive_net
 
@@ -177,6 +181,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  api_uploads:
 
 networks:
   zekdrive_net:

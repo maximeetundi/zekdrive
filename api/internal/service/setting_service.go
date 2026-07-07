@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,14 +28,45 @@ func (s *settingService) GetSettings(ctx context.Context) (map[string]interface{
 
 	var appConfig interface{}
 	if appConfigSetting == nil {
-		// Seed default app configurations
+		// Seed default depuis les variables d'environnement
+		commissionRate := 15
+		if v := os.Getenv("PLATFORM_COMMISSION_RATE"); v != "" {
+			if n, err := strconv.Atoi(v); err == nil {
+				commissionRate = n
+			}
+		}
+		searchRadius := 5
+		if v := os.Getenv("RIDE_SEARCH_RADIUS_KM"); v != "" {
+			if n, err := strconv.Atoi(v); err == nil {
+				searchRadius = n
+			}
+		}
+		dispatchTimeout := 30
+		if v := os.Getenv("DISPATCH_TIMEOUT_SECONDS"); v != "" {
+			if n, err := strconv.Atoi(v); err == nil {
+				dispatchTimeout = n
+			}
+		}
+		supportEmail := os.Getenv("SUPPORT_EMAIL")
+		if supportEmail == "" {
+			supportEmail = "support@zekdrive.cm"
+		}
+		supportPhone := os.Getenv("SUPPORT_PHONE")
+		if supportPhone == "" {
+			supportPhone = "+237690000000"
+		}
+		defaultLang := os.Getenv("PLATFORM_LANG")
+		if defaultLang == "" {
+			defaultLang = "fr"
+		}
+
 		appConfig = map[string]interface{}{
-			"dispatchTimeout": 30,
-			"searchRadius":    8,
-			"commissionRate":  15,
-			"supportEmail":    "support@zekdrive.com",
-			"supportPhone":    "+221 33 800 0000",
-			"defaultLang":     "fr",
+			"dispatchTimeout": dispatchTimeout,
+			"searchRadius":    searchRadius,
+			"commissionRate":  commissionRate,
+			"supportEmail":    supportEmail,
+			"supportPhone":    supportPhone,
+			"defaultLang":     defaultLang,
 		}
 		now := time.Now()
 		newSetting := &domain.Setting{
@@ -42,7 +75,7 @@ func (s *settingService) GetSettings(ctx context.Context) (map[string]interface{
 			LiveValues:   appConfig,
 			TestValues:   appConfig,
 			SettingsType: "app_config",
-			Mode:         "test",
+			Mode:         "live",
 			IsActive:     true,
 			CreatedAt:    now,
 			UpdatedAt:    now,
@@ -58,41 +91,76 @@ func (s *settingService) GetSettings(ctx context.Context) (map[string]interface{
 		return nil, err
 	}
 
-	var gateways []interface{}
-	if len(gatewayRows) == 0 {
-		// Seed default payment gateways
-		defaultGateways := []map[string]interface{}{
-			{
-				"id":          "gw_wave",
-				"name":        "Wave Senegal Gateway",
-				"desc":        "Support local Wave QR-code payments directly from mobile app redirects.",
-				"enabled":     true,
-				"publicKey":   "pk_live_wave_51m92Fkd208mD2l",
-				"secretToken": "sk_live_wave_secret_token_100x",
-			},
-			{
-				"id":          "gw_orange_money",
-				"name":        "Orange Money WebPay API",
-				"desc":        "Support Orange Money USSD push payments with mobile auth prompts.",
-				"enabled":     true,
-				"publicKey":   "pk_live_orange_448kd901msda",
-				"secretToken": "sk_live_orange_secret_token_99y",
-			},
-			{
-				"id":          "gw_stripe",
-				"name":        "Stripe International Gateway",
-				"desc":        "Support credit/debit visa and mastercard payouts and client fares.",
-				"enabled":     false,
-				"publicKey":   "pk_live_stripe_823190salkdm",
-				"secretToken": "sk_live_stripe_secret_token_33z",
-			},
-		}
+	defaultGateways := []map[string]interface{}{
+		// MTN Mobile Money Cameroun (prioritaire)
+		{
+			"id":          "gw_mtn_momo",
+			"name":        "MTN Mobile Money Cameroon",
+			"desc":        "Support MTN MoMo USSD push payments — principal opérateur Cameroun.",
+			"enabled":     os.Getenv("MTN_MOMO_API_KEY") != "",
+			"publicKey":   os.Getenv("MTN_MOMO_SUBSCRIPTION_KEY"),
+			"secretToken": os.Getenv("MTN_MOMO_API_SECRET"),
+		},
+		// Orange Money Cameroun
+		{
+			"id":          "gw_orange_money",
+			"name":        "Orange Money WebPay API",
+			"desc":        "Support Orange Money USSD push payments with mobile auth prompts.",
+			"enabled":     os.Getenv("ORANGE_MONEY_API_KEY") != "",
+			"publicKey":   os.Getenv("ORANGE_MONEY_API_KEY"),
+			"secretToken": os.Getenv("ORANGE_MONEY_API_SECRET"),
+		},
+		// Dohone (agrégateur Cameroun)
+		{
+			"id":          "gw_dohone",
+			"name":        "Dohone Mobile Money",
+			"desc":        "Support local Mobile Money payments in Cameroon (Orange, MTN, Express Union) via Dohone aggregator.",
+			"enabled":     os.Getenv("DOHONE_MERCHANT_KEY") != "",
+			"publicKey":   os.Getenv("DOHONE_MERCHANT_KEY"),
+			"secretToken": os.Getenv("DOHONE_HASH_CODE"),
+		},
+		// CinetPay
+		{
+			"id":          "gw_cinetpay",
+			"name":        "CinetPay Aggregator",
+			"desc":        "Support multi-country Mobile Money and cards payments in Francophone Africa via CinetPay.",
+			"enabled":     os.Getenv("CINETPAY_API_KEY") != "",
+			"publicKey":   os.Getenv("CINETPAY_API_KEY"),
+			"secretToken": os.Getenv("CINETPAY_SITE_ID"),
+		},
+		// Stripe (international)
+		{
+			"id":          "gw_stripe",
+			"name":        "Stripe International Gateway",
+			"desc":        "Support credit/debit visa and mastercard payouts and client fares.",
+			"enabled":     os.Getenv("STRIPE_PUBLIC_KEY") != "",
+			"publicKey":   os.Getenv("STRIPE_PUBLIC_KEY"),
+			"secretToken": os.Getenv("STRIPE_SECRET_KEY"),
+		},
+		// PayPal
+		{
+			"id":      "gw_paypal",
+			"name":    "PayPal Global Gateway",
+			"desc":    "Support global credit cards and account funding via PayPal.",
+			"enabled": false,
+		},
+	}
 
-		for _, gw := range defaultGateways {
+	var gateways []interface{}
+	dbGateways := make(map[string]domain.Setting)
+	for _, row := range gatewayRows {
+		dbGateways[row.KeyName] = row
+	}
+
+	for _, gw := range defaultGateways {
+		idStr := gw["id"].(string)
+		if row, exists := dbGateways[idStr]; exists {
+			gateways = append(gateways, row.LiveValues)
+		} else {
 			now := time.Now()
 			newSetting := &domain.Setting{
 				ID:           uuid.New(),
-				KeyName:      gw["id"].(string),
+				KeyName:      idStr,
 				LiveValues:   gw,
 				TestValues:   gw,
 				SettingsType: "payment_config",
@@ -104,10 +172,6 @@ func (s *settingService) GetSettings(ctx context.Context) (map[string]interface{
 			_ = s.settingRepo.Upsert(ctx, newSetting)
 			gateways = append(gateways, gw)
 		}
-	} else {
-		for _, row := range gatewayRows {
-			gateways = append(gateways, row.LiveValues)
-		}
 	}
 
 	// 3. Fetch Auth Config
@@ -118,24 +182,53 @@ func (s *settingService) GetSettings(ctx context.Context) (map[string]interface{
 
 	var authConfig interface{}
 	if authConfigSetting == nil {
+		// Lire depuis variables d'environnement
+		smtpPort := 465
+		if v := os.Getenv("SMTP_PORT"); v != "" {
+			if n, err := strconv.Atoi(v); err == nil {
+				smtpPort = n
+			}
+		}
+		smtpHost := os.Getenv("SMTP_HOST")
+		smtpUser := os.Getenv("SMTP_USER")
+		smtpPassword := os.Getenv("SMTP_PASSWORD") // ne pas logger!
+		smtpFromEmail := os.Getenv("SMTP_FROM_EMAIL")
+		if smtpFromEmail == "" {
+			smtpFromEmail = "support@zekdrive.cm"
+		}
+		smtpFromName := os.Getenv("SMTP_FROM_NAME")
+		if smtpFromName == "" {
+			smtpFromName = "ZekDrive Support"
+		}
+		whatsappURL := os.Getenv("WHATSAPP_URL")
+		if whatsappURL == "" {
+			whatsappURL = "http://openwa-api:2785"
+		}
+		whatsappSessionID := os.Getenv("WHATSAPP_SESSION_ID")
+		whatsappAPIKey := os.Getenv("WHATSAPP_API_KEY")
+		smsProvider := os.Getenv("SMS_PROVIDER")
+		smsAPIKey := os.Getenv("SMS_API_KEY")
+		smsAPISecret := os.Getenv("SMS_API_SECRET")
+		smsSender := os.Getenv("SMS_SENDER_PHONE")
+
 		authConfig = map[string]interface{}{
-			"sms_enabled":             false,
-			"whatsapp_enabled":        true,
-			"email_password_enabled": true,
-			"smtp_host":               "smtp.ionos.fr",
-			"smtp_port":               465,
-			"smtp_user":               "send-email@rodriguendeffo.com",
-			"smtp_password":           "MdpDev55647913@#",
-			"smtp_from_email":         "send-email@rodriguendeffo.com",
-			"smtp_from_name":          "ZekDrive Support",
+			"sms_enabled":             smsAPIKey != "",
+			"whatsapp_enabled":        whatsappAPIKey != "",
+			"email_password_enabled":  smtpHost != "",
+			"smtp_host":               smtpHost,
+			"smtp_port":               smtpPort,
+			"smtp_user":               smtpUser,
+			"smtp_password":           smtpPassword,
+			"smtp_from_email":         smtpFromEmail,
+			"smtp_from_name":          smtpFromName,
 			"smtp_use_tls":            true,
-			"whatsapp_url":            "http://openwa-api:2785",
-			"whatsapp_session_id":     "a4efd3ee-adc2-4901-bde3-1ad7f1def2c6",
-			"whatsapp_api_key":        "owa_k1_eee56788a1354467c70629006b57db1e97c8f4988d4f8bab1cb415faf2067d5e",
-			"sms_provider":            "twilio",
-			"sms_api_key":             "your_twilio_sid",
-			"sms_api_secret":          "your_twilio_token",
-			"sms_sender":              "+1234567890",
+			"whatsapp_url":            whatsappURL,
+			"whatsapp_session_id":     whatsappSessionID,
+			"whatsapp_api_key":        whatsappAPIKey,
+			"sms_provider":            smsProvider,
+			"sms_api_key":             smsAPIKey,
+			"sms_api_secret":          smsAPISecret,
+			"sms_sender":              smsSender,
 		}
 		now := time.Now()
 		newSetting := &domain.Setting{
@@ -144,7 +237,7 @@ func (s *settingService) GetSettings(ctx context.Context) (map[string]interface{
 			LiveValues:   authConfig,
 			TestValues:   authConfig,
 			SettingsType: "auth_config",
-			Mode:         "test",
+			Mode:         "live",
 			IsActive:     true,
 			CreatedAt:    now,
 			UpdatedAt:    now,

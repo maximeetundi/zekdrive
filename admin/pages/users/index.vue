@@ -69,8 +69,8 @@
           <!-- Custom Country Cell -->
           <template #cell-country="{ item }">
             <span class="flex items-center gap-1">
-              <span>{{ item.country === 'SN' ? '🇸🇳' : item.country === 'CI' ? '🇨🇮' : item.country === 'ML' ? '🇲🇱' : '🌍' }}</span>
-              <span class="text-xs font-semibold" style="margin-left: 2px;">{{ item.country || 'SN' }}</span>
+              <span>{{ item.country === 'CM' ? '🇨🇲' : item.country === 'CI' ? '🇨🇮' : item.country === 'ML' ? '🇲🇱' : '🌍' }}</span>
+              <span class="text-xs font-semibold" style="margin-left: 2px;">{{ item.country || 'CM' }}</span>
             </span>
           </template>
 
@@ -136,7 +136,7 @@
 
         <div class="form-group text-left" style="margin-bottom: 1.25rem;">
           <label class="form-label">{{ t('phone') }}</label>
-          <input v-model="form.phone" type="text" class="form-input" required placeholder="+221 77 123 4567" />
+          <input v-model="form.phone" type="text" class="form-input" required placeholder="+237 6X XX XX XX" />
         </div>
 
         <div class="grid grid-cols-2 gap-4 modal-form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1.25rem;">
@@ -161,7 +161,7 @@
           <div class="form-group text-left">
             <label class="form-label">{{ t('country') }}</label>
             <select v-model="form.country" class="form-select" required>
-              <option value="SN">🇸🇳 Sénégal (SN)</option>
+              <option value="CM">🇨🇲 Cameroun (CM)</option>
               <option value="CI">🇨🇮 Côte d'Ivoire (CI)</option>
               <option value="ML">🇲🇱 Mali (ML)</option>
             </select>
@@ -272,7 +272,7 @@ const form = ref({
   phone: '',
   role: 'customer' as User['role'],
   status: 'active' as User['status'],
-  country: 'SN',
+  country: 'CM',
   kyc_status: 'unsubmitted' as User['kyc_status'],
   kyc_document: '',
 })
@@ -314,7 +314,7 @@ function openCreateModal() {
     phone: '',
     role: 'customer',
     status: 'active',
-    country: 'SN',
+    country: 'CM',
     kyc_status: 'unsubmitted',
     kyc_document: '',
   }
@@ -330,7 +330,7 @@ function openEditModal(user: User) {
     phone: user.phone,
     role: user.role,
     status: user.status,
-    country: user.country || 'SN',
+    country: user.country || 'CM',
     kyc_status: user.kyc_status || 'unsubmitted',
     kyc_document: user.kyc_document || '',
   }
@@ -378,7 +378,7 @@ async function executeDelete() {
 }
 
 function formatCurrency(val: number): string {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(val)
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(val)
 }
 
 function formatDate(dateStr: string): string {

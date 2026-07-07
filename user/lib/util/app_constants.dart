@@ -6,9 +6,15 @@ import 'package:ride_sharing_user_app/util/images.dart';
 
 class AppConstants {
   static const String appName = 'ZekDrive';
-  static const String baseUrl = 'https://api.driver.maximeetundi.store';
-  static const Color lightPrimary = Color(0xFFFF7A00);
-  static const Color darkPrimary = Color(0xFFE65100);
+  // ⚠️ URL configurable via --dart-define=API_BASE_URL=https://api.zekdrive.com
+  // En dev: pointe sur maximeetundi.store (serveur de test du développeur)
+  // En prod: builder avec: flutter build apk --dart-define=API_BASE_URL=https://api.zekdrive.com
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://api.driver.maximeetundi.store',
+  );
+  static const Color lightPrimary = Color(0xFF0F0F0F);
+  static const Color darkPrimary = Color(0xFFFFFFFF);
   static const String fontFamily = 'SFProText';
   static const double coverageRadiusInMeter = 50;
   static const String configUri = '/api/customer/configuration';

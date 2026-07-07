@@ -32,7 +32,7 @@
       <AppStatsCard :title="lang === 'fr' ? 'En attente' : 'Pending'" :value="countByStatus('pending').toString()" icon="⏳" color="orange" />
       <AppStatsCard :title="lang === 'fr' ? 'En livraison' : 'Delivering'" :value="countByStatus('delivering').toString()" icon="🚴" color="purple" />
       <AppStatsCard :title="lang === 'fr' ? 'Livrées' : 'Delivered'" :value="countByStatus('delivered').toString()" icon="✅" color="green" />
-      <AppStatsCard :title="lang === 'fr' ? 'Revenus' : 'Revenue'" :value="totalRevenue + ' XOF'" icon="💰" color="blue" />
+      <AppStatsCard :title="lang === 'fr' ? 'Revenus' : 'Revenue'" :value="totalRevenue + ' XAF'" icon="💰" color="blue" />
     </div>
 
     <!-- Table -->
@@ -170,33 +170,33 @@ interface Order {
 
 const orders = ref<Order[]>([
   {
-    id: 'ord-001-a2b3c4d5', store_name: 'Chez Mamie Fatou', store_type: 'restaurant', store_address: 'Plateau, Dakar',
-    customer_name: 'Ibrahima Diallo', customer_phone: '+221 77 111 22 33', delivery_address: 'Almadies Rue 10',
-    items: [{ name: 'Thiéboudienne', qty: 2, price: 3500 }, { name: 'Bissap', qty: 2, price: 500 }],
-    total: 8000, status: 'delivering', courier_name: 'Cheikh Fall', created_at: new Date(Date.now() - 1800000).toISOString()
+    id: 'ord-001-a2b3c4d5', store_name: 'Chez Mamie Fatou', store_type: 'restaurant', store_address: 'Nlongkak, Yaoundé',
+    customer_name: 'Kamgang Jules', customer_phone: '+237 681 234 567', delivery_address: 'Bastos rue 15',
+    items: [{ name: 'Ndolé au bœuf', qty: 2, price: 3500 }, { name: 'Jus de gingembre', qty: 2, price: 500 }],
+    total: 8000, status: 'delivering', courier_name: 'Bello Moussa', created_at: new Date(Date.now() - 1800000).toISOString()
   },
   {
-    id: 'ord-002-e5f6g7h8', store_name: 'Boutique Mode Dakar', store_type: 'boutique', store_address: 'Sandaga, Dakar',
-    customer_name: 'Aissatou Ndiaye', customer_phone: '+221 78 444 55 66', delivery_address: 'Mermoz, Dakar',
+    id: 'ord-002-e5f6g7h8', store_name: 'Boutique Fashion Yaoundé', store_type: 'boutique', store_address: 'Marché Central, Yaoundé',
+    customer_name: 'Fosso Brigitte', customer_phone: '+237 675 234 567', delivery_address: 'Melen, Yaoundé',
     items: [{ name: 'Robe Bazin bleue', qty: 1, price: 25000 }, { name: 'Ceinture cuir', qty: 1, price: 5000 }],
     total: 30000, status: 'accepted', created_at: new Date(Date.now() - 3600000).toISOString()
   },
   {
-    id: 'ord-003-i9j0k1l2', store_name: 'PharmaDakar Express', store_type: 'pharmacy', store_address: 'Point E, Dakar',
-    customer_name: 'Ousmane Sow', customer_phone: '+221 70 777 88 99', delivery_address: 'Fann Résidence',
+    id: 'ord-003-i9j0k1l2', store_name: 'PharmaPro Yaoundé', store_type: 'pharmacy', store_address: 'Omnisports, Yaoundé',
+    customer_name: 'Ngono Patrick', customer_phone: '+237 678 901 234', delivery_address: 'Mvog-Mbi',
     items: [{ name: 'Paracétamol 1g', qty: 2, price: 1500 }, { name: 'Vitamine C', qty: 1, price: 3000 }],
-    total: 6000, status: 'delivered', courier_name: 'Moussa Diop', created_at: new Date(Date.now() - 7200000).toISOString()
+    total: 6000, status: 'delivered', courier_name: 'Fotso Albert', created_at: new Date(Date.now() - 7200000).toISOString()
   },
   {
-    id: 'ord-004-m3n4o5p6', store_name: 'Super Épicerie Hann', store_type: 'grocery', store_address: 'Hann, Dakar',
-    customer_name: 'Mariama Ba', customer_phone: '+221 76 222 33 44', delivery_address: 'Sicap Liberté 4',
+    id: 'ord-004-m3n4o5p6', store_name: 'Super Marché Biyem-Assi', store_type: 'grocery', store_address: 'Biyem-Assi, Yaoundé',
+    customer_name: 'Abena Roger', customer_phone: '+237 673 456 789', delivery_address: 'Essos',
     items: [{ name: 'Riz 5kg', qty: 1, price: 5000 }, { name: 'Huile 1L', qty: 2, price: 1500 }, { name: 'Sucre 2kg', qty: 1, price: 2000 }],
     total: 10000, status: 'pending', created_at: new Date(Date.now() - 600000).toISOString()
   },
   {
-    id: 'ord-005-q7r8s9t0', store_name: 'Chez Mamie Fatou', store_type: 'restaurant', store_address: 'Plateau, Dakar',
-    customer_name: 'Fatou Kane', customer_phone: '+221 77 999 00 11', delivery_address: 'Ouakam',
-    items: [{ name: 'Yassa Poulet', qty: 1, price: 4000 }, { name: 'Thiakry', qty: 1, price: 1500 }],
+    id: 'ord-005-q7r8s9t0', store_name: 'Chez Mamie Fatou', store_type: 'restaurant', store_address: 'Nlongkak, Yaoundé',
+    customer_name: 'Tsanga Régine', customer_phone: '+237 677 890 123', delivery_address: 'Nsimeyong',
+    items: [{ name: 'Yassa Poulet', qty: 1, price: 4000 }, { name: 'Kossam', qty: 1, price: 1500 }],
     total: 5500, status: 'cancelled', created_at: new Date(Date.now() - 86400000).toISOString()
   },
 ])

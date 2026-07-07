@@ -48,7 +48,7 @@ func (h *MapHandler) Geocode(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to build request"})
 	}
-	req.Header.Set("User-Agent", "ZekDrive/1.0 (admin@zekdrive.com)")
+	req.Header.Set("User-Agent", "ZekDrive/1.0 (admin@zekdrive.cm)")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -103,7 +103,7 @@ func (h *MapHandler) SearchLocation(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to build request"})
 	}
-	req.Header.Set("User-Agent", "ZekDrive/1.0 (admin@zekdrive.com)")
+	req.Header.Set("User-Agent", "ZekDrive/1.0 (admin@zekdrive.cm)")
 
 	resp, err := client.Do(req)
 	if err != nil {

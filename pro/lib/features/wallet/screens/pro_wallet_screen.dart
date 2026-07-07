@@ -632,28 +632,28 @@ class _RechargeBottomSheetState extends State<_RechargeBottomSheet> {
                     },
                   ),
 
-                  const SizedBox(height: Dimensions.paddingSizeLarge),
-
-                  // --- Référence de paiement ---
-                  Text('payment_reference'.tr,
-                      style: textSemiBold.copyWith(
-                          fontSize: Dimensions.fontSizeDefault,
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.color)),
-                  const SizedBox(height: Dimensions.paddingSizeSmall),
-                  TextFormField(
-                    controller: c.rechargeReferenceController,
-                    decoration: _inputDecoration(context, 'enter_reference'.tr,
-                        Icons.receipt_long_outlined),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) {
-                        return 'reference_required'.tr;
-                      }
-                      return null;
-                    },
-                  ),
+                  if (c.selectedPaymentMethod == 'bank_transfer' || c.selectedPaymentMethod == 'cash') ...[
+                    const SizedBox(height: Dimensions.paddingSizeLarge),
+                    Text('payment_reference'.tr,
+                        style: textSemiBold.copyWith(
+                            fontSize: Dimensions.fontSizeDefault,
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.color)),
+                    const SizedBox(height: Dimensions.paddingSizeSmall),
+                    TextFormField(
+                      controller: c.rechargeReferenceController,
+                      decoration: _inputDecoration(context, 'enter_reference'.tr,
+                          Icons.receipt_long_outlined),
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) {
+                          return 'reference_required'.tr;
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
 
                   const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
@@ -668,14 +668,25 @@ class _RechargeBottomSheetState extends State<_RechargeBottomSheet> {
                               if (_formKey.currentState!.validate()) {
                                 final amount = double.parse(
                                     c.rechargeAmountController.text.trim());
-                                final success = await c.rechargeWallet(
-                                  amount: amount,
-                                  paymentMethod: c.selectedPaymentMethod,
-                                  phoneNumber:
-                                      c.rechargePhoneController.text.trim(),
-                                  reference:
-                                      c.rechargeReferenceController.text.trim(),
-                                );
+                                final isManual = c.selectedPaymentMethod == 'bank_transfer' || c.selectedPaymentMethod == 'cash';
+                                bool success = false;
+                                if (isManual) {
+                                  success = await c.rechargeWallet(
+                                    amount: amount,
+                                    paymentMethod: c.selectedPaymentMethod,
+                                    phoneNumber:
+                                        c.rechargePhoneController.text.trim(),
+                                    reference:
+                                        c.rechargeReferenceController.text.trim(),
+                                  );
+                                } else {
+                                  success = await c.initiateRechargeWallet(
+                                    amount: amount,
+                                    gateway: c.selectedPaymentMethod,
+                                    phoneNumber:
+                                        c.rechargePhoneController.text.trim(),
+                                  );
+                                }
                                 if (success && context.mounted) {
                                   Get.back();
                                 }

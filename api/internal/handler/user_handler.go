@@ -31,7 +31,7 @@ func (h *UserHandler) GetMe(c *fiber.Ctx) error {
 
 	u, err := h.userService.GetByID(c.Context(), userID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	if u == nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
@@ -48,17 +48,19 @@ func (h *UserHandler) GetMe(c *fiber.Ctx) error {
 			lastName = parts[1]
 		}
 
+		currencyCode, currencySymbol := getCurrencyByCountry(u.Country)
 		profileData := fiber.Map{
-			"id":                 u.ID.String(),
-			"first_name":         firstName,
-			"last_name":          lastName,
-			"email":              u.Email,
-			"phone":              u.Phone,
-			"is_active":          1,
-			"user_rating":        "5.0",
-			"total_ride_count":   0,
-			"completion_percent": 100.0,
-			"loyalty_points":     0,
+			"id":                  u.ID.String(),
+			"first_name":          firstName,
+			"last_name":           lastName,
+			"email":               u.Email,
+			"phone":               u.Phone,
+			"is_active":           1,
+			"is_profile_verified": 1,
+			"user_rating":         "5.0",
+			"total_ride_count":    0,
+			"completion_percent":  100.0,
+			"loyalty_points":      0,
 			"wallet": fiber.Map{
 				"id":                 u.ID.String(),
 				"payable_balance":    0.0,
@@ -66,6 +68,8 @@ func (h *UserHandler) GetMe(c *fiber.Ctx) error {
 				"pending_balance":    0.0,
 				"wallet_balance":     0.0,
 				"total_withdrawn":    0.0,
+				"currency_code":      currencyCode,
+				"currency_symbol":    currencySymbol,
 			},
 			"level": fiber.Map{
 				"id":          "level-default-id",
@@ -105,7 +109,7 @@ func (h *UserHandler) UpdateProfile(c *fiber.Ctx) error {
 
 	u, err := h.userService.Update(c.Context(), userID, req.Name, req.Phone)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	if strings.Contains(c.Path(), "/customer/") || strings.Contains(c.Path(), "/driver/") {
@@ -135,8 +139,8 @@ func (h *UserHandler) GetCustomerConfig(c *fiber.Ctx) error {
 	settings, err := h.settingService.GetSettings(c.Context())
 	dispatchTimeout := 10
 	searchRadius := 10000.0
-	supportEmail := "support@zekdrive.com"
-	supportPhone := "+221 33 800 0000"
+	supportEmail := "support@zekdrive.cm"
+	supportPhone := "+237690000000"
 	var paymentGateways []interface{} = []interface{}{}
 
 	if err == nil && settings != nil {
@@ -181,6 +185,25 @@ func (h *UserHandler) GetCustomerConfig(c *fiber.Ctx) error {
 		}
 	}
 
+	// Résolution dynamique devise + pays selon l'utilisateur connecté
+	configCurrencyCode := "XAF"
+	configCurrencySymbol := "FCFA"
+	configCountryCode := "CM"
+	if userIDVal := c.Locals("userID"); userIDVal != nil {
+		if uid, ok := userIDVal.(uuid.UUID); ok {
+			if u, err2 := h.userService.GetByID(c.Context(), uid); err2 == nil && u != nil {
+				if u.Country != "" {
+					configCurrencyCode, configCurrencySymbol = getCurrencyByCountry(u.Country)
+					configCountryCode = strings.ToUpper(u.Country)
+					if len(configCountryCode) > 2 {
+						// Si country est un nom complet, garder le code ISO depuis la table
+						configCountryCode = "CM" // fallback
+					}
+				}
+			}
+		}
+	}
+
 	configMap := fiber.Map{
 		"is_demo":                    true,
 		"maintenance_mode":           false,
@@ -189,8 +212,9 @@ func (h *UserHandler) GetCustomerConfig(c *fiber.Ctx) error {
 		"business_name":              "ZekDrive",
 		"logo":                       "logo.png",
 		"bid_on_fare":                false,
-		"country_code":               "SN",
-		"business_address":           "Dakar, Senegal",
+		"country_code":               configCountryCode,
+
+		"business_address":           "Yaoundé, Cameroun",
 		"business_contact_phone":     supportPhone,
 		"business_contact_email":     supportEmail,
 		"business_support_phone":     supportPhone,
@@ -225,8 +249,8 @@ func (h *UserHandler) GetCustomerConfig(c *fiber.Ctx) error {
 		},
 		"currency_decimal_point":   "0",
 		"trip_request_active_time": dispatchTimeout,
-		"currency_code":            "XOF",
-		"currency_symbol":          "FCFA",
+		"currency_code":            configCurrencyCode,
+		"currency_symbol":          configCurrencySymbol,
 		"currency_symbol_position": "right",
 		"about_us": fiber.Map{
 			"image":             "",
@@ -263,4 +287,20 @@ func (h *UserHandler) GetCustomerConfig(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(configMap)
+}
+
+func getCurrencyByCountry(countryName string) (code string, symbol string) {
+	c := strings.ToLower(strings.TrimSpace(countryName))
+	switch c {
+	case "cameroon", "cameroun", "cm":
+		return "XAF", "FCFA"
+	case "senegal", "sénégal", "sn", "cote d'ivoire", "côte d'ivoire", "ci", "mali", "ml", "burkina faso", "bf", "niger", "ne", "togo", "tg", "benin", "bénin", "bj":
+		return "XOF", "FCFA"
+	case "guinea", "guinée", "gn":
+		return "GNF", "GNF"
+	case "gabon", "ga", "congo", "cg", "tchad", "td", "centrafrique", "cf", "guinée équatoriale", "gq":
+		return "XAF", "FCFA"
+	default:
+		return "XAF", "FCFA" // Fallback to Cameroon/Central Africa defaults
+	}
 }

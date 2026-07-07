@@ -90,8 +90,12 @@ class _RideOngoingWidgetState extends State<RideOngoingWidget> {
                                       '${Get.find<SplashController>().config!.imageBaseUrl!.profileImageCustomer}/${riderController.tripDetail!.customer?.profileImage??''}':''))]),
 
                                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                  if(riderController.tripDetail!.customer!.firstName != null && riderController.tripDetail!.customer!.lastName != null)
-                                    SizedBox(width:100 ,child: Text('${riderController.tripDetail!.customer!.firstName!} ${riderController.tripDetail!.customer!.lastName!}')),
+                                  if(riderController.tripDetail!.customer!.firstName != null)
+                                    SizedBox(width: 100, child: Text(
+                                      '${riderController.tripDetail!.customer!.firstName!}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    )),
 
                                   if(riderController.tripDetail!.customer != null)
                                     Row(children: [

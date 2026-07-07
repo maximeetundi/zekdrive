@@ -80,6 +80,15 @@ class WalletRepository implements WalletRepositoryInterface{
   }
 
   @override
+  Future<Response?> initiateRecharge(double amount, String gateway, String phoneNumber) async {
+    return await apiClient.postData(AppConstants.proWalletRechargeInitUri, {
+      'amount': amount,
+      'gateway': gateway,
+      'phone_number': phoneNumber,
+    });
+  }
+
+  @override
   Future add(value) {
     throw UnimplementedError();
   }

@@ -68,73 +68,83 @@
         <span class="nav-item-label">🛡️ {{ lang === 'fr' ? 'KYC / Vérifications' : 'KYC / Verifications' }}</span>
       </NuxtLink>
 
-      <!-- ─────────── COMMERCE ─────────── -->
+      <!-- ─────────── COMMERCE (Dropdown) ─────────── -->
       <div class="sidebar-section-label">🛍️ {{ lang === 'fr' ? 'Commerce' : 'Commerce' }}</div>
 
-      <!-- Tous les commerces -->
-      <NuxtLink to="/stores" class="nav-item" :class="{ active: route.path === '/stores' && !route.query.type }">
-        <span class="nav-item-icon" style="font-size:1rem;">🏪</span>
-        <span class="nav-item-label">{{ lang === 'fr' ? 'Tous les commerces' : 'All Stores' }}</span>
-      </NuxtLink>
-
-      <!-- 🍽️ Restauration -->
-      <div class="nav-sub-group-label">{{ lang === 'fr' ? 'Restauration' : 'Food & Drink' }}</div>
-      <NuxtLink to="/stores?type=restaurant" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'restaurant' }">
-        <span class="nav-item-icon">🍽️</span><span class="nav-item-label">{{ lang === 'fr' ? 'Restaurants' : 'Restaurants' }}</span>
-      </NuxtLink>
-      <NuxtLink to="/stores?type=cafe" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'cafe' }">
-        <span class="nav-item-icon">☕</span><span class="nav-item-label">{{ lang === 'fr' ? 'Cafés / Salons' : 'Cafés' }}</span>
-      </NuxtLink>
-      <NuxtLink to="/stores?type=bakery" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'bakery' }">
-        <span class="nav-item-icon">🥐</span><span class="nav-item-label">{{ lang === 'fr' ? 'Boulangeries' : 'Bakeries' }}</span>
-      </NuxtLink>
-
-      <!-- 🛒 Alimentation -->
-      <div class="nav-sub-group-label">{{ lang === 'fr' ? 'Alimentation' : 'Food Shops' }}</div>
-      <NuxtLink to="/stores?type=grocery" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'grocery' }">
-        <span class="nav-item-icon">🛒</span><span class="nav-item-label">{{ lang === 'fr' ? 'Épiceries' : 'Grocery' }}</span>
-      </NuxtLink>
-      <NuxtLink to="/stores?type=butcher" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'butcher' }">
-        <span class="nav-item-icon">🥩</span><span class="nav-item-label">{{ lang === 'fr' ? 'Boucheries' : 'Butchers' }}</span>
-      </NuxtLink>
-      <NuxtLink to="/stores?type=fishmonger" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'fishmonger' }">
-        <span class="nav-item-icon">🐟</span><span class="nav-item-label">{{ lang === 'fr' ? 'Poissonneries' : 'Fish Shops' }}</span>
-      </NuxtLink>
-
-      <!-- 💊 Santé & Beauté -->
-      <div class="nav-sub-group-label">{{ lang === 'fr' ? 'Santé & Beauté' : 'Health & Beauty' }}</div>
-      <NuxtLink to="/stores?type=pharmacy" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'pharmacy' }">
-        <span class="nav-item-icon">💊</span><span class="nav-item-label">{{ lang === 'fr' ? 'Pharmacies' : 'Pharmacies' }}</span>
-      </NuxtLink>
-      <NuxtLink to="/stores?type=beauty" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'beauty' }">
-        <span class="nav-item-icon">💄</span><span class="nav-item-label">{{ lang === 'fr' ? 'Beauté / Coiffure' : 'Beauty' }}</span>
-      </NuxtLink>
-
-      <!-- 👔 Mode & Textile -->
-      <div class="nav-sub-group-label">{{ lang === 'fr' ? 'Mode & Maison' : 'Fashion & Home' }}</div>
-      <NuxtLink to="/stores?type=clothing" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'clothing' }">
-        <span class="nav-item-icon">👔</span><span class="nav-item-label">{{ lang === 'fr' ? 'Vêtements / Mode' : 'Clothing' }}</span>
-      </NuxtLink>
-      <NuxtLink to="/stores?type=boutique" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'boutique' }">
-        <span class="nav-item-icon">🛍️</span><span class="nav-item-label">{{ lang === 'fr' ? 'Boutique générale' : 'General Boutique' }}</span>
-      </NuxtLink>
-      <NuxtLink to="/stores?type=hardware" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'hardware' }">
-        <span class="nav-item-icon">🔧</span><span class="nav-item-label">{{ lang === 'fr' ? 'Quincaillerie' : 'Hardware' }}</span>
-      </NuxtLink>
-      <NuxtLink to="/stores?type=furniture" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'furniture' }">
-        <span class="nav-item-icon">🪑</span><span class="nav-item-label">{{ lang === 'fr' ? 'Meubles / Déco' : 'Furniture' }}</span>
-      </NuxtLink>
-      <NuxtLink to="/stores?type=electronics" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'electronics' }">
-        <span class="nav-item-icon">📱</span><span class="nav-item-label">{{ lang === 'fr' ? 'Électronique' : 'Electronics' }}</span>
-      </NuxtLink>
-
-      <!-- Commandes -->
-      <NuxtLink to="/orders" class="nav-item" active-class="active" style="margin-top:0.25rem;">
-        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+      <!-- Dropdown Trigger -->
+      <div class="nav-item nav-dropdown-trigger" @click="isEcommerceOpen = !isEcommerceOpen" :class="{ 'active': route.path.startsWith('/stores') || route.path.startsWith('/orders') }">
+        <span class="nav-item-icon" style="font-size:1.1rem;">🏪</span>
+        <span class="nav-item-label">{{ lang === 'fr' ? 'E-Commerce' : 'E-Commerce' }}</span>
+        <svg class="dropdown-arrow-icon" :class="{ rotated: isEcommerceOpen }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
-        <span class="nav-item-label">{{ lang === 'fr' ? '📋 Commandes' : '📋 Orders' }}</span>
-      </NuxtLink>
+      </div>
+
+      <!-- Dropdown Content -->
+      <div class="nav-dropdown-content" :class="{ open: isEcommerceOpen }">
+        <!-- Tous les commerces -->
+        <NuxtLink to="/stores" class="nav-item" :class="{ active: route.path === '/stores' && !route.query.type }">
+          <span class="nav-item-icon" style="font-size:1rem;">🏪</span>
+          <span class="nav-item-label">{{ lang === 'fr' ? 'Tous les commerces' : 'All Stores' }}</span>
+        </NuxtLink>
+
+        <!-- Commandes -->
+        <NuxtLink to="/orders" class="nav-item" :class="{ active: route.path === '/orders' }">
+          <span class="nav-item-icon" style="font-size:1rem;">📋</span>
+          <span class="nav-item-label">{{ lang === 'fr' ? 'Commandes' : 'Orders' }}</span>
+        </NuxtLink>
+
+        <!-- 🍽️ Restauration -->
+        <div class="nav-sub-group-label">{{ lang === 'fr' ? 'Restauration' : 'Food & Drink' }}</div>
+        <NuxtLink to="/stores?type=restaurant" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'restaurant' }">
+          <span class="nav-item-icon">🍽️</span><span class="nav-item-label">{{ lang === 'fr' ? 'Restaurants' : 'Restaurants' }}</span>
+        </NuxtLink>
+        <NuxtLink to="/stores?type=cafe" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'cafe' }">
+          <span class="nav-item-icon">☕</span><span class="nav-item-label">{{ lang === 'fr' ? 'Cafés / Salons' : 'Cafés' }}</span>
+        </NuxtLink>
+        <NuxtLink to="/stores?type=bakery" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'bakery' }">
+          <span class="nav-item-icon">🥐</span><span class="nav-item-label">{{ lang === 'fr' ? 'Boulangeries' : 'Bakeries' }}</span>
+        </NuxtLink>
+
+        <!-- 🛒 Alimentation -->
+        <div class="nav-sub-group-label">{{ lang === 'fr' ? 'Alimentation' : 'Food Shops' }}</div>
+        <NuxtLink to="/stores?type=grocery" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'grocery' }">
+          <span class="nav-item-icon">🛒</span><span class="nav-item-label">{{ lang === 'fr' ? 'Épiceries' : 'Grocery' }}</span>
+        </NuxtLink>
+        <NuxtLink to="/stores?type=butcher" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'butcher' }">
+          <span class="nav-item-icon">🥩</span><span class="nav-item-label">{{ lang === 'fr' ? 'Boucheries' : 'Butchers' }}</span>
+        </NuxtLink>
+        <NuxtLink to="/stores?type=fishmonger" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'fishmonger' }">
+          <span class="nav-item-icon">🐟</span><span class="nav-item-label">{{ lang === 'fr' ? 'Poissonneries' : 'Fish Shops' }}</span>
+        </NuxtLink>
+
+        <!-- 💊 Santé & Beauté -->
+        <div class="nav-sub-group-label">{{ lang === 'fr' ? 'Santé & Beauté' : 'Health & Beauty' }}</div>
+        <NuxtLink to="/stores?type=pharmacy" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'pharmacy' }">
+          <span class="nav-item-icon">💊</span><span class="nav-item-label">{{ lang === 'fr' ? 'Pharmacies' : 'Pharmacies' }}</span>
+        </NuxtLink>
+        <NuxtLink to="/stores?type=beauty" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'beauty' }">
+          <span class="nav-item-icon">💄</span><span class="nav-item-label">{{ lang === 'fr' ? 'Beauté / Coiffure' : 'Beauty' }}</span>
+        </NuxtLink>
+
+        <!-- 👔 Mode & Textile -->
+        <div class="nav-sub-group-label">{{ lang === 'fr' ? 'Mode & Maison' : 'Fashion & Home' }}</div>
+        <NuxtLink to="/stores?type=clothing" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'clothing' }">
+          <span class="nav-item-icon">👔</span><span class="nav-item-label">{{ lang === 'fr' ? 'Vêtements / Mode' : 'Clothing' }}</span>
+        </NuxtLink>
+        <NuxtLink to="/stores?type=boutique" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'boutique' }">
+          <span class="nav-item-icon">🛍️</span><span class="nav-item-label">{{ lang === 'fr' ? 'Boutique générale' : 'General Boutique' }}</span>
+        </NuxtLink>
+        <NuxtLink to="/stores?type=hardware" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'hardware' }">
+          <span class="nav-item-icon">🔧</span><span class="nav-item-label">{{ lang === 'fr' ? 'Quincaillerie' : 'Hardware' }}</span>
+        </NuxtLink>
+        <NuxtLink to="/stores?type=furniture" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'furniture' }">
+          <span class="nav-item-icon">🪑</span><span class="nav-item-label">{{ lang === 'fr' ? 'Meubles / Déco' : 'Furniture' }}</span>
+        </NuxtLink>
+        <NuxtLink to="/stores?type=electronics" class="nav-item nav-item-sub" :class="{ active: route.query.type === 'electronics' }">
+          <span class="nav-item-icon">📱</span><span class="nav-item-label">{{ lang === 'fr' ? 'Électronique' : 'Electronics' }}</span>
+        </NuxtLink>
+      </div>
 
       <!-- PRO USERS -->
       <div class="sidebar-section-label">{{ lang === 'fr' ? '🚗 Pro Users' : '🚗 Pro Users' }}</div>
@@ -164,8 +174,6 @@
         <span class="nav-item-label">{{ t('zones') }}</span>
       </NuxtLink>
 
-
-
       <NuxtLink to="/countries" class="nav-item" active-class="active">
         <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -173,11 +181,18 @@
         <span class="nav-item-label">🌍 {{ lang === 'fr' ? 'Pays & Devises' : 'Countries & Currencies' }}</span>
       </NuxtLink>
 
-      <NuxtLink to="/promotions" class="nav-item" active-class="active">
+      <NuxtLink to="/promotions?tab=coupons" class="nav-item" :class="{ active: route.path === '/promotions' && route.query.tab !== 'banners' }">
         <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
         </svg>
-        <span class="nav-item-label">{{ t('promotions') }}</span>
+        <span class="nav-item-label">🎁 {{ lang === 'fr' ? 'Codes Promos / Coupons' : 'Promo Codes' }}</span>
+      </NuxtLink>
+
+      <NuxtLink to="/promotions?tab=banners" class="nav-item" :class="{ active: route.path === '/promotions' && route.query.tab === 'banners' }">
+        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span class="nav-item-label">📢 {{ lang === 'fr' ? 'Bannières d\'Annonces' : 'Announcement Banners' }}</span>
       </NuxtLink>
 
       <!-- FINANCE -->
@@ -246,7 +261,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '~/stores/auth'
@@ -264,6 +279,14 @@ const { user } = storeToRefs(authStore)
 
 const { theme, lang, init, toggleTheme, toggleLang } = useTheme()
 const { t } = useI18n()
+
+const isEcommerceOpen = ref(route.path.startsWith('/stores') || route.path.startsWith('/orders'))
+
+watch(() => route.path, (newPath) => {
+  if (newPath.startsWith('/stores') || newPath.startsWith('/orders')) {
+    isEcommerceOpen.value = true
+  }
+})
 
 onMounted(() => {
   init()

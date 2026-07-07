@@ -17,7 +17,7 @@ func NewCountryHandler(repo domain.CountryRepository) *CountryHandler {
 func (h *CountryHandler) ListAll(c *fiber.Ctx) error {
 	countries, err := h.repo.ListAll(c.Context())
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(countries)
 }
@@ -26,7 +26,7 @@ func (h *CountryHandler) ListAll(c *fiber.Ctx) error {
 func (h *CountryHandler) ListActive(c *fiber.Ctx) error {
 	countries, err := h.repo.ListActive(c.Context())
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(countries)
 }
@@ -36,7 +36,7 @@ func (h *CountryHandler) GetByCode(c *fiber.Ctx) error {
 	code := c.Params("code")
 	country, err := h.repo.GetByCode(c.Context(), code)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	if country == nil {
 		return c.Status(404).JSON(fiber.Map{"error": "country not found"})
@@ -54,7 +54,7 @@ func (h *CountryHandler) SetActive(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
 	}
 	if err := h.repo.SetActive(c.Context(), code, body.Active); err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(fiber.Map{"success": true, "code": code, "active": body.Active})
 }
@@ -64,7 +64,7 @@ func (h *CountryHandler) GetConfig(c *fiber.Ctx) error {
 	code := c.Params("code")
 	cfg, err := h.repo.GetConfig(c.Context(), code)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	if cfg == nil {
 		return c.Status(404).JSON(fiber.Map{"error": "no config for this country"})
@@ -81,7 +81,7 @@ func (h *CountryHandler) UpsertConfig(c *fiber.Ctx) error {
 	}
 	cfg.CountryCode = code
 	if err := h.repo.UpsertConfig(c.Context(), cfg); err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(fiber.Map{"success": true})
 }
@@ -90,7 +90,7 @@ func (h *CountryHandler) UpsertConfig(c *fiber.Ctx) error {
 func (h *CountryHandler) PublicListActive(c *fiber.Ctx) error {
 	countries, err := h.repo.ListActive(c.Context())
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(countries)
 }
@@ -100,7 +100,7 @@ func (h *CountryHandler) PublicGetConfig(c *fiber.Ctx) error {
 	code := c.Params("code")
 	cfg, err := h.repo.GetConfig(c.Context(), code)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	if cfg == nil {
 		return c.Status(404).JSON(fiber.Map{"error": "no config"})

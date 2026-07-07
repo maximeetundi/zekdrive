@@ -643,7 +643,8 @@
   "delivering": "Delivering",
   "delivered": "Delivered",
   "delivery_courier": "Delivery Courier",
-  "stores": "Stores",
+  "commerce": "Commerce",
+  "stores": "Stores & Restaurants",
   "boutique": "Boutique",
   "grocery": "Grocery",
   "pharmacy": "Pharmacy",
@@ -654,5 +655,39 @@
   "select_country": "Select Country",
   "search_country": "Search a country...",
   "currency": "Currency",
-  "currency_symbol": "Symbol"
+  "currency_symbol": "Symbol",
+  "phone number already in use": "This phone number is already registered. Please sign in.",
+  "email already in use": "This email is already in use. Please sign in.",
+
+  "all": "All",
+  "butcher": "Butcher",
+  "fishmonger": "Fish Market",
+  "beauty": "Beauty & Wellness",
+  "clothing": "Fashion & Clothing",
+  "hardware": "Hardware Store",
+  "furniture": "Furniture & Decor",
+  "electronics": "Electronics",
+
+  "cafe": "Café",
+  "bakery": "Bakery",
+  "search_restaurant_hint": "Search for a restaurant...",
+  "no_restaurant_found": "No restaurant found",
+  "try_another_category": "Try another category",
+
+  "vehicle_standard": "Standard",
+  "vehicle_comfort": "Comfort",
+  "vehicle_luxury": "Luxury",
+  "vehicle_bike": "Motorbike",
+  "vehicle_economy": "Economy",
+  "vehicle_premium": "Premium",
+
+  "parcel_send_title": "Send a Parcel",
+  "parcel_send_subtitle": "Fast, secure, real-time tracking",
+  "parcel_step_address": "Enter\nAddress",
+  "parcel_step_size": "Choose\nSize",
+  "parcel_step_confirm": "Confirm\n& Pay",
+  "parcel_category_title": "Parcel Category",
+
+  "ride": "Taxi",
+  "parcel_delivery": "Parcel Delivery"
 }

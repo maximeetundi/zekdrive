@@ -47,39 +47,26 @@ class _ChartWidgetState extends State<ChartWidget> {
 
   Widget bottomTitleWidgets(double value, TitleMeta meta) {
     final bool isToday = Get.find<TripController>().selectedOverview == 'today';
+    final bool isFr = (Get.locale?.languageCode ?? 'fr') == 'fr';
     const style = TextStyle(color: Color(0xff68737d), fontWeight: FontWeight.normal, fontSize: 12);
 
+    // Labels jours : FR vs EN
+    final List<String> dayLabels = isFr
+        ? ['', 'Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
+        : ['', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    // Labels heures : FR vs EN
+    final List<String> hourLabels = isFr
+        ? ['', '6h', '10h', '14h', '18h', '22h', '2h', '']
+        : ['', '6am', '10am', '2pm', '6pm', '10pm', '2am', ''];
+
+    final int idx = value.toInt();
     Widget text;
 
-    switch (value.toInt()) {
-      case 0:
-        text = const Text('', style: style);
-        break;
-      case 1:
-        text =  Text(isToday ? '6am' : 'Sun', style: style);
-        break;
-      case 2:
-        text = Text(isToday ? '10am' :'Mon', style: style);
-        break;
-      case 3:
-        text = Text(isToday ? '2pm' : 'Tue', style: style);
-        break;
-      case 4:
-        text = Text(isToday ? '6pm' : 'Wed', style: style);
-        break;
-      case 5:
-        text = Text(isToday ? '10pm' : 'Thu', style: style);
-        break;
-      case 6:
-        text = Text(isToday ? '2am' : 'Fri', style: style);
-        break;
-      case 7:
-        text = Text(isToday ? '' : 'Sat', style: style);
-        break;
-
-      default:
-        text = const Text('', style: style);
-        break;
+    if (idx < 0 || idx >= (isToday ? hourLabels.length : dayLabels.length)) {
+      text = const Text('', style: style);
+    } else {
+      text = Text(isToday ? hourLabels[idx] : dayLabels[idx], style: style);
     }
 
     return SideTitleWidget(axisSide: meta.axisSide, child: text);

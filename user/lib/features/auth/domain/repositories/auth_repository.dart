@@ -105,9 +105,10 @@ class AuthRepository implements AuthRepositoryInterface{
   Future<String?> _saveDeviceToken() async {
     String? deviceToken = '@';
     try {
-      deviceToken = await FirebaseMessaging.instance.getToken();
-    }catch(e) {
-      log('--------Device Token---------- $deviceToken');
+      deviceToken = await FirebaseMessaging.instance.getToken()
+          .timeout(const Duration(seconds: 5), onTimeout: () => '@');
+    } catch(e) {
+      log('--------Device Token (error)---------- $e');
     }
     if (deviceToken != null) {
       log('--------Device Token---------- $deviceToken');

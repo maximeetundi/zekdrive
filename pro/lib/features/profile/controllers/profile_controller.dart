@@ -14,6 +14,8 @@ import 'package:ride_sharing_user_app/features/profile/domain/services/profile_s
 import 'package:ride_sharing_user_app/helper/display_helper.dart';
 import 'package:ride_sharing_user_app/util/images.dart';
 import 'package:ride_sharing_user_app/features/auth/controllers/auth_controller.dart';
+import 'package:ride_sharing_user_app/features/splash/controllers/splash_controller.dart';
+import 'package:ride_sharing_user_app/features/auth/screens/sign_in_screen.dart';
 import 'package:ride_sharing_user_app/features/location/controllers/location_controller.dart';
 import 'package:ride_sharing_user_app/features/profile/domain/models/categoty_model.dart';
 import 'package:ride_sharing_user_app/features/profile/domain/models/profile_model.dart';
@@ -95,7 +97,7 @@ class ProfileController extends GetxController implements GetxService{
             description: 'this_app_collects_location_data'.tr,
             onYesPressed: () {
               Get.back();
-              _checkPermission(() =>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               startLocationRecord());
+              _checkPermission(() => startLocationRecord());
             },
           ), barrierDismissible: false);
         }else {
@@ -104,8 +106,12 @@ class ProfileController extends GetxController implements GetxService{
       } else {
         stopLocationRecord();
       }
-    }else{
-      ApiChecker.checkApi(response);
+    } else {
+      // Ne pas déconnecter — afficher juste l'erreur si ce n'est pas un timing 404/401
+      debugPrint('[ProfileController] getProfileInfo error ${response.statusCode}: ${response.body}');
+      if (response.statusCode != 401 && response.statusCode != 404) {
+        ApiChecker.checkApi(response);
+      }
     }
     isLoading = false;
     update();

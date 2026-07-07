@@ -15,5 +15,5 @@ const (
 
 	LegalNoticeName  = "Mentions Légales"
 	LegalNoticeShort = "Informations légales et hébergement de la plateforme ZekDrive."
-	LegalNoticeLong  = `<p><strong>Éditeur de la plateforme :</strong> ZekDrive Inc. SAS au capital de 10 000 000 FCFA, immatriculée sous le numéro SN-DKR-2026-B-1234, dont le siège social est situé à Dakar, Sénégal.</p><p><strong>Directeur de la publication :</strong> Maxime Etundi - contact@rodriguendeffo.com</p><p><strong>Hébergement de la plateforme :</strong> IONOS Cloud - 7 Place de la Gare, 57000 Metz, France.</p><p><strong>Support et réclamations :</strong> support@zekdrive.com / +221 33 800 0000</p>`
+	LegalNoticeLong  = `<p><strong>Éditeur de la plateforme :</strong> ZekDrive Inc. SAS au capital de 10 000 000 FCFA, immatriculée sous le numéro CM-YDE-2026-B-1234, dont le siège social est situé à Yaoundé, Cameroun.</p><p><strong>Directeur de la publication :</strong> ZekDrive Management - contact@zekdrive.cm</p><p><strong>Hébergement de la plateforme :</strong> IONOS Cloud - 7 Place de la Gare, 57000 Metz, France.</p><p><strong>Support et réclamations :</strong> support@zekdrive.cm / +237 690 000 000</p>`
 )

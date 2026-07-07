@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:ride_sharing_user_app/features/splash/controllers/config_controller.dart';
+import 'package:ride_sharing_user_app/features/settings/controllers/country_controller.dart';
 
 class PriceConverter {
 
@@ -9,11 +10,9 @@ class PriceConverter {
     if (loyaltyPoint == true) return '';
     try {
       // Utilise le CountryController si enregistré
-      final dynamic cc = Get.find(tag: 'country');
-      if (cc != null) {
-        final String sym = cc.currencySymbol as String;
-        if (sym.isNotEmpty) return sym;
-      }
+      final CountryController cc = Get.find<CountryController>();
+      final String sym = cc.currencySymbol;
+      if (sym.isNotEmpty) return sym;
     } catch (_) {}
     return Get.find<ConfigController>().config?.currencySymbol ?? '\$';
   }

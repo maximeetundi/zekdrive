@@ -475,7 +475,7 @@ function deleteVehicle(id: string) {
 }
 
 function formatCurrency(val: number): string {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(val)
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(val)
 }
 </script>
 

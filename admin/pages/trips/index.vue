@@ -29,10 +29,12 @@
         <div style="width: 170px;">
           <select v-model="zoneFilter" class="form-select" @change="onFilterChange">
             <option value="">{{ lang === 'fr' ? 'Toutes les zones' : 'All Zones' }}</option>
-            <option value="Dakar Centre">Dakar Centre</option>
-            <option value="Dakar Ouest">Dakar Ouest</option>
-            <option value="Banlieue">Banlieue</option>
-            <option value="Pikine">Pikine</option>
+            <option value="Yaoundé Centre">Yaoundé Centre</option>
+            <option value="Yaoundé Nord">Yaoundé Nord</option>
+            <option value="Yaoundé Sud">Yaoundé Sud</option>
+            <option value="Douala">Douala</option>
+            <option value="Douala Port">Douala Port</option>
+            <option value="Bafoussam">Bafoussam</option>
           </select>
         </div>
 
@@ -149,7 +151,7 @@
           </div>
           <div style="background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
             <div class="text-xs text-muted">Zone</div>
-            <strong class="text-sm text-primary">{{ selectedTrip.zone || 'Dakar' }}</strong>
+            <strong class="text-sm text-primary">{{ selectedTrip.zone || 'Yaoundé' }}</strong>
           </div>
         </div>
 
@@ -297,7 +299,8 @@ function closeMapModal() {
 }
 
 function formatCurrency(val: number): string {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(val)
+  // XAF = Franc CFA de la CEMAC (Cameroun, RCA, Congo, Gabon, Guinée équatoriale, Tchad)
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(val)
 }
 
 function formatDateTime(dateStr: string): string {

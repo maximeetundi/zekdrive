@@ -47,7 +47,7 @@ class _RiderDetailsWidgetState extends State<RiderDetailsWidget> {
 
                     Text.rich(TextSpan(style: textRegular.copyWith(fontSize: Dimensions.fontSizeLarge,
                         color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8)), children:  [
-                          TextSpan(text: '${widget.bidding.driver?.firstName} ${widget.bidding.driver?.lastName}',
+                          TextSpan(text: '${widget.bidding.driver?.firstName ?? ''}',
                               style: textMedium.copyWith(color: Theme.of(context).primaryColorDark,fontSize: Dimensions.fontSizeDefault)),
                         ])),
 

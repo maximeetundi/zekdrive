@@ -259,9 +259,9 @@ class MessageController extends GetxController implements GetxService {
             },
           ));
 
-      if (channel.currentStatus == null) {
-        channel.subscribe();
-        channel.bind("customer-ride-chat.$id").listen((event) {
+      // On souscrit directement — le channel est recréé à chaque ouverture de chat
+      channel.subscribe();
+      channel.bind("customer-ride-chat.$id").listen((event) {
           if (id ==
               jsonDecode(event.data!)['channel_conversation']['channel']
                   ['trip_id']) {
@@ -271,8 +271,7 @@ class MessageController extends GetxController implements GetxService {
                     jsonDecode(event.data!)['channel_conversation']));
             update();
           }
-        });
-      }
+      });
     }
   }
 

@@ -1,3 +1,4 @@
+import 'package:ride_sharing_user_app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing_user_app/common_widgets/confirmation_dialog_widget.dart';
@@ -17,8 +18,6 @@ import 'package:ride_sharing_user_app/features/wallet/screens/wallet_screen.dart
 import 'package:ride_sharing_user_app/util/dimensions.dart';
 import 'package:ride_sharing_user_app/util/images.dart';
 import 'package:ride_sharing_user_app/util/styles.dart';
-
-// Importez les autres dépendances nécessaires
 
 class MainDrawer extends StatelessWidget {
   MainDrawer({super.key});
@@ -77,154 +76,244 @@ class MainDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: Theme.of(context).cardColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(0),
+          bottomRight: Radius.circular(0),
+        ),
+      ),
       child: Column(
         children: [
+          // Premium drawer header with gradient
           GetBuilder<ProfileController>(builder: (profileController) {
-            return DrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-              ),
-              margin: EdgeInsets.zero, // Remove default margin
+            return Container(
+              width: double.infinity,
               padding: EdgeInsets.only(
-                  top: MediaQuery.of(context)
-                      .padding
-                      .top), // Add top padding to avoid overlapping with status bar
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                top: MediaQuery.of(context).padding.top + 20,
+                bottom: 24,
+                left: 20,
+                right: 20,
+              ),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF14B19E), Color(0xFF0E8F7E)],
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Avatar
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: Theme.of(context).primaryColor, width: 1),
+                        color: Colors.white.withOpacity(0.6),
+                        width: 2.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
+                      borderRadius: BorderRadius.circular(40),
                       child: ImageWidget(
-                        height: 70,
-                        width: 70,
-                        image: profileController
-                                    .profileModel?.data?.profileImage !=
-                                null
-                            ? '${Get.find<ConfigController>().config!.imageBaseUrl!.profileImage}/${profileController.profileModel?.data?.profileImage ?? ''}'
+                        height: 72,
+                        width: 72,
+                        image: profileController.profileModel?.data?.profileImage != null
+                            ? '${Get.find<ConfigController>().config?.imageBaseUrl?.profileImage ?? ''}/${profileController.profileModel?.data?.profileImage ?? ''}'
                             : '',
                         placeholder: Images.personPlaceholder,
                         fit: BoxFit.cover,
                       ),
                     ),
                   ),
-                  const SizedBox(width: Dimensions.paddingSizeSmall),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  const SizedBox(height: 12),
+                  // Name
+                  Text(
+                    profileController.customerName(),
+                    style: textBold.copyWith(
+                      fontSize: Dimensions.fontSizeExtraLarge,
+                      color: Colors.white,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  // Level + Rating row
+                  Row(
                     children: [
-                      Text(
-                        profileController.customerName(),
-                        style: textBold.copyWith(
-                          fontSize: Dimensions.fontSizeExtraLarge,
-                          color: Theme.of(context).dialogBackgroundColor,
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        child: Text(
+                          "${'level'.tr}: ${profileController.profileModel?.data?.level?.name ?? '0'}",
+                          style: textMedium.copyWith(
+                            color: Colors.white,
+                            fontSize: Dimensions.fontSizeSmall,
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-                      Row(children: [
-                        Text(
-                          "${'level'.tr} : ${profileController.profileModel?.data?.level?.name ?? '0'}",
-                          style: textBold.copyWith(
-                            color: Theme.of(context).dialogBackgroundColor,
-                            fontSize: Dimensions.fontSizeSmall,
-                          ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
+                      const SizedBox(width: 2),
+                      Text(
+                        profileController.profileModel?.data?.userRating ?? "0",
+                        style: textMedium.copyWith(
+                          color: Colors.white,
+                          fontSize: Dimensions.fontSizeSmall,
                         ),
-                      ]),
-                      Row(children: [
-                        Text(
-                          '${"your_rating".tr} :',
-                          style: textBold.copyWith(
-                            color: Theme.of(context).dialogBackgroundColor,
-                            fontSize: Dimensions.fontSizeSmall,
-                          ),
-                        ),
-                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                        Text(
-                          profileController.profileModel!.data!.userRating ??
-                              "0",
-                          style: textBold.copyWith(
-                            fontSize: Dimensions.fontSizeSmall,
-                            letterSpacing: 3,
-                            color: Theme.of(context).dialogBackgroundColor,
-                          ),
-                        ),
-                        const Icon(Icons.star, size: 12, color: Colors.amber),
-                      ]),
+                      ),
                     ],
                   ),
                 ],
               ),
             );
           }),
+
+          // Menu items
           Expanded(
             child: ListView(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
-                ...item.map((item) => Column(
-                      children: [
-                        ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Image.asset(
-                              item.inactiveIcon,
-                              width: 24,
-                              height: 24,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                          title: Text(
-                            item.name,
-                            style: textMedium.copyWith(
-                                fontSize: Dimensions.fontSizeLarge),
-                          ),
-                          trailing: Icon(
-                            Icons.arrow_forward_ios,
-                            color: Theme.of(context).primaryColor,
-                            size: 16,
-                          ),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Get.to(item.screen);
-                          },
-                        ),
-                      ],
-                    )),
+                ...item.map((navItem) => _DrawerItem(item: navItem)),
               ],
             ),
           ),
-          ListTile(
-            leading:
-                Icon(Icons.exit_to_app, color: Theme.of(context).primaryColor),
-            title: const Text('Déconnexion', style: textMedium),
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (_) {
-                  return GetBuilder<AuthController>(builder: (authController) {
-                    return ConfirmationDialogWidget(
-                      icon: Images.profileLogout,
-                      isLoading: authController.isLoading,
-                      description: 'do_you_want_to_log_out_this_account'.tr,
-                      onYesPressed: () {
-                        Get.find<AuthController>().logOut();
-                      },
-                    );
-                  });
-                },
-              );
-            },
+
+          // Logout button at bottom
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: Theme.of(context).dividerColor,
+                  width: 1,
+                ),
+              ),
+            ),
+            child: InkWell(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) {
+                    return GetBuilder<AuthController>(builder: (authController) {
+                      return ConfirmationDialogWidget(
+                        icon: Images.profileLogout,
+                        isLoading: authController.isLoading,
+                        description: 'do_you_want_to_log_out_this_account'.tr,
+                        onYesPressed: () {
+                          Get.find<AuthController>().logOut();
+                        },
+                      );
+                    });
+                  },
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEF4444).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.logout_rounded,
+                        color: Color(0xFFEF4444),
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'logout'.tr,
+                      style: textMedium.copyWith(
+                        color: const Color(0xFFEF4444),
+                        fontSize: Dimensions.fontSizeDefault,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DrawerItem extends StatelessWidget {
+  final NavigationModel item;
+  const _DrawerItem({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        Get.to(item.screen);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: kBrandTeal.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: Image.asset(
+                    item.inactiveIcon,
+                    width: 20,
+                    height: 20,
+                    color: kBrandTeal,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  item.name,
+                  style: textMedium.copyWith(
+                    fontSize: Dimensions.fontSizeDefault,
+                    color: Theme.of(context).textTheme.bodyLarge!.color,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 13,
+                color: Theme.of(context).hintColor.withOpacity(0.4),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

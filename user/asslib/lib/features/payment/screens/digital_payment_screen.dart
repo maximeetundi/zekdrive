@@ -44,9 +44,8 @@ class DigitalPaymentScreenState extends State<DigitalPaymentScreen> {
   }
 
   void _initData() async {
-    browser = MyInAppBrowser(context, widget.tripId, widget.fromParcel);
     if (Platform.isAndroid) {
-      await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
+      await InAppWebViewController.setWebContentsDebuggingEnabled(true);
       bool swAvailable = await AndroidWebViewFeature.isFeatureSupported(AndroidWebViewFeature.SERVICE_WORKER_BASIC_USAGE);
       bool swInterceptAvailable = await AndroidWebViewFeature.isFeatureSupported(AndroidWebViewFeature.SERVICE_WORKER_SHOULD_INTERCEPT_REQUEST);
       if (swAvailable && swInterceptAvailable) {
@@ -63,22 +62,32 @@ class DigitalPaymentScreenState extends State<DigitalPaymentScreen> {
     }
 
     pullToRefreshController = PullToRefreshController(
-      options: PullToRefreshOptions(color: Colors.black),
+      settings: PullToRefreshSettings(color: Colors.black),
       onRefresh: () async {
         if (Platform.isAndroid) {
-          browser.webViewController.reload();
+          await browser.webViewController?.reload();
         } else if (Platform.isIOS) {
-          browser.webViewController.loadUrl(urlRequest: URLRequest(url: await browser.webViewController.getUrl()));
+          final url = await browser.webViewController?.getUrl();
+          if (url != null) {
+            await browser.webViewController?.loadUrl(urlRequest: URLRequest(url: url));
+          }
         }
       },
     );
-    browser.pullToRefreshController = pullToRefreshController;
+
+    browser = MyInAppBrowser(
+      context,
+      widget.tripId,
+      widget.fromParcel,
+      pullToRefreshController: pullToRefreshController,
+    );
 
     await browser.openUrlRequest(
-      urlRequest: URLRequest(url: Uri.parse(selectedUrl!)),
-      options: InAppBrowserClassOptions(
-        inAppWebViewGroupOptions: InAppWebViewGroupOptions(
-          crossPlatform: InAppWebViewOptions(useShouldOverrideUrlLoading: true, useOnLoadResource: true),
+      urlRequest: URLRequest(url: WebUri(selectedUrl!)),
+      settings: InAppBrowserClassSettings(
+        webViewSettings: InAppWebViewSettings(
+          useShouldOverrideUrlLoading: true,
+          useOnLoadResource: true,
         ),
       ),
     );
@@ -109,6 +118,7 @@ class MyInAppBrowser extends InAppBrowser {
   MyInAppBrowser(this.context, this.tripId, this.fromParcel, {
     super.windowId,
     super.initialUserScripts,
+    super.pullToRefreshController,
   });
 
   bool _canRedirect = true;

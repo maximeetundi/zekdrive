@@ -149,9 +149,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: Dimensions.paddingSizeDefault * 3),
 
-                  authController.isLoading ? Center(child: SpinKitCircle(color: Theme.of(context).primaryColor, size: 40.0,)) : ButtonWidget(
+                  ButtonWidget(
                     buttonText: 'submit'.tr,
                     radius: 50,
+                    isLoading: authController.isLoading,
                     onPressed: () {
                       String fName = fNameController.text.trim();
                       String lName = lNameController.text.trim();

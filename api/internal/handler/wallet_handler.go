@@ -1,6 +1,11 @@
 package handler
 
 import (
+	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/zekdrive/api/internal/domain"
@@ -22,9 +27,9 @@ func (h *WalletHandler) GetMyWallet(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(401).JSON(fiber.Map{"error": "unauthorized"})
 	}
-	wallet, err := h.repo.GetOrCreate(c.Context(), driverID, "XOF")
+	wallet, err := h.repo.GetOrCreate(c.Context(), driverID, "XAF")
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(wallet)
 }
@@ -37,7 +42,7 @@ func (h *WalletHandler) ListMyTransactions(c *fiber.Ctx) error {
 	}
 	txns, err := h.repo.ListTransactions(c.Context(), driverID, 50)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	if txns == nil {
 		txns = []domain.WalletTransaction{}
@@ -61,13 +66,13 @@ func (h *WalletHandler) Recharge(c *fiber.Ctx) error {
 	}
 	// Récupérer la devise depuis le wallet existant
 	w, err := h.repo.GetBalance(c.Context(), driverID)
-	currency := "XOF"
+	currency := "XAF"
 	if err == nil {
 		currency = w.CurrencyCode
 	}
 	wallet, err := h.repo.Recharge(c.Context(), driverID, req.Amount, req.PaymentMethod, req.Reference, currency)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(fiber.Map{
 		"success": true,
@@ -83,7 +88,7 @@ func (h *WalletHandler) Recharge(c *fiber.Ctx) error {
 func (h *WalletHandler) AdminListWallets(c *fiber.Ctx) error {
 	wallets, err := h.repo.AdminListWallets(c.Context())
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	if wallets == nil {
 		wallets = []domain.DriverWallet{}
@@ -106,11 +111,11 @@ func (h *WalletHandler) AdminRecharge(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
 	}
 	if req.Currency == "" {
-		req.Currency = "XOF"
+		req.Currency = "XAF"
 	}
 	wallet, err := h.repo.AdminRecharge(c.Context(), driverID, req.Amount, req.Ref, req.Currency)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(fiber.Map{"success": true, "wallet": wallet})
 }
@@ -130,10 +135,10 @@ func (h *WalletHandler) AdminAddBonus(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
 	}
 	if req.Currency == "" {
-		req.Currency = "XOF"
+		req.Currency = "XAF"
 	}
 	if err := h.repo.AddBonus(c.Context(), driverID, req.Amount, req.BonusType, req.Currency); err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(fiber.Map{"success": true, "bonus_type": req.BonusType, "amount": req.Amount})
 }
@@ -151,7 +156,7 @@ func (h *WalletHandler) AdminSetMinBalance(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
 	}
 	if err := h.repo.SetMinBalance(c.Context(), driverID, req.MinBalance); err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(fiber.Map{"success": true, "min_balance": req.MinBalance})
 }
@@ -169,7 +174,7 @@ func (h *WalletHandler) AdminLockWallet(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
 	}
 	if err := h.repo.LockWallet(c.Context(), driverID, req.Locked); err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	return c.JSON(fiber.Map{"success": true, "locked": req.Locked})
 }
@@ -182,7 +187,7 @@ func (h *WalletHandler) AdminListTransactions(c *fiber.Ctx) error {
 	}
 	txns, err := h.repo.ListTransactions(c.Context(), driverID, 100)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	if txns == nil {
 		txns = []domain.WalletTransaction{}
@@ -209,4 +214,127 @@ func driverIDFromCtx(c *fiber.Ctx) (uuid.UUID, error) {
 		return uuid.Parse(v)
 	}
 	return uuid.Nil, fiber.ErrUnauthorized
+}
+
+func (h *WalletHandler) InitializeRecharge(c *fiber.Ctx) error {
+	driverID, err := driverIDFromCtx(c)
+	if err != nil {
+		return c.Status(401).JSON(fiber.Map{"error": "unauthorized"})
+	}
+
+	type InitRequest struct {
+		Amount      float64 `json:"amount"`
+		Gateway     string  `json:"gateway"` // "dohone_orange", "dohone_mtn", "cinetpay", "stripe", "paypal"
+		PhoneNumber string  `json:"phone_number"`
+	}
+
+	var req InitRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
+	}
+
+	if req.Amount <= 0 {
+		return c.Status(400).JSON(fiber.Map{"error": "amount must be > 0"})
+	}
+
+	ref := fmt.Sprintf("REF-%d-%s", time.Now().UnixNano()/1e6, strings.ToUpper(req.Gateway))
+
+	w, err := h.repo.GetBalance(c.Context(), driverID)
+	currency := "XAF"
+	if err == nil {
+		currency = w.CurrencyCode
+	}
+
+	err = h.repo.CreatePendingTransaction(c.Context(), driverID, req.Amount, req.Gateway, ref, currency)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": friendlyValidationError(err)})
+	}
+
+	if strings.HasPrefix(req.Gateway, "dohone") {
+		operator := "OM"
+		if strings.HasSuffix(req.Gateway, "mtn") {
+			operator = "MOMO"
+		}
+
+		go func() {
+			dohoneURL := fmt.Sprintf("https://www.my-dohone.com/dohone/pay?rD=defaultMerchantKey&rT=%s&rA=%.0f&rC=%s&rP=%s&rPhone=%s", ref, req.Amount, currency, operator, req.PhoneNumber)
+			_, _ = http.Get(dohoneURL)
+		}()
+
+		return c.JSON(fiber.Map{
+			"success":    true,
+			"status":     "initiated",
+			"reference":  ref,
+			"message_fr": "Lancement du paiement Mobile Money via Dohone. Veuillez valider le message USSD push sur votre mobile avec votre code PIN.",
+			"message_en": "Launching Mobile Money payment via Dohone. Please approve the USSD push popup on your mobile with your PIN.",
+		})
+	} else if req.Gateway == "cinetpay" {
+		paymentURL := fmt.Sprintf("https://checkout.cinetpay.com/payment/%s", ref)
+		return c.JSON(fiber.Map{
+			"success":     true,
+			"status":      "redirect",
+			"payment_url": paymentURL,
+			"reference":   ref,
+		})
+	} else {
+		return c.JSON(fiber.Map{
+			"success":     true,
+			"status":      "redirect",
+			"payment_url": "https://api.driver.maximeetundi.store/payments/manual?ref=" + ref,
+			"reference":   ref,
+		})
+	}
+}
+
+func (h *WalletHandler) DohoneNotify(c *fiber.Ctx) error {
+	ref := c.Query("idTrans", "")
+	status := c.Query("status", "")
+	if ref == "" {
+		type DohoneBody struct {
+			IdTrans string `json:"idTrans" xml:"idTrans" form:"idTrans"`
+			Status  string `json:"status" xml:"status" form:"status"`
+		}
+		var b DohoneBody
+		if err := c.BodyParser(&b); err == nil {
+			ref = b.IdTrans
+			status = b.Status
+		}
+	}
+
+	if ref == "" {
+		return c.Status(400).SendString("Missing idTrans")
+	}
+
+	if strings.ToUpper(status) == "SUCCES" || strings.ToUpper(status) == "SUCCESS" {
+		_, err := h.repo.CompletePendingTransaction(c.Context(), ref)
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+	}
+
+	return c.SendString("OK")
+}
+
+func (h *WalletHandler) CinetPayNotify(c *fiber.Ctx) error {
+	type CinetPayBody struct {
+		CpmTransID     string `json:"cpm_trans_id"`
+		CpmTransStatus string `json:"cpm_trans_status"`
+	}
+	var b CinetPayBody
+	if err := c.BodyParser(&b); err != nil {
+		return c.Status(400).SendString("Invalid body")
+	}
+
+	if b.CpmTransID == "" {
+		return c.Status(400).SendString("Missing transaction_id")
+	}
+
+	if strings.ToUpper(b.CpmTransStatus) == "ACCEPTED" {
+		_, err := h.repo.CompletePendingTransaction(c.Context(), b.CpmTransID)
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+	}
+
+	return c.SendString("OK")
 }

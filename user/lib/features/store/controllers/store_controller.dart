@@ -22,7 +22,7 @@ class StoreController extends GetxController implements GetxService {
   String activeStoreType = ''; // '' = all, 'restaurant', 'boutique', etc.
 
   // Get nearby stores listing
-  Future<void> getNearbyStores({String search = '', String type = ''}) async {
+  Future<void> getNearbyStores({String search = '', String type = '', bool excludeFood = false}) async {
     isLoading = true;
     update();
 
@@ -43,8 +43,9 @@ class StoreController extends GetxController implements GetxService {
     }
 
     final typeParam = type.isNotEmpty ? '&type=$type' : '';
+    final excludeParam = excludeFood ? '&exclude_food=true' : '';
     Response response = await apiClient.getData(
-      '/api/customer/stores?lat=$lat&lng=$lng&search=$search$typeParam',
+      '/api/customer/stores?lat=$lat&lng=$lng&search=$search$typeParam$excludeParam',
     );
 
     if (response.statusCode == 200) {

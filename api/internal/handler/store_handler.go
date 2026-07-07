@@ -2,6 +2,7 @@ package handler
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -39,12 +40,12 @@ func (h *StoreHandler) CreateOrUpdateStore(c *fiber.Ctx) error {
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	store, err := h.storeService.CreateOrUpdateStore(c.Context(), userID, &req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(store)
@@ -59,7 +60,7 @@ func (h *StoreHandler) GetStoreProfile(c *fiber.Ctx) error {
 
 	store, err := h.storeService.GetStoreProfile(c.Context(), userID)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(store)
@@ -78,12 +79,12 @@ func (h *StoreHandler) UpdateSchedules(c *fiber.Ctx) error {
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	schedules, err := h.storeService.UpdateSchedules(c.Context(), userID, &req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(schedules)
@@ -104,12 +105,12 @@ func (h *StoreHandler) CreateProduct(c *fiber.Ctx) error {
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	product, err := h.storeService.CreateProduct(c.Context(), userID, &req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(product)
@@ -133,12 +134,12 @@ func (h *StoreHandler) UpdateProduct(c *fiber.Ctx) error {
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	product, err := h.storeService.UpdateProduct(c.Context(), userID, productID, &req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(product)
@@ -157,7 +158,7 @@ func (h *StoreHandler) DeleteProduct(c *fiber.Ctx) error {
 	}
 
 	if err := h.storeService.DeleteProduct(c.Context(), userID, productID); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)
@@ -172,7 +173,7 @@ func (h *StoreHandler) ListStoreProducts(c *fiber.Ctx) error {
 
 	products, err := h.storeService.ListProductsForStoreOwner(c.Context(), userID)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(products)
@@ -192,7 +193,7 @@ func (h *StoreHandler) ListStoreOrders(c *fiber.Ctx) error {
 
 	orders, err := h.storeService.ListStoreOrders(c.Context(), userID, limit, offset)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(orders)
@@ -216,12 +217,12 @@ func (h *StoreHandler) UpdateOrderStatusByStore(c *fiber.Ctx) error {
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	order, err := h.storeService.UpdateOrderStatusByStore(c.Context(), userID, orderID, req.Status)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(order)
@@ -234,13 +235,14 @@ func (h *StoreHandler) ListNearbyStores(c *fiber.Ctx) error {
 	lngStr := c.Query("lng", "0.0")
 	search := c.Query("search", "")
 	storeType := c.Query("type", "") // "restaurant", "boutique", "grocery", "pharmacy", "other", or "" for all
+	excludeFood := c.Query("exclude_food", "") == "true"
 
 	lat, _ := strconv.ParseFloat(latStr, 64)
 	lng, _ := strconv.ParseFloat(lngStr, 64)
 
-	stores, err := h.storeService.ListNearbyStores(c.Context(), lat, lng, search, storeType)
+	stores, err := h.storeService.ListNearbyStores(c.Context(), lat, lng, search, storeType, excludeFood)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(stores)
@@ -254,7 +256,7 @@ func (h *StoreHandler) AdminListStores(c *fiber.Ctx) error {
 
 	stores, err := h.storeService.ListAllStores(c.Context(), storeType, search, limit, offset)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(stores)
@@ -268,7 +270,7 @@ func (h *StoreHandler) GetStoreDetails(c *fiber.Ctx) error {
 
 	store, err := h.storeService.GetStoreDetails(c.Context(), storeID)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(store)
@@ -282,7 +284,13 @@ func (h *StoreHandler) ListCustomerProducts(c *fiber.Ctx) error {
 
 	products, err := h.storeService.ListProductsForCustomer(c.Context(), storeID)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		if strings.Contains(err.Error(), "not found") {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Boutique introuvable"})
+		}
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
+	}
+	if products == nil {
+		return c.JSON([]interface{}{})
 	}
 
 	return c.JSON(products)
@@ -301,12 +309,12 @@ func (h *StoreHandler) CreateOrder(c *fiber.Ctx) error {
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	order, err := h.storeService.CreateOrder(c.Context(), customerID, &req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(order)
@@ -320,7 +328,7 @@ func (h *StoreHandler) GetOrderDetails(c *fiber.Ctx) error {
 
 	order, err := h.storeService.GetOrder(c.Context(), orderID)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(order)
@@ -338,7 +346,7 @@ func (h *StoreHandler) ListCustomerOrders(c *fiber.Ctx) error {
 
 	orders, err := h.storeService.ListCustomerOrders(c.Context(), customerID, limit, offset)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(orders)
@@ -363,7 +371,7 @@ func (h *StoreHandler) ListDriverOrders(c *fiber.Ctx) error {
 
 	orders, err := h.storeService.ListDriverOrders(c.Context(), d.ID, limit, offset)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(orders)
@@ -388,7 +396,7 @@ func (h *StoreHandler) AcceptDeliveryOrder(c *fiber.Ctx) error {
 
 	order, err := h.storeService.AcceptDeliveryOrder(c.Context(), d.ID, orderID)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(order)
@@ -417,7 +425,7 @@ func (h *StoreHandler) UpdateOrderStatusByDriver(c *fiber.Ctx) error {
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	// Double check OTP if driver completes or delivers order and order delivery_type is pickup or delivery verification
@@ -432,7 +440,7 @@ func (h *StoreHandler) UpdateOrderStatusByDriver(c *fiber.Ctx) error {
 
 	order, err := h.storeService.UpdateOrderStatusByDriver(c.Context(), d.ID, orderID, req.Status)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(order)

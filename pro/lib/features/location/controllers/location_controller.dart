@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ride_sharing_user_app/features/map/widgets/google_map_replacement.dart';
 import 'package:ride_sharing_user_app/features/location/domain/services/location_service_interface.dart';
 import 'package:ride_sharing_user_app/util/images.dart';
 import 'package:ride_sharing_user_app/features/auth/controllers/auth_controller.dart';
@@ -24,7 +24,7 @@ class LocationController extends GetxController implements GetxService {
   Position get position => _position;
   String get address => _address;
   GoogleMapController get mapController => _mapController!;
-  LatLng _initialPosition = const LatLng(23.83721, 90.363715);
+  LatLng _initialPosition = const LatLng(3.8480, 11.5021);
   LatLng get initialPosition => _initialPosition;
 
 

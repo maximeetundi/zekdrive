@@ -70,8 +70,8 @@
           <!-- Country Cell -->
           <template #cell-country="{ item }">
             <span class="flex items-center gap-1">
-              <span>{{ item.country === 'SN' ? '🇸🇳' : item.country === 'CI' ? '🇨🇮' : item.country === 'ML' ? '🇲🇱' : '🌍' }}</span>
-              <span class="text-xs font-semibold" style="margin-left: 2px;">{{ item.country || 'SN' }}</span>
+              <span>{{ item.country === 'CM' ? '🇨🇲' : item.country === 'CI' ? '🇨🇮' : item.country === 'ML' ? '🇲🇱' : '🌍' }}</span>
+              <span class="text-xs font-semibold" style="margin-left: 2px;">{{ item.country || 'CM' }}</span>
             </span>
           </template>
 
@@ -183,7 +183,7 @@
           <div class="form-group text-left">
             <label class="form-label">{{ t('country') }}</label>
             <select v-model="editForm.country" class="form-select" required>
-              <option value="SN">🇸🇳 Sénégal (SN)</option>
+              <option value="CM">🇨🇲 Cameroun (CM)</option>
               <option value="CI">🇨🇮 Côte d'Ivoire (CI)</option>
               <option value="ML">🇲🇱 Mali (ML)</option>
             </select>
@@ -256,13 +256,13 @@
         <ClientOnly>
           <AppMapView
             height="400px"
-            :center="{ lat: selectedDriver.lat || 14.6928, lng: selectedDriver.lng || -17.4467 }"
+            :center="{ lat: selectedDriver.lat || 3.8480, lng: selectedDriver.lng || 11.5021 }"
             :zoom="15"
             :drivers="[{
               id: selectedDriver.id,
               name: selectedDriver.name,
-              lat: selectedDriver.lat || 14.6928,
-              lng: selectedDriver.lng || -17.4467,
+              lat: selectedDriver.lat || 3.8480,
+              lng: selectedDriver.lng || 11.5021,
               status: selectedDriver.availability,
               vehicle_type: selectedDriver.vehicle_type
             }]"
@@ -319,7 +319,7 @@ const editForm = ref({
   vehicle_plate: '',
   vehicle_type: 'car' as Driver['vehicle_type'],
   availability: 'offline' as Driver['availability'],
-  country: 'SN',
+  country: 'CM',
   kyc_status: 'unsubmitted' as Driver['kyc_status'],
   kyc_document: '',
 })
@@ -356,7 +356,7 @@ function openEditModal(driver: Driver) {
     vehicle_plate: driver.vehicle_plate,
     vehicle_type: driver.vehicle_type,
     availability: driver.availability,
-    country: driver.country || 'SN',
+    country: driver.country || 'CM',
     kyc_status: driver.kyc_status || 'unsubmitted',
     kyc_document: driver.kyc_document || '',
   }
@@ -405,7 +405,7 @@ async function rejectDriver(id: string) {
 }
 
 function formatCurrency(val: number): string {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(val)
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(val)
 }
 
 function formatTime(dateStr: string): string {

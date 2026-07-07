@@ -289,3 +289,78 @@ func (r *WalletRepository) AdminListWallets(ctx interface{}) ([]domain.DriverWal
 func (r *WalletRepository) AdminRecharge(ctx interface{}, driverID uuid.UUID, amount float64, ref, currency string) (*domain.DriverWallet, error) {
 	return r.Recharge(ctx, driverID, amount, "admin", ref, currency)
 }
+
+func (r *WalletRepository) CreatePendingTransaction(ctx interface{}, driverID uuid.UUID, amount float64, method, ref, currency string) error {
+	c := ctx.(context.Context)
+	descFr := fmt.Sprintf("Recharge initiée — %.0f %s via %s", amount, currency, method)
+	descEn := fmt.Sprintf("Top-up initiated — %.0f %s via %s", amount, currency, method)
+
+	var balance float64
+	_ = r.db.QueryRowContext(c, `SELECT balance FROM driver_wallets WHERE driver_id=$1`, driverID).Scan(&balance)
+
+	_, err := r.db.ExecContext(c, `
+		INSERT INTO wallet_transactions
+		(driver_id, type, amount, balance_before, balance_after, currency_code,
+		 description_fr, description_en, payment_method, reference, status)
+		VALUES ($1,'recharge',$2,$3,$4,$5,$6,$7,$8,$9,'pending')
+	`, driverID, amount, balance, balance, currency, descFr, descEn, method, ref)
+	return err
+}
+
+func (r *WalletRepository) CompletePendingTransaction(ctx interface{}, ref string) (*domain.DriverWallet, error) {
+	c := ctx.(context.Context)
+	tx, err := r.db.BeginTx(c, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	var txID uuid.UUID
+	var driverID uuid.UUID
+	var amount float64
+	var status string
+	var currency string
+	err = tx.QueryRowContext(c, `
+		SELECT id, driver_id, amount, status, currency_code 
+		FROM wallet_transactions 
+		WHERE reference = $1 AND status = 'pending'
+		FOR UPDATE
+	`, ref).Scan(&txID, &driverID, &amount, &status, &currency)
+	if err != nil {
+		return nil, fmt.Errorf("pending transaction not found: %w", err)
+	}
+
+	var before float64
+	err = tx.QueryRowContext(c, `SELECT balance FROM driver_wallets WHERE driver_id=$1 FOR UPDATE`, driverID).Scan(&before)
+	if err != nil {
+		return nil, fmt.Errorf("wallet not found: %w", err)
+	}
+
+	after := before + amount
+
+	_, err = tx.ExecContext(c, `
+		UPDATE driver_wallets
+		SET balance=$1, total_recharged=total_recharged+$2, is_locked=FALSE, updated_at=NOW()
+		WHERE driver_id=$3
+	`, after, amount, driverID)
+	if err != nil {
+		return nil, err
+	}
+
+	descFr := fmt.Sprintf("Recharge complétée — %.0f %s", amount, currency)
+	descEn := fmt.Sprintf("Top-up completed — %.0f %s", amount, currency)
+	_, err = tx.ExecContext(c, `
+		UPDATE wallet_transactions
+		SET status='completed', balance_before=$1, balance_after=$2, description_fr=$3, description_en=$4, updated_at=NOW()
+		WHERE id=$5
+	`, before, after, descFr, descEn, txID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return r.GetBalance(ctx, driverID)
+}

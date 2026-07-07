@@ -296,6 +296,8 @@ class Wallet {
   double? pendingBalance;
   double? walletBalance;
   double? totalWithdrawn;
+  String? currencyCode;
+  String? currencySymbol;
 
   Wallet(
       {this.id,
@@ -304,25 +306,28 @@ class Wallet {
         this.receivedBalance,
         this.pendingBalance,
         this.walletBalance,
-        this.totalWithdrawn});
+        this.totalWithdrawn,
+        this.currencyCode,
+        this.currencySymbol});
 
   Wallet.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    payableBalance = json['payable_balance'].toDouble();
-    receivableBalance = json['receivable_balance'].toDouble();
+    payableBalance = json['payable_balance'] != null ? json['payable_balance'].toDouble() : 0.0;
+    receivableBalance = json['receivable_balance'] != null ? json['receivable_balance'].toDouble() : 0.0;
     if(json['received_balance'] != null){
       try{
         receivedBalance = json['received_balance'].toDouble();
       }catch(e){
         receivedBalance = double.parse(json['received_balance']);
       }
-
     }else{
       receivedBalance = 0;
     }
-    pendingBalance = json['pending_balance'].toDouble();
-    walletBalance = json['wallet_balance'].toDouble();
-    totalWithdrawn = json['total_withdrawn'].toDouble();
+    pendingBalance = json['pending_balance'] != null ? json['pending_balance'].toDouble() : 0.0;
+    walletBalance = json['wallet_balance'] != null ? json['wallet_balance'].toDouble() : 0.0;
+    totalWithdrawn = json['total_withdrawn'] != null ? json['total_withdrawn'].toDouble() : 0.0;
+    currencyCode = json['currency_code'];
+    currencySymbol = json['currency_symbol'];
   }
 
 }

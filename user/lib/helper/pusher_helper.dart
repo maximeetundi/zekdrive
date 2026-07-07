@@ -33,15 +33,18 @@ class PusherHelper {
 
     await pusherClient?.connect();
 
-    String? pusherChannelId =  pusherClient?.channelsManager.channelsConnectionDelegate.socketId;
-    if(pusherChannelId != null){
-      Get.find<ConfigController>().setPusherStatus('Connected');
-    }
-
-
-    pusherClient?.lifecycleStream.listen((event) {
-      Get.find<ConfigController>().setPusherStatus('Disconnected');
+    // Utilise le lifecycleStream pour détecter la connexion (evite les membres protégés)
+    pusherClient?.lifecycleStream.listen((state) {
+      if (state == PusherChannelsClientLifeCycleState.establishedConnection) {
+        Get.find<ConfigController>().setPusherStatus('Connected');
+      } else if (state == PusherChannelsClientLifeCycleState.disconnected ||
+                 state == PusherChannelsClientLifeCycleState.connectionError) {
+        Get.find<ConfigController>().setPusherStatus('Disconnected');
+      }
     });
+
+    // Délai court pour laisser la connexion s'établir
+    await Future.delayed(const Duration(milliseconds: 500));
 
   }
 
@@ -92,9 +95,9 @@ class PusherHelper {
         },
       ));
 
-      if(pusherDriverAccepted.currentStatus ==  null){
-        pusherDriverAccepted.subscribe();
-        pusherDriverAccepted.bind("driver-trip-accepted.$tripId").listen((event) {
+      // On souscrit directement — l'unsubscribe() après événement évite les doublons
+      pusherDriverAccepted.subscribe();
+      pusherDriverAccepted.bind("driver-trip-accepted.$tripId").listen((event) {
           Get.back();
           Get.find<RideController>().getRideDetails(jsonDecode(event.data!)['id']).then((value){
             if(value.statusCode == 200){
@@ -109,11 +112,11 @@ class PusherHelper {
                 Get.find<MapController>().notifyMapController();
                 Get.to(() => const MapScreen(fromScreen: MapScreenType.splash));
               }
-              // pusherClient!.unsubscribe("private-driver-trip-accepted.$tripId");
+              // Désabonnement après traitement pour éviter les doublons d'événements
+              pusherDriverAccepted.unsubscribe();
             }
           });
-        });
-      }
+      });
 
 
 
@@ -128,9 +131,9 @@ class PusherHelper {
         },
       ));
 
-      if(driverTripStarted.currentStatus == null){
-        driverTripStarted.subscribe();
-        driverTripStarted.bind("driver-trip-started.$tripId").listen((event) {
+      // On souscrit directement — l'unsubscribe() après événement évite les doublons
+      driverTripStarted.subscribe();
+      driverTripStarted.bind("driver-trip-started.$tripId").listen((event) {
           //   Get.find<MapController>().getPolyline();
           Get.find<RideController>().startLocationRecord();
           if(jsonDecode(event.data!)['type']== 'parcel'){
@@ -142,7 +145,6 @@ class PusherHelper {
                 if (Get.find<RideController>().tripDetails!.parcelInformation!.payer == 'sender') {
                   Get.find<RideController>().getFinalFare(jsonDecode(event.data!)['id']).then((value) {
                     if (value.statusCode == 200) {
-                      //  Get.find<ParcelController>().updateParcelState(ParcelDeliveryState.parcelComplete);
                       Get.find<MapController>().notifyMapController();
                       Get.off(() => const PaymentScreen(fromParcel: true,));
                     }
@@ -153,7 +155,6 @@ class PusherHelper {
               if (Get.find<RideController>().tripDetails!.parcelInformation!.payer == 'sender') {
                 Get.find<RideController>().getFinalFare(jsonDecode(event.data!)['id']).then((value) {
                   if (value.statusCode == 200) {
-                    //  Get.find<ParcelController>().updateParcelState(ParcelDeliveryState.parcelComplete);
                     Get.find<MapController>().notifyMapController();
                     Get.off(() => const PaymentScreen(fromParcel: true,));
                   }
@@ -165,9 +166,9 @@ class PusherHelper {
             Get.find<RideController>().updateRideCurrentState(RideState.ongoingRide);
             Get.to(() => const MapScreen(fromScreen: MapScreenType.splash));
           }
-          //  pusherClient!.unsubscribe("private-driver-trip-started.$tripId");
-        });
-      }
+          // Désabonnement après traitement
+          driverTripStarted.unsubscribe();
+      });
 
 
       driverTripCancelled = pusherClient!.privateChannel("private-driver-trip-cancelled.$tripId", authorizationDelegate:
@@ -181,15 +182,15 @@ class PusherHelper {
         },
       ));
 
-      if(driverTripCancelled.currentStatus == null){
-        driverTripCancelled.subscribe();
-        driverTripCancelled.bind("driver-trip-cancelled.$tripId").listen((event) async{
+      // On souscrit directement
+      driverTripCancelled.subscribe();
+      driverTripCancelled.bind("driver-trip-cancelled.$tripId").listen((event) async{
           await Get.find<RideController>().getCurrentRideStatus(fromRefresh: true);
           Get.find<RideController>().stopLocationRecord();
           Get.offAll(const DashboardScreen());
-          //  pusherClient!.unsubscribe("private-driver-trip-cancelled.$tripId");
-        });
-      }
+          // Désabonnement après traitement
+          driverTripCancelled.unsubscribe();
+      });
 
 
 
@@ -204,9 +205,9 @@ class PusherHelper {
         },
       ));
 
-      if(driverTripCompleted.currentStatus ==  null){
-        driverTripCompleted.subscribe();
-        driverTripCompleted.bind("driver-trip-completed.$tripId").listen((event) {
+      // On souscrit directement
+      driverTripCompleted.subscribe();
+      driverTripCompleted.bind("driver-trip-completed.$tripId").listen((event) {
           if(jsonDecode(event.data!)['type']== 'parcel'){
             Get.find<RideController>().clearRideDetails();
             if(Get.find<ConfigController>().config!.reviewStatus!) {
@@ -225,9 +226,9 @@ class PusherHelper {
               }
             });
           }
-          //  pusherClient!.unsubscribe("private-driver-trip-completed.$tripId");
-        });
-      }
+          // Désabonnement après traitement
+          driverTripCompleted.unsubscribe();
+      });
 
 
 
@@ -241,9 +242,9 @@ class PusherHelper {
           'Access-Control-Allow-Methods':"PUT, GET, POST, DELETE, OPTIONS"
         },
       ));
-      if(driverPaymentReceived.currentStatus == null){
-        driverPaymentReceived.subscribe();
-        driverPaymentReceived.bind("driver-payment-received.$tripId").listen((event) {
+      // On souscrit directement
+      driverPaymentReceived.subscribe();
+      driverPaymentReceived.bind("driver-payment-received.$tripId").listen((event) {
           if(Get.find<ConfigController>().config!.reviewStatus!){
             if(jsonDecode(event.data!)['type']== 'ride_request' && Get.find<ConfigController>().config!.reviewStatus!){
               Get.off(()=> ReviewScreen(tripId: jsonDecode(event.data!)['id']));
@@ -253,9 +254,9 @@ class PusherHelper {
             Get.offAll(()=> const DashboardScreen());
             Get.find<RideController>().tripDetails = null;
           }
-          // pusherClient!.unsubscribe("private-driver-payment-received.$tripId");
-        });
-      }
+          // Désabonnement après traitement
+          driverPaymentReceived.unsubscribe();
+      });
     }
 
   }

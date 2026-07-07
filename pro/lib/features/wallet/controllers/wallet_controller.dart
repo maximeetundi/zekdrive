@@ -9,6 +9,7 @@ import 'package:ride_sharing_user_app/features/wallet/domain/models/transaction_
 import 'package:ride_sharing_user_app/features/wallet/domain/models/withdraw_model.dart';
 import 'package:ride_sharing_user_app/features/wallet/domain/models/driver_wallet_model.dart';
 import 'package:ride_sharing_user_app/features/wallet/domain/models/wallet_transaction_model.dart';
+import 'package:ride_sharing_user_app/localization/localization_controller.dart';
 
 
 class WalletController extends GetxController implements GetxService{
@@ -302,10 +303,18 @@ class WalletController extends GetxController implements GetxService{
   final TextEditingController rechargePhoneController = TextEditingController();
   final TextEditingController rechargeReferenceController = TextEditingController();
 
-  String _selectedPaymentMethod = 'mobile_money';
+  String _selectedPaymentMethod = 'dohone_orange';
   String get selectedPaymentMethod => _selectedPaymentMethod;
 
-  final List<String> paymentMethods = ['mobile_money', 'bank_transfer', 'cash'];
+  final List<String> paymentMethods = [
+    'dohone_orange',
+    'dohone_mtn',
+    'cinetpay',
+    'stripe',
+    'paypal',
+    'bank_transfer',
+    'cash'
+  ];
 
   void setPaymentMethod(String method) {
     _selectedPaymentMethod = method;
@@ -316,7 +325,49 @@ class WalletController extends GetxController implements GetxService{
     rechargeAmountController.clear();
     rechargePhoneController.clear();
     rechargeReferenceController.clear();
-    _selectedPaymentMethod = 'mobile_money';
+    _selectedPaymentMethod = 'dohone_orange';
+  }
+
+  /// Initialise une recharge automatique (Dohone OM/MTN, CinetPay, Stripe, PayPal)
+  Future<bool> initiateRechargeWallet({
+    required double amount,
+    required String gateway,
+    required String phoneNumber,
+  }) async {
+    _isRecharging = true;
+    update();
+    bool success = false;
+    try {
+      Response? response = await walletServiceInterface.initiateRecharge(
+        amount, gateway, phoneNumber,
+      );
+      if (response != null && response.statusCode == 200) {
+        success = true;
+        final status = response.body['status'];
+        final messageFr = response.body['message_fr'];
+        final messageEn = response.body['message_en'];
+        final localizedMsg = Get.find<LocalizationController>().isLtr ? (messageEn ?? '') : (messageFr ?? '');
+        
+        if (status == 'initiated') {
+          showCustomSnackBar(localizedMsg.isNotEmpty ? localizedMsg : 'recharge_initiated'.tr, isError: false);
+        } else if (status == 'redirect') {
+          final url = response.body['payment_url'];
+          showCustomSnackBar('${'redirect_to_payment'.tr}: $url', isError: false);
+        } else {
+          showCustomSnackBar('recharge_successful'.tr, isError: false);
+        }
+        // Rafraîchir le wallet et les transactions
+        await getWallet();
+        await getProWalletTransactions();
+      } else if (response != null) {
+        ApiChecker.checkApi(response);
+      }
+    } catch (e) {
+      showCustomSnackBar('recharge_failed'.tr);
+    }
+    _isRecharging = false;
+    update();
+    return success;
   }
 
   @override

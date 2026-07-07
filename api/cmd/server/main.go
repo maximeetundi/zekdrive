@@ -51,7 +51,7 @@ func main() {
 
 	// Seed Admin User if not exists
 	ctx := context.Background()
-	existingAdmin, err := userRepo.GetByEmail(ctx, "admin@zekdrive.com")
+	existingAdmin, err := userRepo.GetByEmail(ctx, "admin@zekdrive.cm")
 	if err != nil {
 		log.Printf("Warning: Failed to check for existing admin: %v", err)
 	} else if existingAdmin == nil {
@@ -63,9 +63,9 @@ func main() {
 			adminUser := &domain.User{
 				ID:        uuid.New(),
 				Name:      "Super Admin ZekDrive",
-				Email:     "admin@zekdrive.com",
+				Email:     "admin@zekdrive.cm",
 				Password:  string(hashedPassword),
-				Phone:     "+221770000000",
+				Phone:     "+237690000000",
 				Role:      domain.RoleAdmin,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
@@ -73,23 +73,23 @@ func main() {
 			if err := userRepo.Create(ctx, adminUser); err != nil {
 				log.Printf("Warning: Failed to seed admin user: %v", err)
 			} else {
-				log.Println("Default admin user successfully seeded (admin@zekdrive.com / admin123)")
+				log.Println("Default admin user successfully seeded (admin@zekdrive.cm / admin123)")
 			}
 		}
 	}
 
-	// Seed admin_users RBAC: link admin@zekdrive.com → super_admin role
+	// Seed admin_users RBAC: link admin@zekdrive.cm → super_admin role
 	// (role UUID seeded in migration 008)
 	superAdminRoleID := uuid.MustParse("a0000001-0000-0000-0000-000000000001")
 	adminRoleRepo := repository.NewAdminRoleRepository(pgDB)
-	adminForRbac, rbacErr := userRepo.GetByEmail(ctx, "admin@zekdrive.com")
+	adminForRbac, rbacErr := userRepo.GetByEmail(ctx, "admin@zekdrive.cm")
 	if rbacErr != nil {
 		log.Printf("Warning: Failed to fetch admin for RBAC: %v", rbacErr)
 	} else if adminForRbac != nil {
 		if err := adminRoleRepo.UpsertAdminUser(ctx, adminForRbac.ID, superAdminRoleID); err != nil {
 			log.Printf("Warning: RBAC seed failed: %v", err)
 		} else {
-			log.Println("RBAC seeded: admin@zekdrive.com → super_admin")
+			log.Println("RBAC seeded: admin@zekdrive.cm → super_admin")
 		}
 	}
 
@@ -128,8 +128,8 @@ func main() {
 	// 7. Initialize Handlers
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService, settingService)
-	driverHandler := handler.NewDriverHandler(driverService, settingService)
-	tripHandler := handler.NewTripHandler(tripService, driverService)
+	driverHandler := handler.NewDriverHandler(driverService, settingService, redisClient)
+	tripHandler := handler.NewTripHandler(tripService, driverService, redisClient)
 	deliveryHandler := handler.NewDeliveryHandler(deliveryService, driverService)
 	vehicleHandler := handler.NewVehicleHandler(vehicleRepo, driverService)
 	zoneHandler := handler.NewZoneHandler(zoneRepo)

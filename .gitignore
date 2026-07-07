@@ -16,6 +16,7 @@ Thumbs.db
 
 # Node / Nuxt / Admin / Vitrine
 node_modules/
+capture/
 .nuxt/
 .output/
 dist/

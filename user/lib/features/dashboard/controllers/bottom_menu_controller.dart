@@ -2,8 +2,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing_user_app/features/dashboard/screens/dashboard_screen.dart';
 import 'package:ride_sharing_user_app/util/images.dart';
-import 'package:ride_sharing_user_app/features/location/controllers/location_controller.dart';
-import 'package:ride_sharing_user_app/features/location/view/access_location_screen.dart';
 import 'package:ride_sharing_user_app/common_widgets/confirmation_dialog_widget.dart';
 
 class BottomMenuController extends GetxController implements GetxService{
@@ -22,11 +20,8 @@ class BottomMenuController extends GetxController implements GetxService{
 
   void navigateToDashboard() {
     _currentTab = 0;
-    if(Get.find<LocationController>().getUserAddress() != null) {
-      Get.offAll(()=> const DashboardScreen());
-    }else {
-      Get.offAll(const AccessLocationScreen());
-    }
+    // Aller toujours au Dashboard — la carte utilise les coords par défaut si pas de GPS
+    Get.offAll(() => const DashboardScreen());
   }
 
   void exitApp() {

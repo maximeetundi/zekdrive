@@ -10,4 +10,5 @@ abstract class WalletServiceInterface {
   Future<dynamic> getWallet();
   Future<dynamic> getWalletTransactions();
   Future<dynamic> recharge(double amount, String paymentMethod, String phoneNumber, String reference);
+  Future<dynamic> initiateRecharge(double amount, String gateway, String phoneNumber);
 }

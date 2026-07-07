@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ride_sharing_user_app/common_widgets/app_bar_widget.dart';
-import 'package:ride_sharing_user_app/common_widgets/body_widget.dart';
 import 'package:ride_sharing_user_app/common_widgets/confirmation_dialog_widget.dart';
 import 'package:ride_sharing_user_app/common_widgets/image_widget.dart';
 import 'package:ride_sharing_user_app/features/address/screens/my_address.dart';
@@ -17,263 +15,379 @@ import 'package:ride_sharing_user_app/features/splash/controllers/config_control
 import 'package:ride_sharing_user_app/features/support/support_screen.dart';
 import 'package:ride_sharing_user_app/features/trip/screens/trip_screen.dart';
 import 'package:ride_sharing_user_app/features/wallet/screens/wallet_screen.dart';
-import 'package:ride_sharing_user_app/util/app_constants.dart';
-import 'package:ride_sharing_user_app/util/dimensions.dart';
 import 'package:ride_sharing_user_app/util/images.dart';
 import 'package:ride_sharing_user_app/util/styles.dart';
+import 'package:ride_sharing_user_app/util/colors.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: GetBuilder<ProfileController>(builder: (profileController) {
-        return BodyWidget(
-          appBar: AppBarWidget(title: 'profile'.tr, showBackButton: false),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-            child: Column(children: [
-              Stack(clipBehavior: Clip.none, children: [
-                Container(
-                  height: 175,
-                  width: Get.width,
-                  decoration: BoxDecoration(
-                      borderRadius:
-                          BorderRadius.circular(Dimensions.radiusExtraLarge),
-                      color: Get.isDarkMode
-                          ? Theme.of(context).scaffoldBackgroundColor
-                          : Theme.of(context).primaryColor.withOpacity(0.1)),
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        if (profileController.profileModel == null ||
+            profileController.profileModel!.data == null) {
+          return const Center(child: CircularProgressIndicator(color: kBrandTeal));
+        }
+
+        final data = profileController.profileModel!.data!;
+        final name = profileController.customerName();
+        final rating = data.userRating ?? '5.0';
+        final rides = data.totalRideCount ?? 0;
+        final points = data.loyaltyPoints ?? 0;
+
+        return CustomScrollView(
+          slivers: [
+            // ── SLIVER HEADER ──────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Background gradient header
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).padding.top + 16,
+                      bottom: 32,
+                      left: 20,
+                      right: 20,
+                    ),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF14B19E), Color(0xFF0E8A7A)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Column(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: Dimensions.paddingSizeSmall),
-                          child: Row(children: [
-                            Container(
+                        // Top bar
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Profil',
+                              style: textBold.copyWith(fontSize: 20, color: Colors.white),
+                            ),
+                            GestureDetector(
+                              onTap: () => Get.to(() => const EditProfileScreen()),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                                 decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.edit_rounded, size: 14, color: Colors.white),
+                                    const SizedBox(width: 5),
+                                    Text('Modifier', style: textMedium.copyWith(fontSize: 13, color: Colors.white)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        // Avatar + name
+                        Row(
+                          children: [
+                            Stack(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border: Border.all(
-                                        color: Theme.of(context).primaryColor,
-                                        width: 1)),
-                                child: ClipRRect(
+                                    border: Border.all(color: Colors.white, width: 3),
+                                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10)],
+                                  ),
+                                  child: ClipRRect(
                                     borderRadius: BorderRadius.circular(50),
                                     child: ImageWidget(
-                                        height: 70,
-                                        width: 70,
-                                        image: profileController.profileModel
-                                                    ?.data?.profileImage !=
-                                                null
-                                            ? '${Get.find<ConfigController>().config!.imageBaseUrl!.profileImage}/${profileController.profileModel?.data?.profileImage ?? ''}'
-                                            : '',
-                                        placeholder: Images.personPlaceholder,
-                                        fit: BoxFit.cover))),
-                            const SizedBox(width: Dimensions.paddingSizeSmall),
-                            Column(
+                                      height: 76,
+                                      width: 76,
+                                      image: data.profileImage != null
+                                          ? '${Get.find<ConfigController>().config!.imageBaseUrl!.profileImage}/${data.profileImage}'
+                                          : '',
+                                      placeholder: Images.personPlaceholder,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(profileController.customerName(),
-                                      style: textBold.copyWith(
-                                          fontSize:
-                                              Dimensions.fontSizeExtraLarge),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis),
-                                  const SizedBox(
-                                    height: Dimensions.paddingSizeExtraSmall,
+                                  Text(
+                                    name,
+                                    style: textBold.copyWith(fontSize: 20, color: Colors.white),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  Row(children: [
-                                    Text(
-                                        "${'level'.tr} : ${profileController.profileModel?.data?.level?.name ?? '0'}",
-                                        style: textBold.copyWith(
-                                            color: Theme.of(context).hintColor,
-                                            fontSize:
-                                                Dimensions.fontSizeSmall)),
-                                    const SizedBox(width: 5),
-                                    SizedBox(
-                                        width: 15,
-                                        height: 15,
-                                        child: ImageWidget(
-                                            image:
-                                                "${AppConstants.baseUrl}/storage/app/public/customer/level/${profileController.profileModel!.data!.level?.image}"))
-                                  ]),
-                                  Row(children: [
-                                    Text('${"your_rating".tr} :'.tr,
-                                        style: textBold.copyWith(
-                                            color: Theme.of(context).hintColor,
-                                            fontSize:
-                                                Dimensions.fontSizeSmall)),
-                                    const SizedBox(
-                                        height:
-                                            Dimensions.paddingSizeExtraSmall),
-                                    Text(
-                                        profileController.profileModel!.data!
-                                                .userRating ??
-                                            "0",
-                                        style: textBold.copyWith(
-                                            fontSize: Dimensions.fontSizeSmall,
-                                            letterSpacing: 3,
-                                            color:
-                                                Theme.of(context).hintColor)),
-                                    const Icon(Icons.star,
-                                        size: 12, color: Colors.amber),
-                                  ]),
-                                ]),
-                          ]),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.star_rounded, size: 15, color: Color(0xFFFBBF24)),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        rating,
+                                        style: textMedium.copyWith(fontSize: 13, color: Colors.white),
+                                      ),
+                                      Container(
+                                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                                        width: 4,
+                                        height: 4,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white54,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${data.level?.name ?? 'Bronze'}',
+                                        style: textMedium.copyWith(fontSize: 13, color: Colors.white70),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        Row(
+                        const SizedBox(height: 20),
+                        // Stats row
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              _buildColumnItem(
-                                  'total_ride',
-                                  '${profileController.profileModel?.data?.totalRideCount ?? 0}',
-                                  context),
-                              Container(
-                                  width: 1,
-                                  height: 40,
-                                  color: Theme.of(context).primaryColor),
-                              _buildColumnItem(
-                                  'total_point',
-                                  '${profileController.profileModel?.data?.loyaltyPoints ?? 0}',
-                                  context),
-                            ]),
-                      ]),
+                              _statItem('$rides', 'Courses', context),
+                              _divider(),
+                              _statItem('$points', 'Points', context),
+                              _divider(),
+                              _statItem(rating, 'Note', context),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── MENU ITEMS ─────────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Container(
+                margin: const EdgeInsets.only(top: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
                 ),
-                Positioned(
-                    child: Align(
-                        alignment: Alignment.topRight,
-                        child: InkWell(
-                          onTap: () => Get.to(() => const EditProfileScreen()),
-                          child: Padding(
-                              padding: const EdgeInsets.all(
-                                  Dimensions.paddingSizeDefault),
-                              child: SizedBox(
-                                  width: 20,
-                                  child: Image.asset(Images.editIcon))),
-                        )))
-              ]),
-              ProfileMenuItem(
-                  title: 'profile',
-                  icon: Images.profileProfile,
-                  onTap: () => Get.to(() => const EditProfileScreen())),
-              ProfileMenuItem(
-                  title: 'my_address',
-                  icon: Images.location,
-                  onTap: () => Get.to(() => const MyAddressScreen())),
-              ProfileMenuItem(
-                  title: 'message',
-                  icon: Images.profileMessage,
-                  onTap: () => Get.to(() => const MessageListScreen())),
-              ProfileMenuItem(
-                  title: 'my_wallet',
-                  icon: Images.profileMyWallet,
-                  onTap: () => Get.to(() => const WalletScreen())),
-              ProfileMenuItem(
-                  title: 'my_offer',
-                  icon: Images.paymentAndVoucher,
-                  onTap: () => Get.to(() => MyOfferWidget())),
-              ProfileMenuItem(
-                  title: 'my_trips',
-                  icon: Images.profileMyTrip,
-                  onTap: () =>
-                      Get.to(() => const TripScreen(fromProfile: true))),
-              ProfileMenuItem(
-                  title: 'help_support',
-                  icon: Images.profileHelpSupport,
-                  onTap: () => Get.to(() => const HelpAndSupportScreen())),
-              ProfileMenuItem(
-                  title: 'settings',
-                  icon: Images.profileSetting,
-                  onTap: () => Get.to(() => const SettingScreen())),
-              ProfileMenuItem(
-                  title: 'privacy_policy',
-                  icon: Images.privacyPolicyIcon,
-                  onTap: () => Get.to(() => PolicyScreen(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    // Handle
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        margin: const EdgeInsets.only(top: 8, bottom: 8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).dividerColor,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+
+                    // ── Account section
+                    _sectionHeader('Mon Compte', context),
+                    ProfileMenuItem(
+                      title: 'profile',
+                      icon: Images.profileProfile,
+                      iconColor: kBrandTeal,
+                      iconBgColor: kBrandTeal.withOpacity(0.10),
+                      onTap: () => Get.to(() => const EditProfileScreen()),
+                    ),
+                    ProfileMenuItem(
+                      title: 'my_wallet',
+                      icon: Images.profileMyWallet,
+                      iconColor: const Color(0xFF8B5CF6),
+                      iconBgColor: const Color(0xFF8B5CF6).withOpacity(0.10),
+                      onTap: () => Get.to(() => const WalletScreen()),
+                    ),
+                    ProfileMenuItem(
+                      title: 'my_address',
+                      icon: Images.location,
+                      iconColor: const Color(0xFFEF4444),
+                      iconBgColor: const Color(0xFFEF4444).withOpacity(0.10),
+                      onTap: () => Get.to(() => const MyAddressScreen()),
+                    ),
+                    ProfileMenuItem(
+                      title: 'my_trips',
+                      icon: Images.profileMyTrip,
+                      iconColor: const Color(0xFF3B82F6),
+                      iconBgColor: const Color(0xFF3B82F6).withOpacity(0.10),
+                      onTap: () => Get.to(() => const TripScreen(fromProfile: true)),
+                    ),
+
+                    // ── Offers section
+                    _sectionHeader('Offres & Promotions', context),
+                    ProfileMenuItem(
+                      title: 'my_offer',
+                      icon: Images.paymentAndVoucher,
+                      iconColor: const Color(0xFFF59E0B),
+                      iconBgColor: const Color(0xFFF59E0B).withOpacity(0.10),
+                      onTap: () => Get.to(() => MyOfferWidget()),
+                    ),
+                    ProfileMenuItem(
+                      title: 'message',
+                      icon: Images.profileMessage,
+                      iconColor: const Color(0xFF10B981),
+                      iconBgColor: const Color(0xFF10B981).withOpacity(0.10),
+                      onTap: () => Get.to(() => const MessageListScreen()),
+                    ),
+
+                    // ── Support section
+                    _sectionHeader('Support', context),
+                    ProfileMenuItem(
+                      title: 'help_support',
+                      icon: Images.profileHelpSupport,
+                      iconColor: const Color(0xFF6366F1),
+                      iconBgColor: const Color(0xFF6366F1).withOpacity(0.10),
+                      onTap: () => Get.to(() => const HelpAndSupportScreen()),
+                    ),
+                    ProfileMenuItem(
+                      title: 'settings',
+                      icon: Images.profileSetting,
+                      iconColor: const Color(0xFF6B7280),
+                      iconBgColor: const Color(0xFF6B7280).withOpacity(0.10),
+                      onTap: () => Get.to(() => const SettingScreen()),
+                    ),
+
+                    // ── Legal section
+                    _sectionHeader('Légal', context),
+                    ProfileMenuItem(
+                      title: 'privacy_policy',
+                      icon: Images.privacyPolicyIcon,
+                      iconColor: const Color(0xFF6B7280),
+                      iconBgColor: const Color(0xFF6B7280).withOpacity(0.08),
+                      onTap: () => Get.to(() => PolicyScreen(
                         isPolicy: true,
-                        image: Get.find<ConfigController>()
-                                .config
-                                ?.privacyPolicy
-                                ?.image ??
-                            '',
-                      ))),
-              ProfileMenuItem(
-                  title: 'terms_and_condition',
-                  icon: Images.termsAndCondition,
-                  onTap: () => Get.to(() => PolicyScreen(
-                      image: Get.find<ConfigController>()
-                              .config
-                              ?.termsAndConditions
-                              ?.image ??
-                          ''))),
-              ProfileMenuItem(
-                  title: 'legal',
-                  icon: Images.privacyPolicy,
-                  onTap: () => Get.to(() => PolicyScreen(
-                      isLegal: true,
-                      image:
-                          Get.find<ConfigController>().config?.legal?.image ??
-                              ''))),
-              ProfileMenuItem(
-                title: 'logout',
-                icon: Images.profileLogout,
-                onTap: () {
-                  showDialog(
-                      context: context,
-                      builder: (_) {
-                        return GetBuilder<AuthController>(
-                            builder: (authController) {
-                          return ConfirmationDialogWidget(
-                            icon: Images.profileLogout,
-                            isLoading: authController.isLoading,
-                            description:
-                                'do_you_want_to_log_out_this_account'.tr,
-                            onYesPressed: () {
-                              Get.find<AuthController>().logOut();
-                            },
+                        image: Get.find<ConfigController>().config?.privacyPolicy?.image ?? '',
+                      )),
+                    ),
+                    ProfileMenuItem(
+                      title: 'terms_and_condition',
+                      icon: Images.termsAndCondition,
+                      iconColor: const Color(0xFF6B7280),
+                      iconBgColor: const Color(0xFF6B7280).withOpacity(0.08),
+                      onTap: () => Get.to(() => PolicyScreen(
+                        image: Get.find<ConfigController>().config?.termsAndConditions?.image ?? '',
+                      )),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // ── Logout button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      child: GetBuilder<AuthController>(builder: (authController) {
+                        return OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFFEF4444),
+                            side: const BorderSide(color: Color(0xFFEF4444), width: 1.2),
+                            minimumSize: const Size(double.infinity, 52),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                          icon: const Icon(Icons.logout_rounded, size: 18),
+                          label: Text('Se déconnecter', style: textSemiBold.copyWith(fontSize: 15)),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (_) => GetBuilder<AuthController>(
+                                builder: (ac) => ConfirmationDialogWidget(
+                                  icon: Images.profileLogout,
+                                  isLoading: ac.isLoading,
+                                  description: 'do_you_want_to_log_out_this_account'.tr,
+                                  onYesPressed: () => Get.find<AuthController>().logOut(),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }),
+                    ),
+
+                    // ── Delete account
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: TextButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (_) => GetBuilder<AuthController>(
+                              builder: (ac) => ConfirmationDialogWidget(
+                                icon: Images.profileLogout,
+                                isLoading: ac.isLoading,
+                                description: 'are_you_sure_permanent_delete_smg'.tr,
+                                onYesPressed: () => Get.find<AuthController>().permanentlyDelete(),
+                              ),
+                            ),
                           );
-                        });
-                      });
-                },
+                        },
+                        child: Text(
+                          'Supprimer mon compte',
+                          style: textRegular.copyWith(fontSize: 13, color: Theme.of(context).hintColor),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 48),
+                  ],
+                ),
               ),
-              ProfileMenuItem(
-                title: 'permanently_delete_account'.tr,
-                icon: Images.deleteAccountIcon,
-                divider: false,
-                onTap: () {
-                  showDialog(
-                      context: context,
-                      builder: (_) {
-                        return GetBuilder<AuthController>(
-                            builder: (authController) {
-                          return ConfirmationDialogWidget(
-                            icon: Images.profileLogout,
-                            isLoading: authController.isLoading,
-                            description: 'are_you_sure_permanent_delete_smg'.tr,
-                            onYesPressed: () {
-                              Get.find<AuthController>().permanentlyDelete();
-                            },
-                          );
-                        });
-                      });
-                },
-              ),
-              const SizedBox(height: Dimensions.paddingSizeExtraLarge * 4),
-            ]),
-          ),
+            ),
+          ],
         );
       }),
     );
   }
 
-  Column _buildColumnItem(String title, String value, BuildContext context) {
-    return Column(children: [
-      Text(value,
-          style: textBold.copyWith(
-              color: Theme.of(context).primaryColor,
-              fontSize: Dimensions.fontSizeExtraLarge)),
-      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-      Text(title.tr,
-          style: textMedium.copyWith(fontSize: Dimensions.fontSizeSmall)),
-    ]);
+  Widget _statItem(String value, String label, BuildContext context) {
+    return Column(
+      children: [
+        Text(value, style: textBold.copyWith(fontSize: 20, color: Colors.white)),
+        const SizedBox(height: 2),
+        Text(label, style: textRegular.copyWith(fontSize: 12, color: Colors.white70)),
+      ],
+    );
+  }
+
+  Widget _divider() => Container(width: 1, height: 32, color: Colors.white.withOpacity(0.3));
+
+  Widget _sectionHeader(String title, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 6),
+      child: Text(
+        title.toUpperCase(),
+        style: textSemiBold.copyWith(
+          fontSize: 11,
+          letterSpacing: 1.2,
+          color: Theme.of(context).hintColor,
+        ),
+      ),
+    );
   }
 }

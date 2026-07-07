@@ -78,7 +78,7 @@
                 type="email"
                 required
                 class="auth-input"
-                placeholder="admin@zekdrive.com"
+                placeholder="admin@zekdrive.cm"
                 :disabled="loading"
                 autocomplete="email"
               />
@@ -129,7 +129,7 @@
         <!-- Credentials hint -->
         <div class="auth-hint">
           <span class="auth-hint-label">{{ t('default_credentials') }}</span>
-          <code class="auth-hint-code">admin@zekdrive.com</code>
+          <code class="auth-hint-code">admin@zekdrive.cm</code>
           <span style="color:var(--text-muted)">/</span>
           <code class="auth-hint-code">admin123</code>
         </div>

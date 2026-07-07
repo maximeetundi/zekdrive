@@ -7,7 +7,6 @@ import 'package:ride_sharing_user_app/features/my_offer/domain/models/best_offer
 import 'package:ride_sharing_user_app/features/splash/controllers/config_controller.dart';
 import 'package:ride_sharing_user_app/helper/date_converter.dart';
 import 'package:ride_sharing_user_app/util/dimensions.dart';
-import 'package:ride_sharing_user_app/util/images.dart';
 import 'package:ride_sharing_user_app/util/styles.dart';
 
 class DiscountScreen extends StatelessWidget {

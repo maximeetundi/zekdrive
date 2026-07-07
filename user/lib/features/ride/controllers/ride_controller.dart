@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ride_sharing_user_app/features/map/widgets/google_map_replacement.dart';
 import 'package:ride_sharing_user_app/data/api_checker.dart';
 import 'package:ride_sharing_user_app/features/map/screens/map_screen.dart';
 import 'package:ride_sharing_user_app/features/parcel/domain/models/parcel_estimated_fare_model.dart';
@@ -386,13 +386,10 @@ class RideController extends GetxController implements GetxService {
     Response response = await rideServiceInterface.currentRideStatus();
     if (response.statusCode == 200 && response.body['data'] != null) {
       tripDetails = TripDetailsModel.fromJson(response.body).data!;
-      estimatedDistance = tripDetails!.estimatedDistance!.toString();
+      estimatedDistance = tripDetails!.estimatedDistance?.toString() ?? '0';
       encodedPolyLine = tripDetails!.encodedPolyline ?? '';
-      if(encodedPolyLine.isNotEmpty) {
-
-      //  Get.find<MapController>().getPolyline();
-      }
-    }else if(response.statusCode == 403){
+    } else {
+      // 403, 404, 401 = pas de course active — état normal, on ne redirige pas
       tripDetails = null;
     }
     update();
@@ -448,9 +445,12 @@ class RideController extends GetxController implements GetxService {
     Response response = await rideServiceInterface.ignoreBidding(bidId);
     if (response.statusCode == 200) {
       Get.back();
-     getBiddingList('tripId', 1);
+      // BUG FIX: utilisait 'tripId' (string hardcodée) au lieu de l'ID réel du trajet
+      if (tripDetails != null) {
+        getBiddingList(tripDetails!.id!, 1);
+      }
       isLoading = false;
-    }else{
+    } else {
       isLoading = false;
       ApiChecker.checkApi(response);
     }

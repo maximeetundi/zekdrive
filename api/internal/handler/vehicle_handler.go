@@ -48,7 +48,7 @@ func (h *VehicleHandler) Register(c *fiber.Ctx) error {
 	// Verify if driver already has a vehicle
 	existing, err := h.vehicleRepo.GetByDriverID(c.Context(), d.ID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	if existing != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "vehicle already registered for this driver"})
@@ -60,7 +60,7 @@ func (h *VehicleHandler) Register(c *fiber.Ctx) error {
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	now := time.Now()
@@ -78,7 +78,7 @@ func (h *VehicleHandler) Register(c *fiber.Ctx) error {
 	}
 
 	if err := h.vehicleRepo.Create(c.Context(), v); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(v)
@@ -98,7 +98,7 @@ func (h *VehicleHandler) GetMe(c *fiber.Ctx) error {
 
 	v, err := h.vehicleRepo.GetByDriverID(c.Context(), d.ID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	if v == nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "no vehicle found for this driver"})
@@ -121,7 +121,7 @@ func (h *VehicleHandler) Update(c *fiber.Ctx) error {
 
 	v, err := h.vehicleRepo.GetByDriverID(c.Context(), d.ID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 	if v == nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "no vehicle found to update"})
@@ -133,7 +133,7 @@ func (h *VehicleHandler) Update(c *fiber.Ctx) error {
 	}
 
 	if err := h.validate.Struct(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	v.Make = req.Make
@@ -145,7 +145,7 @@ func (h *VehicleHandler) Update(c *fiber.Ctx) error {
 	v.UpdatedAt = time.Now()
 
 	if err := h.vehicleRepo.Update(c.Context(), v); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": friendlyValidationError(err)})
 	}
 
 	return c.JSON(v)

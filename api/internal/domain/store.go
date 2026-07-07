@@ -179,7 +179,7 @@ type StoreRepository interface {
 	GetStoreByID(ctx context.Context, id uuid.UUID) (*Store, error)
 	GetStoreByUserID(ctx context.Context, userID uuid.UUID) (*Store, error)
 	UpdateStore(ctx context.Context, store *Store) error
-	ListNearbyStores(ctx context.Context, lat, lng float64, radius float64, search string, storeType string) ([]Store, error)
+	ListNearbyStores(ctx context.Context, lat, lng float64, radius float64, search string, storeType string, excludeFood bool) ([]Store, error)
 	ListAllStores(ctx context.Context, storeType string, search string, limit, offset int) ([]Store, error)
 
 	// Schedules
@@ -208,7 +208,7 @@ type StoreService interface {
 	CreateOrUpdateStore(ctx context.Context, userID uuid.UUID, req *CreateStoreRequest) (*Store, error)
 	GetStoreProfile(ctx context.Context, userID uuid.UUID) (*Store, error)
 	GetStoreDetails(ctx context.Context, storeID uuid.UUID) (*Store, error)
-	ListNearbyStores(ctx context.Context, lat, lng float64, search string, storeType string) ([]Store, error)
+	ListNearbyStores(ctx context.Context, lat, lng float64, search string, storeType string, excludeFood bool) ([]Store, error)
 	ListAllStores(ctx context.Context, storeType string, search string, limit, offset int) ([]Store, error)
 
 	// Schedules

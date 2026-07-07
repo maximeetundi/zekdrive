@@ -643,6 +643,7 @@
   "delivering": "En livraison",
   "delivered": "Livré",
   "delivery_courier": "Livreur",
+  "commerce": "Commerce",
   "stores": "Boutiques & Restaurants",
   "boutique": "Boutique",
   "grocery": "Épicerie",
@@ -654,5 +655,39 @@
   "select_country": "Sélectionner le pays",
   "search_country": "Rechercher un pays...",
   "currency": "Devise",
-  "currency_symbol": "Symbole"
+  "currency_symbol": "Symbole",
+  "phone number already in use": "Ce numéro est déjà utilisé. Veuillez vous connecter.",
+  "email already in use": "Cet email est déjà utilisé. Veuillez vous connecter.",
+
+  "all": "Tous",
+  "butcher": "Boucherie",
+  "fishmonger": "Poissonnerie",
+  "beauty": "Beauté & Bien-être",
+  "clothing": "Mode & Vêtements",
+  "hardware": "Quincaillerie",
+  "furniture": "Meubles & Déco",
+  "electronics": "Électronique",
+
+  "cafe": "Café",
+  "bakery": "Boulangerie",
+  "search_restaurant_hint": "Rechercher un restaurant...",
+  "no_restaurant_found": "Aucun restaurant trouvé",
+  "try_another_category": "Essayez une autre catégorie",
+
+  "vehicle_standard": "Standard",
+  "vehicle_comfort": "Confort",
+  "vehicle_luxury": "Luxe",
+  "vehicle_bike": "Moto",
+  "vehicle_economy": "Économique",
+  "vehicle_premium": "Premium",
+
+  "parcel_send_title": "Envoyez un colis",
+  "parcel_send_subtitle": "Rapide, sécurisé, suivi en temps réel",
+  "parcel_step_address": "Saisir\nl'adresse",
+  "parcel_step_size": "Choisir\nla taille",
+  "parcel_step_confirm": "Confirmer\net payer",
+  "parcel_category_title": "Catégorie de colis",
+
+  "ride": "Taxi",
+  "parcel_delivery": "Livraison de colis"
 }
